@@ -1,14 +1,17 @@
-# Nginx simples para servir HTML estático
+# Use a imagem base do nginx
 FROM nginx:alpine
 
-# Copiar arquivos HTML
-COPY . /usr/share/nginx/html/
+# Remove a configuração padrão
+RUN rm /etc/nginx/conf.d/default.conf
 
-# Copiar configuração personalizada do Nginx
-COPY nginx.conf /etc/nginx/nginx.conf
+# Copia o arquivo de configuração customizado
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expor porta 80
-EXPOSE 80
+# Copia os arquivos da aplicação
+COPY . /usr/share/nginx/html
 
-# Nginx já inicia automaticamente
+# Expõe a porta 8080
+EXPOSE 8080
+
+# Inicia o nginx
 CMD ["nginx", "-g", "daemon off;"]
