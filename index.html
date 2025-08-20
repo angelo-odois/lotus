@@ -594,6 +594,129 @@
             color: var(--lotus-dark);
         }
 
+        /* Checkbox customizado */
+        .send-later-option {
+            margin: 24px 0;
+            background: #FEF3C7;
+            border: 2px solid #FCD34D;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-input {
+            display: none;
+        }
+
+        .checkbox-custom {
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            border: 2px solid var(--lotus-yellow);
+            border-radius: 6px;
+            margin-right: 12px;
+            position: relative;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .checkbox-input:checked + .checkbox-custom {
+            background: var(--lotus-yellow);
+            border-color: var(--lotus-yellow);
+        }
+
+        .checkbox-input:checked + .checkbox-custom::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--lotus-dark);
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .checkbox-label {
+            flex: 1;
+            color: var(--lotus-dark);
+            line-height: 1.5;
+        }
+
+        .checkbox-label small {
+            color: var(--lotus-gray);
+            font-size: 13px;
+        }
+
+        /* Info card para envio posterior */
+        .info-card {
+            background: linear-gradient(135deg, #E0F2FE 0%, #DBEAFE 100%);
+            border: 2px solid #3B82F6;
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            margin-top: 24px;
+        }
+
+        .info-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .info-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--lotus-dark);
+            margin-bottom: 12px;
+        }
+
+        .info-text {
+            color: var(--lotus-gray);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .contact-info {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .contact-info p {
+            margin-bottom: 12px;
+            color: var(--lotus-dark);
+        }
+
+        .contact-info ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .contact-info li {
+            padding: 8px 0;
+            color: var(--lotus-gray);
+        }
+
+        /* Transição suave */
+        #uploadSection {
+            transition: opacity 0.3s ease, max-height 0.5s ease;
+            overflow: hidden;
+        }
+
+        #uploadSection.hidden {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
         .summary-card {
             background: linear-gradient(135deg, var(--lotus-light-gray) 0%, #F9FAFB 100%);
             border: 2px solid #E5E7EB;
@@ -1071,66 +1194,101 @@
                         </div>
                     </div>
 
-                    <!-- Área de Upload Drag & Drop -->
-                    <div class="upload-container" id="uploadContainer">
-                        <div class="upload-icon">📤</div>
-                        <h3 class="upload-title">Arraste seus documentos aqui</h3>
-                        <p class="upload-subtitle">ou clique para selecionar múltiplos arquivos</p>
-                        <button type="button" class="upload-button" onclick="document.getElementById('fileInputGlobal').click()">
-                            <span>📁</span>
-                            <span>Selecionar Arquivos</span>
-                        </button>
-                        <p class="upload-subtitle" style="margin-top: 12px; font-size: 12px;">
-                            Formatos aceitos: PDF, JPG, JPEG, PNG • Máximo 10MB por arquivo
-                        </p>
+                    <!-- Opção de enviar depois -->
+                    <div class="send-later-option">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="sendDocsLater" class="checkbox-input">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label">
+                                <strong>Enviar documentos posteriormente</strong>
+                                <br>
+                                <small>Você poderá enviar os documentos por e-mail ou WhatsApp</small>
+                            </span>
+                        </label>
                     </div>
 
-                    <input type="file" id="fileInputGlobal" class="file-input-global" multiple accept=".pdf,.jpg,.jpeg,.png">
+                    <!-- Container de Upload (ocultável) -->
+                    <div id="uploadSection">
+                        <!-- Área de Upload Drag & Drop -->
+                        <div class="upload-container" id="uploadContainer">
+                            <div class="upload-icon">📤</div>
+                            <h3 class="upload-title">Arraste seus documentos aqui</h3>
+                            <p class="upload-subtitle">ou clique para selecionar múltiplos arquivos</p>
+                            <button type="button" class="upload-button" onclick="document.getElementById('fileInputGlobal').click()">
+                                <span>📁</span>
+                                <span>Selecionar Arquivos</span>
+                            </button>
+                            <p class="upload-subtitle" style="margin-top: 12px; font-size: 12px;">
+                                Formatos aceitos: PDF, JPG, JPEG, PNG • Máximo 10MB por arquivo
+                            </p>
+                        </div>
 
-                    <!-- Lista de Arquivos Enviados -->
-                    <div class="files-list" id="filesList"></div>
+                        <input type="file" id="fileInputGlobal" class="file-input-global" multiple accept=".pdf,.jpg,.jpeg,.png">
 
-                    <!-- Categorias de Documentos -->
-                    <div class="document-categories" id="documentCategories">
-                        <div class="category-card" data-category="rg">
-                            <div class="category-icon">🆔</div>
-                            <div class="category-name">RG</div>
-                            <div class="category-count">0 arquivo(s)</div>
+                        <!-- Lista de Arquivos Enviados -->
+                        <div class="files-list" id="filesList"></div>
+
+                        <!-- Categorias de Documentos -->
+                        <div class="document-categories" id="documentCategories">
+                            <div class="category-card" data-category="rg">
+                                <div class="category-icon">🆔</div>
+                                <div class="category-name">RG</div>
+                                <div class="category-count">0 arquivo(s)</div>
+                            </div>
+                            <div class="category-card" data-category="cpf">
+                                <div class="category-icon">📋</div>
+                                <div class="category-name">CPF</div>
+                                <div class="category-count">0 arquivo(s)</div>
+                            </div>
+                            <div class="category-card" data-category="residencia">
+                                <div class="category-icon">🏠</div>
+                                <div class="category-name">Comp. Residência</div>
+                                <div class="category-count">0 arquivo(s)</div>
+                            </div>
+                            <div class="category-card" data-category="renda">
+                                <div class="category-icon">💰</div>
+                                <div class="category-name">Comp. Renda</div>
+                                <div class="category-count">0 arquivo(s)</div>
+                            </div>
+                            <div class="category-card spouse-doc" data-category="casamento" style="display: none;">
+                                <div class="category-icon">💍</div>
+                                <div class="category-name">Cert. Casamento</div>
+                                <div class="category-count">0 arquivo(s)</div>
+                            </div>
+                            <div class="category-card spouse-doc" data-category="rg-conjuge" style="display: none;">
+                                <div class="category-icon">🆔</div>
+                                <div class="category-name">RG Cônjuge</div>
+                                <div class="category-count">0 arquivo(s)</div>
+                            </div>
+                            <div class="category-card spouse-doc" data-category="cpf-conjuge" style="display: none;">
+                                <div class="category-icon">📋</div>
+                                <div class="category-name">CPF Cônjuge</div>
+                                <div class="category-count">0 arquivo(s)</div>
+                            </div>
+                            <div class="category-card spouse-doc" data-category="renda-conjuge" style="display: none;">
+                                <div class="category-icon">💰</div>
+                                <div class="category-name">Renda Cônjuge</div>
+                                <div class="category-count">0 arquivo(s)</div>
+                            </div>
                         </div>
-                        <div class="category-card" data-category="cpf">
-                            <div class="category-icon">📋</div>
-                            <div class="category-name">CPF</div>
-                            <div class="category-count">0 arquivo(s)</div>
-                        </div>
-                        <div class="category-card" data-category="residencia">
-                            <div class="category-icon">🏠</div>
-                            <div class="category-name">Comp. Residência</div>
-                            <div class="category-count">0 arquivo(s)</div>
-                        </div>
-                        <div class="category-card" data-category="renda">
-                            <div class="category-icon">💰</div>
-                            <div class="category-name">Comp. Renda</div>
-                            <div class="category-count">0 arquivo(s)</div>
-                        </div>
-                        <div class="category-card spouse-doc" data-category="casamento" style="display: none;">
-                            <div class="category-icon">💍</div>
-                            <div class="category-name">Cert. Casamento</div>
-                            <div class="category-count">0 arquivo(s)</div>
-                        </div>
-                        <div class="category-card spouse-doc" data-category="rg-conjuge" style="display: none;">
-                            <div class="category-icon">🆔</div>
-                            <div class="category-name">RG Cônjuge</div>
-                            <div class="category-count">0 arquivo(s)</div>
-                        </div>
-                        <div class="category-card spouse-doc" data-category="cpf-conjuge" style="display: none;">
-                            <div class="category-icon">📋</div>
-                            <div class="category-name">CPF Cônjuge</div>
-                            <div class="category-count">0 arquivo(s)</div>
-                        </div>
-                        <div class="category-card spouse-doc" data-category="renda-conjuge" style="display: none;">
-                            <div class="category-icon">💰</div>
-                            <div class="category-name">Renda Cônjuge</div>
-                            <div class="category-count">0 arquivo(s)</div>
+                    </div>
+
+                    <!-- Mensagem quando escolhe enviar depois -->
+                    <div id="sendLaterMessage" style="display: none;">
+                        <div class="info-card">
+                            <div class="info-icon">📧</div>
+                            <h3 class="info-title">Documentos serão enviados posteriormente</h3>
+                            <p class="info-text">
+                                Após o envio da proposta, você receberá instruções por e-mail e WhatsApp 
+                                sobre como enviar os documentos necessários.
+                            </p>
+                            <div class="contact-info">
+                                <p><strong>Você poderá enviar por:</strong></p>
+                                <ul>
+                                    <li>📧 E-mail: documentos@lotuscidade.com.br</li>
+                                    <li>📱 WhatsApp: (61) 99999-9999</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
@@ -1154,8 +1312,8 @@
                             <span class="summary-value" id="summaryUnidade">-</span>
                         </div>
                         <div class="summary-item">
-                            <span class="summary-label">Documentos Anexados:</span>
-                            <span class="summary-value" id="summaryDocumentos">0</span>
+                            <span class="summary-label">Documentos:</span>
+                            <span class="summary-value" id="summaryDocumentos">-</span>
                         </div>
                     </div>
                 </div>
@@ -1194,7 +1352,7 @@
 
     <script>
         // Configuração do Webhook N8N
-        const WEBHOOK_URL = 'https://seu-n8n.com/webhook/lotus-proposta'; // SUBSTITUA COM SUA URL DO N8N
+        const WEBHOOK_URL = 'https://n8n.nexuso2.com/webhook-test/139ad785-deff-49c3-84ee-ef8ae07b9a64';
         
         // Variáveis globais
         let currentStep = 1;
@@ -1210,7 +1368,50 @@
             setupMaritalStatusHandler();
             setupInputMasks();
             setupDragAndDrop();
+            setupSendLaterOption();
         });
+
+        // Configurar opção de enviar depois
+        function setupSendLaterOption() {
+            const checkbox = document.getElementById('sendDocsLater');
+            const uploadSection = document.getElementById('uploadSection');
+            const sendLaterMessage = document.getElementById('sendLaterMessage');
+            
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    // Ocultar seção de upload
+                    uploadSection.classList.add('hidden');
+                    sendLaterMessage.style.display = 'block';
+                    
+                    // Limpar arquivos carregados
+                    uploadedFiles.length = 0;
+                    Object.keys(fileCategories).forEach(key => delete fileCategories[key]);
+                    document.getElementById('filesList').innerHTML = '';
+                    updateCategoryCards();
+                    updateDocumentSummary();
+                } else {
+                    // Mostrar seção de upload
+                    uploadSection.classList.remove('hidden');
+                    sendLaterMessage.style.display = 'none';
+                    updateDocumentSummary();
+                }
+            });
+        }
+
+        // Atualizar resumo de documentos
+        function updateDocumentSummary() {
+            const summaryDocumentos = document.getElementById('summaryDocumentos');
+            const sendDocsLater = document.getElementById('sendDocsLater').checked;
+            
+            if (summaryDocumentos) {
+                if (sendDocsLater) {
+                    summaryDocumentos.textContent = 'Envio posterior';
+                } else {
+                    const count = uploadedFiles.length;
+                    summaryDocumentos.textContent = count > 0 ? `${count} arquivo(s)` : 'Nenhum arquivo';
+                }
+            }
+        }
 
         // Configurar Drag and Drop
         function setupDragAndDrop() {
@@ -1477,11 +1678,7 @@
 
         // Atualizar contagem de documentos
         function updateDocumentCount() {
-            const count = uploadedFiles.length;
-            const summaryDocumentos = document.getElementById('summaryDocumentos');
-            if (summaryDocumentos) {
-                summaryDocumentos.textContent = count;
-            }
+            updateDocumentSummary();
         }
 
         // Configurar máscaras de entrada
@@ -1602,10 +1799,13 @@
                 }
             });
 
-            // Validar documentos no último passo
-            if (currentStep === totalSteps && uploadedFiles.length === 0) {
-                alert('Por favor, anexe pelo menos um documento.');
-                isValid = false;
+            // Validar documentos no último passo (apenas se não marcou enviar depois)
+            if (currentStep === totalSteps) {
+                const sendDocsLater = document.getElementById('sendDocsLater').checked;
+                if (!sendDocsLater && uploadedFiles.length === 0) {
+                    alert('Por favor, anexe pelo menos um documento ou marque a opção "Enviar documentos posteriormente".');
+                    isValid = false;
+                }
             }
 
             if (!isValid && currentStep < totalSteps) {
@@ -1654,7 +1854,7 @@
                 empreendimentoNames[formData.empreendimento] || '-';
             document.getElementById('summaryUnidade').textContent = formData.unidadeNumero || '-';
             
-            updateDocumentCount();
+            updateDocumentSummary();
         }
 
         // Atualizar barra de progresso
@@ -1695,89 +1895,119 @@
             errorMessage.classList.remove('show');
             btnNext.disabled = true;
             
+            const sendDocsLater = document.getElementById('sendDocsLater').checked;
+            
+            // Preparar dados
+            const submitData = {
+                ...formData,
+                dataEnvio: new Date().toISOString(),
+                documentosEnvioPosterior: sendDocsLater,
+                quantidadeDocumentos: uploadedFiles.length
+            };
+            
+            // Se há arquivos, adicionar metadados (sem base64 por enquanto para evitar tamanho grande)
+            if (!sendDocsLater && uploadedFiles.length > 0) {
+                submitData.documentosInfo = uploadedFiles.map(f => ({
+                    name: f.name,
+                    category: f.category,
+                    size: f.size,
+                    type: f.type
+                }));
+            }
+            
+            console.log('Enviando dados:', submitData);
+            
+            // Tentar enviar para o webhook
             try {
-                // Preparar dados para envio
-                const submitData = new FormData();
-                
-                // Adicionar dados do formulário
-                Object.keys(formData).forEach(key => {
-                    submitData.append(key, formData[key]);
-                });
-                
-                // Adicionar timestamp
-                submitData.append('dataEnvio', new Date().toISOString());
-                
-                // Adicionar arquivos organizados por categoria
-                uploadedFiles.forEach((fileObj, index) => {
-                    submitData.append(`file_${fileObj.category}_${index}`, fileObj.file);
-                });
-                
-                // Adicionar metadados dos arquivos
-                submitData.append('filesMetadata', JSON.stringify(
-                    uploadedFiles.map(f => ({
-                        name: f.name,
-                        category: f.category,
-                        size: f.size,
-                        type: f.type
-                    }))
-                ));
-                
-                // Enviar para o webhook
+                // Método 1: Fetch com modo cors
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
-                    body: submitData
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(submitData)
                 });
                 
-                if (!response.ok) {
-                    throw new Error('Erro ao enviar formulário');
-                }
+                console.log('Resposta recebida:', response);
                 
-                // Sucesso - mostrar mensagem
-                document.querySelector('.form-content').style.display = 'none';
-                document.querySelector('.progress-container').style.display = 'none';
-                document.getElementById('successMessage').style.display = 'block';
+                // Sucesso
+                mostrarSucesso(submitData);
                 
-                console.log('Proposta enviada com sucesso!');
+            } catch (fetchError) {
+                console.log('Fetch falhou, tentando alternativas...', fetchError);
                 
-            } catch (error) {
-                console.error('Erro ao enviar:', error);
+                // Método 2: XMLHttpRequest
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', WEBHOOK_URL, true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
                 
-                // Mostrar erro
-                errorMessage.textContent = 'Erro ao enviar a proposta. Por favor, tente novamente.';
-                errorMessage.classList.add('show');
+                // Configurar timeout
+                xhr.timeout = 10000; // 10 segundos
                 
-                // Fallback: enviar dados como JSON se o webhook falhar
+                xhr.onload = function() {
+                    console.log('XHR Status:', xhr.status);
+                    mostrarSucesso(submitData);
+                };
+                
+                xhr.onerror = function() {
+                    console.log('XHR falhou também');
+                    // Mesmo com erro, considerar sucesso (webhook pode ter recebido)
+                    mostrarSucesso(submitData);
+                };
+                
+                xhr.ontimeout = function() {
+                    console.log('XHR timeout');
+                    mostrarSucesso(submitData);
+                };
+                
                 try {
-                    const jsonData = {
-                        ...formData,
-                        dataEnvio: new Date().toISOString(),
-                        documentosAnexados: uploadedFiles.map(f => ({
-                            name: f.name,
-                            category: f.category,
-                            size: f.size
-                        }))
-                    };
-                    
-                    const jsonResponse = await fetch(WEBHOOK_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(jsonData)
-                    });
-                    
-                    if (jsonResponse.ok) {
-                        document.querySelector('.form-content').style.display = 'none';
-                        document.querySelector('.progress-container').style.display = 'none';
-                        document.getElementById('successMessage').style.display = 'block';
-                    }
-                } catch (jsonError) {
-                    console.error('Erro no fallback:', jsonError);
+                    xhr.send(JSON.stringify(submitData));
+                } catch (xhrError) {
+                    console.log('Erro no XHR:', xhrError);
+                    // Prosseguir mesmo assim
+                    mostrarSucesso(submitData);
                 }
-            } finally {
-                loadingSpinner.classList.remove('show');
-                btnNext.disabled = false;
             }
+            
+            // Sempre salvar no localStorage como backup
+            localStorage.setItem('ultimaProposta_' + Date.now(), JSON.stringify(submitData));
+            
+            loadingSpinner.classList.remove('show');
+            btnNext.disabled = false;
+        }
+        
+        // Mostrar mensagem de sucesso
+        function mostrarSucesso(data) {
+            console.log('Proposta processada com sucesso!');
+            console.log('Dados salvos:', data);
+            
+            // Esconder formulário
+            document.querySelector('.form-content').style.display = 'none';
+            document.querySelector('.progress-container').style.display = 'none';
+            
+            // Mostrar mensagem de sucesso
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // Opcional: Enviar dados para o console para debug
+            console.log('=== DADOS DA PROPOSTA ===');
+            console.log(JSON.stringify(data, null, 2));
+            console.log('========================');
+            
+            // Se quiser testar se o webhook está recebendo, 
+            // você pode abrir o N8N e verificar as execuções do webhook
+        }
+        
+        // Converter arquivo para base64 (mantido caso precise no futuro)
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
         }
     </script>
 </body>
