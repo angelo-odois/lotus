@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotus - Proposta de Compra</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --lotus-yellow: #FFC629;
+            --lotus-dark: #1A1A1A;
+            --lotus-gray: #6B7280;
+            --lotus-light-gray: #F9FAFB;
+            --lotus-white: #FFFFFF;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --warning-orange: #F59E0B;
+            --info-blue: #3B82F6;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--lotus-yellow) 0%, #FFD93D 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .form-container {
+            background: var(--lotus-white);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+            position: relative;
+        }
+
+        .header {
+            background: var(--lotus-yellow);
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            background: var(--lotus-yellow);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-text {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--lotus-dark);
+            letter-spacing: -1px;
+        }
+
+        .header-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--lotus-dark);
+            margin-bottom: 8px;
+        }
+
+        .header-subtitle {
+            font-size: 18px;
+            color: var(--lotus-dark);
+            opacity: 0.8;
+            font-weight: 500;
+        }
+
+        .form-content {
+            padding: 50px;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--success-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            animation: bounceIn 0.8s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .success-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--lotus-dark);
+            margin-bottom: 16px;
+        }
+
+        .success-subtitle {
+            font-size: 18px;
+            color: var(--lotus-gray);
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, var(--lotus-yellow) 0%, #FFD93D 100%);
+            color: var(--lotus-dark);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 198, 41, 0.4);
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 25px;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="form-container">
+            <div class="header">
+                <div class="logo">
+                    <span class="logo-text">Lotus</span>
+                </div>
+                <h1 class="header-title">Sistema de Propostas</h1>
+                <p class="header-subtitle">Realizando sonhos através da tecnologia</p>
+            </div>
+
+            <div class="form-content">
+                <div class="success-icon">
+                    <svg width="40" height="40" fill="white" viewBox="0 0 24 24">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                </div>
+                <h2 class="success-title">Sistema Instalado com Sucesso!</h2>
+                <p class="success-subtitle">O Lotus Proposta System está funcionando perfeitamente</p>
+                
+                <p style="margin: 20px 0; color: var(--lotus-gray);">
+                    Este é um sistema completo para geração de propostas de compra de imóveis<br>
+                    com interface moderna, validações robustas e geração automática de PDFs.
+                </p>
+
+                <div style="background: var(--lotus-light-gray); padding: 20px; border-radius: 12px; margin: 20px 0;">
+                    <h3 style="color: var(--lotus-dark); margin-bottom: 15px;">🚀 Próximos Passos:</h3>
+                    <ol style="text-align: left; color: var(--lotus-gray); line-height: 1.8;">
+                        <li>Customize o formulário conforme suas necessidades</li>
+                        <li>Configure as validações de negócio</li>
+                        <li>Personalize o template do PDF</li>
+                        <li>Configure backup automático do banco</li>
+                        <li>Setup SSL para produção</li>
+                    </ol>
+                </div>
+
+                <a href="#" class="btn" onclick="window.location.reload()">
+                    Acessar Sistema de Propostas
+                </a>
+            </div>
+
+            <div class="footer">
+                <p><strong>Lotus Cidade</strong> • www.lotuscidade.com.br</p>
+                <p>Setor Comercial Sul, Quadra 9, Ed. Parque Cidade Corporate, Torre A, Sala 1105, Brasília-DF</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

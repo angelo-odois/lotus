@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # Frontend - Nginx serving the HTML form
+  frontend:
+    image: nginx:alpine
+    container_name: lotus_frontend
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+    networks:
+      - lotus_network
+
+  # Backend - Node.js API for PDF generation
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lotus_backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - CORS_ORIGIN=http://localhost:3000
+    volumes:
+      - ./uploads:/app/uploads
+      - ./pdfs:/app/pdfs
+    depends_on:
+      - database
+      - redis
+    networks:
+      - lotus_network
+
+  # Database - PostgreSQL for storing proposals
+  database:
+    image: postgres:15-alpine
+    container_name: lotus_database
+    environment:
+      - POSTGRES_DB=lotus_propostas
+      - POSTGRES_USER=lotus
+      - POSTGRES_PASSWORD=lotus123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - lotus_network
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: lotus_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - lotus_network
+
+  # File manager for uploads
+  minio:
+    image: minio/minio
+    container_name: lotus_minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    environment:
+      - MINIO_ROOT_USER=lotus
+      - MINIO_ROOT_PASSWORD=lotus123456
+    command: server /data --console-address ":9001"
+    networks:
+      - lotus_network
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+
+networks:
+  lotus_network:
+    driver: bridge
