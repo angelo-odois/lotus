@@ -81,14 +81,7 @@
             font-size: 32px;
             font-weight: 700;
             color: var(--lotus-dark);
-            margin-bottom: 8px;
-        }
-
-        .header-subtitle {
-            font-size: 18px;
-            color: var(--lotus-dark);
-            opacity: 0.8;
-            font-weight: 500;
+            margin-bottom: 0;
         }
 
         .progress-container {
@@ -111,6 +104,22 @@
 
         .progress-label.active {
             color: var(--lotus-yellow);
+        }
+
+        /* Mobile: mostrar apenas o step ativo */
+        @media (max-width: 768px) {
+            .progress-labels {
+                justify-content: center;
+            }
+            
+            .progress-label {
+                display: none;
+            }
+            
+            .progress-label.active {
+                display: block;
+                font-size: 16px;
+            }
         }
 
         .progress-bar {
@@ -270,6 +279,56 @@
             box-shadow: 0 8px 25px rgba(255, 198, 41, 0.3);
         }
 
+        /* Estilos para a seção do cônjuge */
+        .spouse-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFF5D6 100%);
+            border: 2px solid var(--lotus-yellow);
+            border-radius: 16px;
+            display: none;
+            animation: slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .spouse-section.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .spouse-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .spouse-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--lotus-yellow);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .spouse-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--lotus-dark);
+        }
+
         .empreendimento-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -329,6 +388,212 @@
             color: var(--lotus-yellow);
         }
 
+        /* Estilos para upload de documentos */
+        .document-upload-section {
+            margin-top: 32px;
+        }
+
+        .upload-container {
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFF5D6 100%);
+            border: 3px dashed var(--lotus-yellow);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 32px;
+        }
+
+        .upload-container.drag-over {
+            background: linear-gradient(135deg, #FFE4B5 0%, #FFD700 100%);
+            border-color: var(--lotus-dark);
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(255, 198, 41, 0.3);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .upload-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--lotus-dark);
+            margin-bottom: 8px;
+        }
+
+        .upload-subtitle {
+            font-size: 14px;
+            color: var(--lotus-gray);
+            margin-bottom: 20px;
+        }
+
+        .upload-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--lotus-yellow);
+            color: var(--lotus-dark);
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 198, 41, 0.3);
+        }
+
+        .file-input-global {
+            display: none;
+        }
+
+        .files-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .file-item {
+            background: var(--lotus-white);
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            animation: slideIn 0.3s ease;
+        }
+
+        .file-item:hover {
+            border-color: var(--lotus-yellow);
+            transform: translateX(4px);
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--lotus-light-gray);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: var(--lotus-dark);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .file-details {
+            font-size: 12px;
+            color: var(--lotus-gray);
+        }
+
+        .file-category {
+            padding: 4px 8px;
+            background: var(--lotus-yellow);
+            color: var(--lotus-dark);
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .file-remove {
+            width: 32px;
+            height: 32px;
+            background: #FEE2E2;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--error-red);
+        }
+
+        .file-remove:hover {
+            background: var(--error-red);
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .document-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .category-card {
+            background: var(--lotus-white);
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .category-card.has-files {
+            border-color: var(--success-green);
+            background: #F0FDF4;
+        }
+
+        .category-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: var(--lotus-dark);
+            margin-bottom: 4px;
+        }
+
+        .category-count {
+            font-size: 12px;
+            color: var(--lotus-gray);
+        }
+
+        .category-count.success {
+            color: var(--success-green);
+            font-weight: 600;
+        }
+
+        .required-docs-info {
+            background: #FEF3C7;
+            border: 1px solid #FCD34D;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .required-docs-icon {
+            font-size: 24px;
+        }
+
+        .required-docs-text {
+            flex: 1;
+            font-size: 14px;
+            color: var(--lotus-dark);
+        }
+
         .summary-card {
             background: linear-gradient(135deg, var(--lotus-light-gray) 0%, #F9FAFB 100%);
             border: 2px solid #E5E7EB;
@@ -365,6 +630,7 @@
         .summary-value {
             font-weight: 700;
             color: var(--lotus-dark);
+            text-align: right;
         }
 
         .nav-container {
@@ -462,28 +728,38 @@
             font-size: 14px;
         }
 
-        .download-section {
-            margin-top: 30px;
-            padding: 20px;
-            background: var(--lotus-light-gray);
-            border-radius: 12px;
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--lotus-yellow);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
         }
 
-        .download-btn {
-            display: inline-block;
-            background: var(--lotus-yellow);
-            color: var(--lotus-dark);
-            padding: 12px 24px;
-            text-decoration: none;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-spinner.show {
+            display: block;
+        }
+
+        .error-message {
+            display: none;
+            padding: 12px;
+            background: #FEE2E2;
+            border: 1px solid var(--error-red);
             border-radius: 8px;
-            font-weight: 600;
-            margin: 10px;
-            transition: all 0.3s ease;
+            color: var(--error-red);
+            margin-top: 20px;
+            font-size: 14px;
         }
 
-        .download-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 198, 41, 0.3);
+        .error-message.show {
+            display: block;
         }
 
         @media (max-width: 768px) {
@@ -523,6 +799,10 @@
             .step-title {
                 font-size: 24px;
             }
+
+            .spouse-section {
+                padding: 20px;
+            }
         }
     </style>
 </head>
@@ -535,7 +815,6 @@
                     <span class="logo-text">Lotus</span>
                 </div>
                 <h1 class="header-title">Proposta de Compra</h1>
-                <p class="header-subtitle">Realize seu sonho da casa própria</p>
             </div>
 
             <!-- Progress -->
@@ -544,7 +823,7 @@
                     <span class="progress-label active" id="label1">Dados Pessoais</span>
                     <span class="progress-label" id="label2">Empreendimento</span>
                     <span class="progress-label" id="label3">Unidade</span>
-                    <span class="progress-label" id="label4">Financiamento</span>
+                    <span class="progress-label" id="label4">Documentos</span>
                 </div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill"></div>
@@ -633,6 +912,85 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Seção do Cônjuge (aparece apenas quando casado é selecionado) -->
+                    <div class="spouse-section" id="spouseSection">
+                        <div class="spouse-header">
+                            <div class="spouse-icon">💑</div>
+                            <h3 class="spouse-title">Dados do Cônjuge</h3>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label class="form-label" for="nomeConjuge">Nome Completo do Cônjuge *</label>
+                                <input type="text" id="nomeConjuge" name="nomeConjuge" class="form-input spouse-field" 
+                                       placeholder="Digite o nome completo do cônjuge">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="cpfConjuge">CPF do Cônjuge *</label>
+                                <input type="text" id="cpfConjuge" name="cpfConjuge" class="form-input spouse-field" 
+                                       placeholder="000.000.000-00" maxlength="14">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="rgConjuge">RG do Cônjuge *</label>
+                                <input type="text" id="rgConjuge" name="rgConjuge" class="form-input spouse-field" 
+                                       placeholder="0000000">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="dataNascimentoConjuge">Data de Nascimento *</label>
+                                <input type="date" id="dataNascimentoConjuge" name="dataNascimentoConjuge" class="form-input spouse-field">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="telefoneConjuge">Telefone/Celular *</label>
+                                <input type="tel" id="telefoneConjuge" name="telefoneConjuge" class="form-input spouse-field" 
+                                       placeholder="(61) 99999-9999">
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label class="form-label" for="emailConjuge">E-mail do Cônjuge</label>
+                                <input type="email" id="emailConjuge" name="emailConjuge" class="form-input" 
+                                       placeholder="conjuge@email.com">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="profissaoConjuge">Profissão do Cônjuge *</label>
+                                <input type="text" id="profissaoConjuge" name="profissaoConjuge" class="form-input spouse-field" 
+                                       placeholder="Profissão do cônjuge">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="rendaConjuge">Renda Mensal do Cônjuge (R$) *</label>
+                                <input type="number" id="rendaConjuge" name="rendaConjuge" class="form-input spouse-field" 
+                                       placeholder="5000.00" step="0.01">
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label class="form-label">Regime de Casamento *</label>
+                                <div class="radio-grid">
+                                    <div class="radio-item">
+                                        <input type="radio" id="comunhaoParcial" name="regimeCasamento" value="comunhaoParcial" class="radio-input spouse-field">
+                                        <label for="comunhaoParcial" class="radio-label">Comunhão Parcial</label>
+                                    </div>
+                                    <div class="radio-item">
+                                        <input type="radio" id="comunhaoUniversal" name="regimeCasamento" value="comunhaoUniversal" class="radio-input spouse-field">
+                                        <label for="comunhaoUniversal" class="radio-label">Comunhão Universal</label>
+                                    </div>
+                                    <div class="radio-item">
+                                        <input type="radio" id="separacaoBens" name="regimeCasamento" value="separacaoBens" class="radio-input spouse-field">
+                                        <label for="separacaoBens" class="radio-label">Separação de Bens</label>
+                                    </div>
+                                    <div class="radio-item">
+                                        <input type="radio" id="participacaoFinal" name="regimeCasamento" value="participacaoFinal" class="radio-input spouse-field">
+                                        <label for="participacaoFinal" class="radio-label">Participação Final</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Step 2: Empreendimento -->
@@ -698,47 +1056,81 @@
                     </div>
                 </div>
 
-                <!-- Step 4: Financiamento -->
+                <!-- Step 4: Documentos -->
                 <div class="step" id="step4">
-                    <h2 class="step-title">Condições de pagamento</h2>
-                    <p class="step-description">Defina como você vai realizar o pagamento do seu imóvel</p>
+                    <h2 class="step-title">Envio de Documentos</h2>
+                    <p class="step-description">Anexe os documentos necessários para análise da proposta</p>
                     
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label" for="valorImovel">Valor Total do Imóvel (R$) *</label>
-                            <input type="number" id="valorImovel" name="valorImovel" class="form-input" required 
-                                   placeholder="450000.00" step="0.01">
+                    <div class="required-docs-info">
+                        <span class="required-docs-icon">ℹ️</span>
+                        <div class="required-docs-text">
+                            <strong>Documentos necessários:</strong> RG, CPF, Comprovante de Residência e Comprovante de Renda.
+                            <span id="spouseDocsInfo" style="display: none;">
+                                <br><strong>Documentos do cônjuge:</strong> Certidão de Casamento, RG do Cônjuge, CPF do Cônjuge, Comprovante de Renda do Cônjuge.
+                            </span>
                         </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" for="valorEntrada">Valor de Entrada (R$) *</label>
-                            <input type="number" id="valorEntrada" name="valorEntrada" class="form-input" required 
-                                   placeholder="90000.00" step="0.01">
+                    </div>
+
+                    <!-- Área de Upload Drag & Drop -->
+                    <div class="upload-container" id="uploadContainer">
+                        <div class="upload-icon">📤</div>
+                        <h3 class="upload-title">Arraste seus documentos aqui</h3>
+                        <p class="upload-subtitle">ou clique para selecionar múltiplos arquivos</p>
+                        <button type="button" class="upload-button" onclick="document.getElementById('fileInputGlobal').click()">
+                            <span>📁</span>
+                            <span>Selecionar Arquivos</span>
+                        </button>
+                        <p class="upload-subtitle" style="margin-top: 12px; font-size: 12px;">
+                            Formatos aceitos: PDF, JPG, JPEG, PNG • Máximo 10MB por arquivo
+                        </p>
+                    </div>
+
+                    <input type="file" id="fileInputGlobal" class="file-input-global" multiple accept=".pdf,.jpg,.jpeg,.png">
+
+                    <!-- Lista de Arquivos Enviados -->
+                    <div class="files-list" id="filesList"></div>
+
+                    <!-- Categorias de Documentos -->
+                    <div class="document-categories" id="documentCategories">
+                        <div class="category-card" data-category="rg">
+                            <div class="category-icon">🆔</div>
+                            <div class="category-name">RG</div>
+                            <div class="category-count">0 arquivo(s)</div>
                         </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" for="valorFinanciar">Valor a Financiar (R$)</label>
-                            <input type="number" id="valorFinanciar" name="valorFinanciar" class="form-input" readonly>
+                        <div class="category-card" data-category="cpf">
+                            <div class="category-icon">📋</div>
+                            <div class="category-name">CPF</div>
+                            <div class="category-count">0 arquivo(s)</div>
                         </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" for="prazoFinanciamento">Prazo do Financiamento</label>
-                            <select id="prazoFinanciamento" name="prazoFinanciamento" class="form-input">
-                                <option value="10">10 anos</option>
-                                <option value="15">15 anos</option>
-                                <option value="20">20 anos</option>
-                                <option value="25">25 anos</option>
-                                <option value="30" selected>30 anos</option>
-                                <option value="35">35 anos</option>
-                            </select>
+                        <div class="category-card" data-category="residencia">
+                            <div class="category-icon">🏠</div>
+                            <div class="category-name">Comp. Residência</div>
+                            <div class="category-count">0 arquivo(s)</div>
                         </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" for="sistemaFinanciamento">Sistema de Financiamento</label>
-                            <select id="sistemaFinanciamento" name="sistemaFinanciamento" class="form-input">
-                                <option value="sac">SAC - Sistema de Amortização Constante</option>
-                                <option value="price" selected>PRICE - Sistema Francês</option>
-                            </select>
+                        <div class="category-card" data-category="renda">
+                            <div class="category-icon">💰</div>
+                            <div class="category-name">Comp. Renda</div>
+                            <div class="category-count">0 arquivo(s)</div>
+                        </div>
+                        <div class="category-card spouse-doc" data-category="casamento" style="display: none;">
+                            <div class="category-icon">💍</div>
+                            <div class="category-name">Cert. Casamento</div>
+                            <div class="category-count">0 arquivo(s)</div>
+                        </div>
+                        <div class="category-card spouse-doc" data-category="rg-conjuge" style="display: none;">
+                            <div class="category-icon">🆔</div>
+                            <div class="category-name">RG Cônjuge</div>
+                            <div class="category-count">0 arquivo(s)</div>
+                        </div>
+                        <div class="category-card spouse-doc" data-category="cpf-conjuge" style="display: none;">
+                            <div class="category-icon">📋</div>
+                            <div class="category-name">CPF Cônjuge</div>
+                            <div class="category-count">0 arquivo(s)</div>
+                        </div>
+                        <div class="category-card spouse-doc" data-category="renda-conjuge" style="display: none;">
+                            <div class="category-icon">💰</div>
+                            <div class="category-name">Renda Cônjuge</div>
+                            <div class="category-count">0 arquivo(s)</div>
                         </div>
                     </div>
 
@@ -749,6 +1141,10 @@
                             <span class="summary-label">Cliente:</span>
                             <span class="summary-value" id="summaryNome">-</span>
                         </div>
+                        <div class="summary-item" id="summaryConjugeItem" style="display: none;">
+                            <span class="summary-label">Cônjuge:</span>
+                            <span class="summary-value" id="summaryConjuge">-</span>
+                        </div>
                         <div class="summary-item">
                             <span class="summary-label">Empreendimento:</span>
                             <span class="summary-value" id="summaryEmpreendimento">-</span>
@@ -758,16 +1154,8 @@
                             <span class="summary-value" id="summaryUnidade">-</span>
                         </div>
                         <div class="summary-item">
-                            <span class="summary-label">Valor Total:</span>
-                            <span class="summary-value" id="summaryValorTotal">-</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Entrada:</span>
-                            <span class="summary-value" id="summaryEntrada">-</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Financiamento:</span>
-                            <span class="summary-value" id="summaryFinanciamento">-</span>
+                            <span class="summary-label">Documentos Anexados:</span>
+                            <span class="summary-value" id="summaryDocumentos">0</span>
                         </div>
                     </div>
                 </div>
@@ -781,6 +1169,9 @@
                         Continuar →
                     </button>
                 </div>
+                
+                <div class="loading-spinner" id="loadingSpinner"></div>
+                <div class="error-message" id="errorMessage"></div>
             </form>
 
             <!-- Success Message -->
@@ -790,14 +1181,8 @@
                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                     </svg>
                 </div>
-                <h2 class="success-title">Proposta criada com sucesso!</h2>
-                <p class="success-subtitle">Seus dados foram registrados e processados</p>
-                
-                <div class="download-section">
-                    <h3>📄 Documentos Gerados:</h3>
-                    <a href="#" class="download-btn" id="downloadPDF">📄 Baixar Proposta (PDF)</a>
-                    <a href="#" class="download-btn" id="downloadJSON">📊 Baixar Dados (JSON)</a>
-                </div>
+                <h2 class="success-title">Proposta enviada com sucesso!</h2>
+                <p class="success-subtitle">Seus dados foram registrados e em breve entraremos em contato</p>
             </div>
         </div>
     </div>
@@ -807,6 +1192,593 @@
         <p>Setor Comercial Sul, Quadra 9, Ed. Parque Cidade Corporate, Torre A, Sala 1105, Brasília-DF</p>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+        // Configuração do Webhook N8N
+        const WEBHOOK_URL = 'https://seu-n8n.com/webhook/lotus-proposta'; // SUBSTITUA COM SUA URL DO N8N
+        
+        // Variáveis globais
+        let currentStep = 1;
+        const totalSteps = 4;
+        const formData = {};
+        const uploadedFiles = [];
+        const fileCategories = {};
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgress();
+            setupEventListeners();
+            setupMaritalStatusHandler();
+            setupInputMasks();
+            setupDragAndDrop();
+        });
+
+        // Configurar Drag and Drop
+        function setupDragAndDrop() {
+            const uploadContainer = document.getElementById('uploadContainer');
+            const fileInput = document.getElementById('fileInputGlobal');
+
+            // Prevenir comportamento padrão do browser
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadContainer.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            // Adicionar efeitos visuais
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadContainer.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadContainer.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight(e) {
+                uploadContainer.classList.add('drag-over');
+            }
+
+            function unhighlight(e) {
+                uploadContainer.classList.remove('drag-over');
+            }
+
+            // Manipular drop
+            uploadContainer.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+
+            // Click para selecionar
+            fileInput.addEventListener('change', function(e) {
+                handleFiles(e.target.files);
+            });
+        }
+
+        // Processar arquivos
+        function handleFiles(files) {
+            ([...files]).forEach(processFile);
+            updateDocumentCount();
+        }
+
+        // Processar arquivo individual
+        function processFile(file) {
+            // Validar tipo de arquivo
+            const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+            if (!validTypes.includes(file.type)) {
+                alert(`Arquivo ${file.name} não é suportado. Use PDF, JPG, JPEG ou PNG.`);
+                return;
+            }
+
+            // Validar tamanho (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert(`Arquivo ${file.name} excede o limite de 10MB.`);
+                return;
+            }
+
+            // Adicionar arquivo à lista
+            const fileId = Date.now() + Math.random();
+            const fileObj = {
+                id: fileId,
+                file: file,
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                category: detectCategory(file.name)
+            };
+
+            uploadedFiles.push(fileObj);
+            
+            // Adicionar à categoria correspondente
+            if (!fileCategories[fileObj.category]) {
+                fileCategories[fileObj.category] = [];
+            }
+            fileCategories[fileObj.category].push(fileObj);
+
+            // Atualizar UI
+            addFileToList(fileObj);
+            updateCategoryCards();
+        }
+
+        // Detectar categoria do documento pelo nome
+        function detectCategory(filename) {
+            const lowerName = filename.toLowerCase();
+            
+            // Documentos do cônjuge
+            if (lowerName.includes('conjuge') || lowerName.includes('cônjuge')) {
+                if (lowerName.includes('rg')) {
+                    return 'rg-conjuge';
+                } else if (lowerName.includes('cpf')) {
+                    return 'cpf-conjuge';
+                } else if (lowerName.includes('renda') || lowerName.includes('salario') || lowerName.includes('holerite')) {
+                    return 'renda-conjuge';
+                }
+            }
+            
+            // Documentos principais
+            if (lowerName.includes('rg')) {
+                return 'rg';
+            } else if (lowerName.includes('cpf')) {
+                return 'cpf';
+            } else if (lowerName.includes('residencia') || lowerName.includes('endereco') || lowerName.includes('comprovante')) {
+                return 'residencia';
+            } else if (lowerName.includes('renda') || lowerName.includes('salario') || lowerName.includes('holerite')) {
+                return 'renda';
+            } else if (lowerName.includes('casamento') || lowerName.includes('certidao')) {
+                return 'casamento';
+            } else {
+                return 'outros';
+            }
+        }
+
+        // Adicionar arquivo à lista visual
+        function addFileToList(fileObj) {
+            const filesList = document.getElementById('filesList');
+            const fileSize = (fileObj.size / 1024).toFixed(2);
+            
+            const categoryLabels = {
+                'rg': 'RG',
+                'cpf': 'CPF',
+                'residencia': 'Comp. Residência',
+                'renda': 'Comp. Renda',
+                'casamento': 'Cert. Casamento',
+                'rg-conjuge': 'RG Cônjuge',
+                'cpf-conjuge': 'CPF Cônjuge',
+                'renda-conjuge': 'Renda Cônjuge',
+                'outros': 'Outros'
+            };
+
+            const fileIcon = fileObj.type.includes('pdf') ? '📄' : '🖼️';
+            
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.id = `file-${fileObj.id}`;
+            fileItem.innerHTML = `
+                <div class="file-icon">${fileIcon}</div>
+                <div class="file-info">
+                    <span class="file-name">${fileObj.name}</span>
+                    <div class="file-details">
+                        <span>${fileSize} KB</span> • 
+                        <span class="file-category">${categoryLabels[fileObj.category]}</span>
+                    </div>
+                </div>
+                <div class="file-remove" onclick="removeFile(${fileObj.id})">✕</div>
+            `;
+            
+            filesList.appendChild(fileItem);
+        }
+
+        // Remover arquivo
+        function removeFile(fileId) {
+            // Remover da lista
+            const index = uploadedFiles.findIndex(f => f.id === fileId);
+            if (index > -1) {
+                const file = uploadedFiles[index];
+                
+                // Remover da categoria
+                if (fileCategories[file.category]) {
+                    const catIndex = fileCategories[file.category].findIndex(f => f.id === fileId);
+                    if (catIndex > -1) {
+                        fileCategories[file.category].splice(catIndex, 1);
+                    }
+                    if (fileCategories[file.category].length === 0) {
+                        delete fileCategories[file.category];
+                    }
+                }
+                
+                uploadedFiles.splice(index, 1);
+            }
+            
+            // Remover elemento visual
+            const element = document.getElementById(`file-${fileId}`);
+            if (element) {
+                element.remove();
+            }
+            
+            updateCategoryCards();
+            updateDocumentCount();
+        }
+
+        // Atualizar cards de categoria
+        function updateCategoryCards() {
+            const categories = ['rg', 'cpf', 'residencia', 'renda', 'casamento', 'rg-conjuge', 'cpf-conjuge', 'renda-conjuge'];
+            
+            categories.forEach(category => {
+                const card = document.querySelector(`[data-category="${category}"]`);
+                if (card) {
+                    const count = fileCategories[category] ? fileCategories[category].length : 0;
+                    const countElement = card.querySelector('.category-count');
+                    
+                    countElement.textContent = `${count} arquivo(s)`;
+                    
+                    if (count > 0) {
+                        card.classList.add('has-files');
+                        countElement.classList.add('success');
+                    } else {
+                        card.classList.remove('has-files');
+                        countElement.classList.remove('success');
+                    }
+                }
+            });
+        }
+
+        // Atualizar visibilidade dos documentos do cônjuge
+        function updateSpouseDocuments(show) {
+            const spouseDocs = document.querySelectorAll('.spouse-doc');
+            const spouseInfo = document.getElementById('spouseDocsInfo');
+            
+            spouseDocs.forEach(doc => {
+                doc.style.display = show ? 'block' : 'none';
+            });
+            
+            if (spouseInfo) {
+                spouseInfo.style.display = show ? 'inline' : 'none';
+            }
+        }
+
+        // Configurar manipulador do estado civil
+        function setupMaritalStatusHandler() {
+            const maritalStatusInputs = document.querySelectorAll('input[name="estadoCivil"]');
+            const spouseSection = document.getElementById('spouseSection');
+            const spouseFields = document.querySelectorAll('.spouse-field');
+
+            maritalStatusInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const isMarried = this.value === 'casado';
+                    
+                    // Mostrar/ocultar seção do cônjuge
+                    if (isMarried) {
+                        spouseSection.classList.add('show');
+                        // Tornar campos do cônjuge obrigatórios
+                        spouseFields.forEach(field => {
+                            if (field.type !== 'email' && !field.id.includes('emailConjuge')) {
+                                field.setAttribute('required', 'required');
+                            }
+                        });
+                    } else {
+                        spouseSection.classList.remove('show');
+                        // Remover obrigatoriedade dos campos do cônjuge
+                        spouseFields.forEach(field => {
+                            field.removeAttribute('required');
+                            field.value = ''; // Limpar campos
+                        });
+                    }
+
+                    // Atualizar visibilidade dos documentos do cônjuge no step 4
+                    updateSpouseDocuments(isMarried);
+                });
+            });
+        }
+
+        // Atualizar contagem de documentos
+        function updateDocumentCount() {
+            const count = uploadedFiles.length;
+            const summaryDocumentos = document.getElementById('summaryDocumentos');
+            if (summaryDocumentos) {
+                summaryDocumentos.textContent = count;
+            }
+        }
+
+        // Configurar máscaras de entrada
+        function setupInputMasks() {
+            // Máscara CPF
+            const cpfInputs = [document.getElementById('cpf'), document.getElementById('cpfConjuge')];
+            cpfInputs.forEach(input => {
+                if (input) {
+                    input.addEventListener('input', function(e) {
+                        let value = e.target.value.replace(/\D/g, '');
+                        if (value.length <= 11) {
+                            value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+                        }
+                        e.target.value = value;
+                    });
+                }
+            });
+
+            // Máscara Telefone
+            const phoneInputs = [document.getElementById('telefone'), document.getElementById('telefoneConjuge')];
+            phoneInputs.forEach(input => {
+                if (input) {
+                    input.addEventListener('input', function(e) {
+                        let value = e.target.value.replace(/\D/g, '');
+                        if (value.length <= 11) {
+                            value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+                        }
+                        e.target.value = value;
+                    });
+                }
+            });
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            document.getElementById('btnNext').addEventListener('click', nextStep);
+            document.getElementById('btnBack').addEventListener('click', prevStep);
+
+            // Adicionar listeners para os indicadores de passo
+            document.querySelectorAll('.step-dot').forEach(dot => {
+                dot.addEventListener('click', function() {
+                    const targetStep = parseInt(this.dataset.step);
+                    if (targetStep <= currentStep) {
+                        goToStep(targetStep);
+                    }
+                });
+            });
+        }
+
+        // Navegação entre passos
+        function nextStep() {
+            if (validateStep()) {
+                saveStepData();
+                
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    showStep(currentStep);
+                    updateProgress();
+                } else {
+                    submitForm();
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+                updateProgress();
+            }
+        }
+
+        function goToStep(step) {
+            currentStep = step;
+            showStep(currentStep);
+            updateProgress();
+        }
+
+        function showStep(step) {
+            // Ocultar todos os passos
+            document.querySelectorAll('.step').forEach(s => {
+                s.classList.remove('active');
+            });
+
+            // Mostrar passo atual
+            document.getElementById(`step${step}`).classList.add('active');
+
+            // Atualizar botões de navegação
+            const btnBack = document.getElementById('btnBack');
+            const btnNext = document.getElementById('btnNext');
+
+            btnBack.style.display = step === 1 ? 'none' : 'block';
+            btnNext.textContent = step === totalSteps ? 'Enviar Proposta' : 'Continuar →';
+
+            // Atualizar resumo se estiver no último passo
+            if (step === totalSteps) {
+                updateSummary();
+                // Atualizar visibilidade dos documentos do cônjuge
+                updateSpouseDocuments(formData.estadoCivil === 'casado');
+            }
+        }
+
+        // Validação de passos
+        function validateStep() {
+            const currentStepElement = document.getElementById(`step${currentStep}`);
+            const requiredFields = currentStepElement.querySelectorAll('[required]');
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                // Verificar se o campo está visível (para campos do cônjuge)
+                const isVisible = field.offsetParent !== null;
+                
+                if (isVisible && !field.value) {
+                    field.style.borderColor = 'var(--error-red)';
+                    isValid = false;
+                } else {
+                    field.style.borderColor = '#E5E7EB';
+                }
+            });
+
+            // Validar documentos no último passo
+            if (currentStep === totalSteps && uploadedFiles.length === 0) {
+                alert('Por favor, anexe pelo menos um documento.');
+                isValid = false;
+            }
+
+            if (!isValid && currentStep < totalSteps) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+            }
+
+            return isValid;
+        }
+
+        // Salvar dados do passo
+        function saveStepData() {
+            const currentStepElement = document.getElementById(`step${currentStep}`);
+            const inputs = currentStepElement.querySelectorAll('input, select');
+
+            inputs.forEach(input => {
+                if (input.type === 'radio') {
+                    if (input.checked) {
+                        formData[input.name] = input.value;
+                    }
+                } else if (input.type !== 'file') {
+                    formData[input.name] = input.value;
+                }
+            });
+        }
+
+        // Atualizar resumo
+        function updateSummary() {
+            document.getElementById('summaryNome').textContent = formData.nome || '-';
+            
+            // Mostrar cônjuge se casado
+            if (formData.estadoCivil === 'casado' && formData.nomeConjuge) {
+                document.getElementById('summaryConjugeItem').style.display = 'flex';
+                document.getElementById('summaryConjuge').textContent = formData.nomeConjuge;
+            } else {
+                document.getElementById('summaryConjugeItem').style.display = 'none';
+            }
+
+            const empreendimentoNames = {
+                'haya': 'HAYA',
+                'kasa': 'KASA',
+                'vert': 'VERT',
+                'alma': 'ALMA'
+            };
+
+            document.getElementById('summaryEmpreendimento').textContent = 
+                empreendimentoNames[formData.empreendimento] || '-';
+            document.getElementById('summaryUnidade').textContent = formData.unidadeNumero || '-';
+            
+            updateDocumentCount();
+        }
+
+        // Atualizar barra de progresso
+        function updateProgress() {
+            const progressPercentage = (currentStep / totalSteps) * 100;
+            document.getElementById('progressFill').style.width = `${progressPercentage}%`;
+
+            // Atualizar labels de progresso
+            for (let i = 1; i <= totalSteps; i++) {
+                const label = document.getElementById(`label${i}`);
+                if (i <= currentStep) {
+                    label.classList.add('active');
+                } else {
+                    label.classList.remove('active');
+                }
+            }
+
+            // Atualizar indicadores
+            document.querySelectorAll('.step-dot').forEach((dot, index) => {
+                if (index < currentStep) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        // Enviar formulário para o webhook N8N
+        async function submitForm() {
+            saveStepData();
+            
+            // Mostrar loading
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const errorMessage = document.getElementById('errorMessage');
+            const btnNext = document.getElementById('btnNext');
+            
+            loadingSpinner.classList.add('show');
+            errorMessage.classList.remove('show');
+            btnNext.disabled = true;
+            
+            try {
+                // Preparar dados para envio
+                const submitData = new FormData();
+                
+                // Adicionar dados do formulário
+                Object.keys(formData).forEach(key => {
+                    submitData.append(key, formData[key]);
+                });
+                
+                // Adicionar timestamp
+                submitData.append('dataEnvio', new Date().toISOString());
+                
+                // Adicionar arquivos organizados por categoria
+                uploadedFiles.forEach((fileObj, index) => {
+                    submitData.append(`file_${fileObj.category}_${index}`, fileObj.file);
+                });
+                
+                // Adicionar metadados dos arquivos
+                submitData.append('filesMetadata', JSON.stringify(
+                    uploadedFiles.map(f => ({
+                        name: f.name,
+                        category: f.category,
+                        size: f.size,
+                        type: f.type
+                    }))
+                ));
+                
+                // Enviar para o webhook
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    body: submitData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao enviar formulário');
+                }
+                
+                // Sucesso - mostrar mensagem
+                document.querySelector('.form-content').style.display = 'none';
+                document.querySelector('.progress-container').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+                
+                console.log('Proposta enviada com sucesso!');
+                
+            } catch (error) {
+                console.error('Erro ao enviar:', error);
+                
+                // Mostrar erro
+                errorMessage.textContent = 'Erro ao enviar a proposta. Por favor, tente novamente.';
+                errorMessage.classList.add('show');
+                
+                // Fallback: enviar dados como JSON se o webhook falhar
+                try {
+                    const jsonData = {
+                        ...formData,
+                        dataEnvio: new Date().toISOString(),
+                        documentosAnexados: uploadedFiles.map(f => ({
+                            name: f.name,
+                            category: f.category,
+                            size: f.size
+                        }))
+                    };
+                    
+                    const jsonResponse = await fetch(WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(jsonData)
+                    });
+                    
+                    if (jsonResponse.ok) {
+                        document.querySelector('.form-content').style.display = 'none';
+                        document.querySelector('.progress-container').style.display = 'none';
+                        document.getElementById('successMessage').style.display = 'block';
+                    }
+                } catch (jsonError) {
+                    console.error('Erro no fallback:', jsonError);
+                }
+            } finally {
+                loadingSpinner.classList.remove('show');
+                btnNext.disabled = false;
+            }
+        }
+    </script>
 </body>
 </html>
