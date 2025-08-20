@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotus - Proposta de Compra</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --lotus-yellow: #FFC629;
+            --lotus-dark: #1A1A1A;
+            --lotus-gray: #6B7280;
+            --lotus-light-gray: #F9FAFB;
+            --lotus-white: #FFFFFF;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --warning-orange: #F59E0B;
+            --info-blue: #3B82F6;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--lotus-yellow) 0%, #FFD93D 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .form-container {
+            background: var(--lotus-white);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+            position: relative;
+        }
+
+        .header {
+            background: var(--lotus-yellow);
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            background: var(--lotus-yellow);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .logo-text {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--lotus-dark);
+            letter-spacing: -1px;
+        }
+
+        .header-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--lotus-dark);
+            margin-bottom: 8px;
+        }
+
+        .header-subtitle {
+            font-size: 18px;
+            color: var(--lotus-dark);
+            opacity: 0.8;
+            font-weight: 500;
+        }
+
+        .progress-container {
+            padding: 30px 40px 20px;
+            background: var(--lotus-white);
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--lotus-gray);
+            transition: all 0.3s ease;
+        }
+
+        .progress-label.active {
+            color: var(--lotus-yellow);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #E5E7EB;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--lotus-yellow) 0%, #FFD93D 100%);
+            border-radius: 4px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .step-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #D1D5DB;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .step-dot.active {
+            background: var(--lotus-yellow);
+            transform: scale(1.2);
+            box-shadow: 0 0 0 4px rgba(255, 198, 41, 0.2);
+        }
+
+        .form-content {
+            padding: 40px;
+        }
+
+        .step {
+            display: none;
+            animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+
+        .step-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--lotus-dark);
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .step-description {
+            font-size: 16px;
+            color: var(--lotus-gray);
+            text-align: center;
+            margin-bottom: 40px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--lotus-dark);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            background: var(--lotus-white);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--lotus-yellow);
+            box-shadow: 0 0 0 4px rgba(255, 198, 41, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .radio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .radio-item {
+            position: relative;
+        }
+
+        .radio-input {
+            display: none;
+        }
+
+        .radio-label {
+            display: block;
+            padding: 16px 20px;
+            background: var(--lotus-light-gray);
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--lotus-gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .radio-input:checked + .radio-label {
+            background: var(--lotus-yellow);
+            border-color: var(--lotus-yellow);
+            color: var(--lotus-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 198, 41, 0.3);
+        }
+
+        .empreendimento-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .empreendimento-card {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .empreendimento-input {
+            display: none;
+        }
+
+        .empreendimento-label {
+            display: block;
+            background: var(--lotus-white);
+            border: 3px solid #E5E7EB;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+            height: 320px;
+        }
+
+        .empreendimento-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .empreendimento-content {
+            padding: 24px;
+            text-align: center;
+        }
+
+        .empreendimento-name {
+            font-weight: 800;
+            font-size: 28px;
+            color: var(--lotus-gray);
+            margin: 0;
+            transition: all 0.3s ease;
+        }
+
+        .empreendimento-input:checked + .empreendimento-label {
+            border-color: var(--lotus-yellow);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(255, 198, 41, 0.3);
+        }
+
+        .empreendimento-input:checked + .empreendimento-label .empreendimento-name {
+            color: var(--lotus-yellow);
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--lotus-light-gray) 0%, #F9FAFB 100%);
+            border: 2px solid #E5E7EB;
+            border-radius: 20px;
+            padding: 32px;
+            margin-top: 32px;
+        }
+
+        .summary-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--lotus-dark);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            font-weight: 600;
+            color: var(--lotus-gray);
+        }
+
+        .summary-value {
+            font-weight: 700;
+            color: var(--lotus-dark);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 140px;
+        }
+
+        .btn-back {
+            background: var(--lotus-light-gray);
+            color: var(--lotus-gray);
+            border: 2px solid #E5E7EB;
+        }
+
+        .btn-back:hover {
+            background: #E5E7EB;
+            transform: translateY(-2px);
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, var(--lotus-yellow) 0%, #FFD93D 100%);
+            color: var(--lotus-dark);
+            border: 2px solid var(--lotus-yellow);
+            box-shadow: 0 4px 15px rgba(255, 198, 41, 0.3);
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 198, 41, 0.4);
+        }
+
+        .btn-next:disabled {
+            background: #D1D5DB;
+            color: #9CA3AF;
+            border-color: #D1D5DB;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 60px 40px;
+            display: none;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--success-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            animation: bounceIn 0.8s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .success-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--lotus-dark);
+            margin-bottom: 16px;
+        }
+
+        .success-subtitle {
+            font-size: 18px;
+            color: var(--lotus-gray);
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 25px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .download-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--lotus-light-gray);
+            border-radius: 12px;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: var(--lotus-yellow);
+            color: var(--lotus-dark);
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 198, 41, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .form-content {
+                padding: 30px 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .empreendimento-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .radio-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-container {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .step-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="form-container">
+            <!-- Header -->
+            <div class="header">
+                <div class="logo">
+                    <span class="logo-text">Lotus</span>
+                </div>
+                <h1 class="header-title">Proposta de Compra</h1>
+                <p class="header-subtitle">Realize seu sonho da casa própria</p>
+            </div>
+
+            <!-- Progress -->
+            <div class="progress-container">
+                <div class="progress-labels">
+                    <span class="progress-label active" id="label1">Dados Pessoais</span>
+                    <span class="progress-label" id="label2">Empreendimento</span>
+                    <span class="progress-label" id="label3">Unidade</span>
+                    <span class="progress-label" id="label4">Financiamento</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="step-indicators">
+                    <div class="step-dot active" data-step="1"></div>
+                    <div class="step-dot" data-step="2"></div>
+                    <div class="step-dot" data-step="3"></div>
+                    <div class="step-dot" data-step="4"></div>
+                </div>
+            </div>
+
+            <form class="form-content" id="lotusForm">
+                <!-- Step 1: Dados Pessoais -->
+                <div class="step active" id="step1">
+                    <h2 class="step-title">Vamos nos conhecer!</h2>
+                    <p class="step-description">Preencha seus dados pessoais para iniciarmos sua jornada</p>
+                    
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label class="form-label" for="nome">Nome Completo *</label>
+                            <input type="text" id="nome" name="nome" class="form-input" required 
+                                   placeholder="Digite seu nome completo">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="cpf">CPF *</label>
+                            <input type="text" id="cpf" name="cpf" class="form-input" required 
+                                   placeholder="000.000.000-00" maxlength="14">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="rg">RG *</label>
+                            <input type="text" id="rg" name="rg" class="form-input" required 
+                                   placeholder="0000000">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="dataNascimento">Data de Nascimento *</label>
+                            <input type="date" id="dataNascimento" name="dataNascimento" class="form-input" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="telefone">Telefone/Celular *</label>
+                            <input type="tel" id="telefone" name="telefone" class="form-input" required 
+                                   placeholder="(61) 99999-9999">
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label class="form-label" for="email">E-mail *</label>
+                            <input type="email" id="email" name="email" class="form-input" required 
+                                   placeholder="seu@email.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="profissao">Profissão *</label>
+                            <input type="text" id="profissao" name="profissao" class="form-input" required 
+                                   placeholder="Sua profissão">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="renda">Renda Mensal (R$) *</label>
+                            <input type="number" id="renda" name="renda" class="form-input" required 
+                                   placeholder="5000.00" step="0.01">
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label class="form-label">Estado Civil *</label>
+                            <div class="radio-grid">
+                                <div class="radio-item">
+                                    <input type="radio" id="solteiro" name="estadoCivil" value="solteiro" class="radio-input" required>
+                                    <label for="solteiro" class="radio-label">Solteiro(a)</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="casado" name="estadoCivil" value="casado" class="radio-input">
+                                    <label for="casado" class="radio-label">Casado(a)</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="divorciado" name="estadoCivil" value="divorciado" class="radio-input">
+                                    <label for="divorciado" class="radio-label">Divorciado(a)</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="viuvo" name="estadoCivil" value="viuvo" class="radio-input">
+                                    <label for="viuvo" class="radio-label">Viúvo(a)</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Empreendimento -->
+                <div class="step" id="step2">
+                    <h2 class="step-title">Escolha seu futuro lar</h2>
+                    <p class="step-description">Selecione o empreendimento que mais combina com você</p>
+                    
+                    <div class="empreendimento-grid">
+                        <div class="empreendimento-card">
+                            <input type="radio" id="haya" name="empreendimento" value="haya" class="empreendimento-input" required>
+                            <label for="haya" class="empreendimento-label">
+                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDI4MCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyODAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxyZWN0IHg9IjQwIiB5PSI0MCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiNGRkM2MjkiLz4KPHN2ZyB4PSIxMTAiIHk9IjcwIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzFBMUExQSI+CjxwYXRoIGQ9Ik0xMCAyMFYxNEg0VjIwSDEwWk0xMiAyMEgyMFYxMkgxMlYyMFpNMTAuNSAySDMuNUwxIDUuNVYxMkgzVjIwSDVIMTFWMTJIMTNWMjBIMTVIMjFWMTJIMjNWNS41TDIwLjUgMkgxMC41WiIvPgo8L3N2Zz4KPHR1c3QgeD0iODAiIHk9IjE4MCIgZm9udC1mYW1pbHk9IkludGVyLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNTAwIiBmaWxsPSIjNkI3MjgwIj5FbXByZWVuZGltZW50byBIYXlhPC90ZXh0Pgo8L3N2Zz4=" 
+                                     alt="Empreendimento Haya" class="empreendimento-image">
+                                <div class="empreendimento-content">
+                                    <h3 class="empreendimento-name">HAYA</h3>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="empreendimento-card">
+                            <input type="radio" id="kasa" name="empreendimento" value="kasa" class="empreendimento-input">
+                            <label for="kasa" class="empreendimento-label">
+                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDI4MCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyODAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxyZWN0IHg9IjMwIiB5PSI2MCIgd2lkdGg9IjIyMCIgaGVpZ2h0PSI4MCIgZmlsbD0iI0ZGQzYyOSIvPgo8cmVjdCB4PSI2MCIgeT0iNDAiIHdpZHRoPSIxNjAiIGhlaWdodD0iMTIwIiBmaWxsPSIjRkZEOTNEIi8+CjxzdmcgeD0iMTEwIiB5PSI3MCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiMxQTFBMUEiPgo8cGF0aCBkPSJNNyAxM0M3LjU1IDEzIDggMTIuNTUgOCAxMkM4IDExLjQ1IDcuNTUgMTEgNyAxMUM2LjQ1IDExIDYgMTEuNDUgNiAxMkM2IDEyLjU1IDYuNDUgMTMgNyAxM1pNNyA5QzguMTEgOSA5IDguMTEgOSA3QzkgNS44OSA4LjExIDUgNyA1QzUuODkgNSA1IDUuODkgNSA3QzUgOC4xMSA1Ljg5IDkgNyA5WiIvPgo8L3N2Zz4KPHR1c3QgeD0iOTAiIHk9IjE4MCIgZm9udC1mYW1pbHk9IkludGVyLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNTAwIiBmaWxsPSIjNkI3MjgwIj5FbXByZWVuZGltZW50byBLYXNhPC90ZXh0Pgo8L3N2Zz4=" 
+                                     alt="Empreendimento Kasa" class="empreendimento-image">
+                                <div class="empreendimento-content">
+                                    <h3 class="empreendimento-name">KASA</h3>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="empreendimento-card">
+                            <input type="radio" id="vert" name="empreendimento" value="vert" class="empreendimento-input">
+                            <label for="vert" class="empreendimento-label">
+                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDI4MCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyODAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxyZWN0IHg9IjQwIiB5PSIxNDAiIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAiIGZpbGw9IiMyN0FFNTM0Ii8+CjxjaXJjbGUgY3g9IjgwIiBjeT0iMTMwIiByPSIxNSIgZmlsbD0iIzI3QUU2MCIvPgo8Y2lyY2xlIGN4PSIxNDAiIGN5PSIxMjAiIHI9IjIwIiBmaWxsPSIjMTBCOTgxIi8+CjxjaXJjbGUgY3g9IjIwMCIgY3k9IjEzNSIgcj0iMTIiIGZpbGw9IiMyN0FFNTM0Ii8+CjxyZWN0IHg9IjEwMCIgeT0iNDAiIHdpZHRoPSI4MCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNGRkM2MjkiLz4KPHR1c3QgeD0iOTAiIHk9IjE4MCIgZm9udC1mYW1pbHk9IkludGVyLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNTAwIiBmaWxsPSIjNkI3MjgwIj5FbXByZWVuZGltZW50byBWZXJ0PC90ZXh0Pgo8L3N2Zz4=" 
+                                     alt="Empreendimento Vert" class="empreendimento-image">
+                                <div class="empreendimento-content">
+                                    <h3 class="empreendimento-name">VERT</h3>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="empreendimento-card">
+                            <input type="radio" id="alma" name="empreendimento" value="alma" class="empreendimento-input">
+                            <label for="alma" class="empreendimento-label">
+                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDI4MCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyODAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxyZWN0IHg9IjYwIiB5PSIzMCIgd2lkdGg9IjE2MCIgaGVpZ2h0PSIxNDAiIGZpbGw9IiNGRkM2MjkiLz4KPHJlY3QgeD0iODAiIHk9IjUwIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIGZpbGw9IiMxQTFBMUEiLz4KPHJlY3QgeD0iMTIwIiB5PSI1MCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjMUExQTFBIi8+CjxyZWN0IHg9IjE2MCIgeT0iNTAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0iIzFBMUExQSIvPgo8cmVjdCB4PSI4MCIgeT0iOTAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0iIzFBMUExQSIvPgo8cmVjdCB4PSIxMjAiIHk9IjkwIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIGZpbGw9IiMxQTFBMUEiLz4KPHJlY3QgeD0iMTYwIiB5PSI5MCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjMUExQTFBIi8+CjxyZWN0IHg9IjgwIiB5PSIxMzAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0iIzFBMUExQSIvPgo8cmVjdCB4PSIxMjAiIHk9IjEzMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjMUExQTFBIi8+CjxyZWN0IHg9IjE2MCIgeT0iMTMwIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIGZpbGw9IiMxQTFBMUEiLz4KPHR1c3QgeD0iOTAiIHk9IjE4MCIgZm9udC1mYW1pbHk9IkludGVyLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNTAwIiBmaWxsPSIjNkI3MjgwIj5FbXByZWVuZGltZW50byBBbG1hPC90ZXh0Pgo8L3N2Zz4=" 
+                                     alt="Empreendimento Alma" class="empreendimento-image">
+                                <div class="empreendimento-content">
+                                    <h3 class="empreendimento-name">ALMA</h3>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Unidade -->
+                <div class="step" id="step3">
+                    <h2 class="step-title">Escolha sua unidade</h2>
+                    <p class="step-description">Informe o número da unidade que você deseja adquirir</p>
+                    
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label class="form-label" for="unidadeNumero">Número da Unidade *</label>
+                            <input type="text" id="unidadeNumero" name="unidadeNumero" class="form-input" required 
+                                   placeholder="Ex: 101, 205, 3004, Torre A - Apt 1502">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Financiamento -->
+                <div class="step" id="step4">
+                    <h2 class="step-title">Condições de pagamento</h2>
+                    <p class="step-description">Defina como você vai realizar o pagamento do seu imóvel</p>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="valorImovel">Valor Total do Imóvel (R$) *</label>
+                            <input type="number" id="valorImovel" name="valorImovel" class="form-input" required 
+                                   placeholder="450000.00" step="0.01">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="valorEntrada">Valor de Entrada (R$) *</label>
+                            <input type="number" id="valorEntrada" name="valorEntrada" class="form-input" required 
+                                   placeholder="90000.00" step="0.01">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="valorFinanciar">Valor a Financiar (R$)</label>
+                            <input type="number" id="valorFinanciar" name="valorFinanciar" class="form-input" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="prazoFinanciamento">Prazo do Financiamento</label>
+                            <select id="prazoFinanciamento" name="prazoFinanciamento" class="form-input">
+                                <option value="10">10 anos</option>
+                                <option value="15">15 anos</option>
+                                <option value="20">20 anos</option>
+                                <option value="25">25 anos</option>
+                                <option value="30" selected>30 anos</option>
+                                <option value="35">35 anos</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="sistemaFinanciamento">Sistema de Financiamento</label>
+                            <select id="sistemaFinanciamento" name="sistemaFinanciamento" class="form-input">
+                                <option value="sac">SAC - Sistema de Amortização Constante</option>
+                                <option value="price" selected>PRICE - Sistema Francês</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="summary-card">
+                        <h3 class="summary-title">Resumo da sua proposta</h3>
+                        <div class="summary-item">
+                            <span class="summary-label">Cliente:</span>
+                            <span class="summary-value" id="summaryNome">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Empreendimento:</span>
+                            <span class="summary-value" id="summaryEmpreendimento">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Unidade:</span>
+                            <span class="summary-value" id="summaryUnidade">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Valor Total:</span>
+                            <span class="summary-value" id="summaryValorTotal">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Entrada:</span>
+                            <span class="summary-value" id="summaryEntrada">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Financiamento:</span>
+                            <span class="summary-value" id="summaryFinanciamento">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="nav-container">
+                    <button type="button" class="btn btn-back" id="btnBack" style="display: none;">
+                        ← Voltar
+                    </button>
+                    <button type="button" class="btn btn-next" id="btnNext">
+                        Continuar →
+                    </button>
+                </div>
+            </form>
+
+            <!-- Success Message -->
+            <div class="success-message" id="successMessage">
+                <div class="success-icon">
+                    <svg width="40" height="40" fill="white" viewBox="0 0 24 24">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                </div>
+                <h2 class="success-title">Proposta criada com sucesso!</h2>
+                <p class="success-subtitle">Seus dados foram registrados e processados</p>
+                
+                <div class="download-section">
+                    <h3>📄 Documentos Gerados:</h3>
+                    <a href="#" class="download-btn" id="downloadPDF">📄 Baixar Proposta (PDF)</a>
+                    <a href="#" class="download-btn" id="downloadJSON">📊 Baixar Dados (JSON)</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>Lotus Cidade</strong> • www.lotuscidade.com.br</p>
+        <p>Setor Comercial Sul, Quadra 9, Ed. Parque Cidade Corporate, Torre A, Sala 1105, Brasília-DF</p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
