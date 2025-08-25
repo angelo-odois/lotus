@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Lotus - Proposta de Compra</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -14,92 +14,186 @@
         }
 
         :root {
+            /* Paleta da Lotus baseada no site */
             --lotus-yellow: #FFC629;
-            --lotus-dark: #1A1A1A;
-            --lotus-gray: #6B7280;
-            --lotus-light-gray: #F9FAFB;
+            --lotus-yellow-light: #FFD93D;
+            --lotus-yellow-dark: #E6B324;
+            --lotus-charcoal: #1A1A1A;
+            --lotus-gray-dark: #2C2C2C;
+            --lotus-gray-medium: #5A5A5A;
+            --lotus-gray-light: #8A8A8A;
+            --lotus-cream: #FEFCF7;
             --lotus-white: #FFFFFF;
+            --lotus-concrete: #F5F5F5;
+            --lotus-green: #4A7C59;
             --success-green: #10B981;
-            --error-red: #EF4444;
-            --warning-orange: #F59E0B;
+            --error-red: #DC2626;
             --info-blue: #3B82F6;
+            
+            /* Sombras modernas */
+            --shadow-subtle: 0 2px 8px rgba(26, 26, 26, 0.04);
+            --shadow-medium: 0 8px 24px rgba(26, 26, 26, 0.08);
+            --shadow-strong: 0 16px 40px rgba(26, 26, 26, 0.12);
+            
+            /* 📱 Viewport dinâmico para mobile */
+            --vh: 1vh;
+            --keyboard-height: 0px;
+        }
+
+        /* 📱 Suporte para viewport dinâmico */
+        html {
+            height: 100%;
+            height: 100vh;
+            height: 100dvh; /* Dynamic viewport height */
+            height: 100svh; /* Small viewport height */
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, var(--lotus-yellow) 0%, #FFD93D 100%);
+            background: var(--lotus-cream);
             min-height: 100vh;
+            min-height: 100dvh; /* Suporte para viewport dinâmico */
+            min-height: 100svh;
+            min-height: calc(var(--vh, 1vh) * 100); /* Fallback customizado */
+            min-height: -webkit-fill-available; /* iOS Safari */
             line-height: 1.6;
+            color: var(--lotus-charcoal);
+            font-feature-settings: 'kern' 1;
+            /* 📱 Scroll suave para mobile */
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            /* 📱 Ajuste para safe areas (notch, etc) */
+            padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+        }
+
+        /* 📱 Suporte específico para iOS Safari */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                min-height: -webkit-fill-available;
+            }
         }
 
         .main-container {
             min-height: 100vh;
+            min-height: 100dvh; /* Viewport dinâmico */
+            min-height: 100svh;
+            min-height: calc(var(--vh, 1vh) * 100);
+            min-height: -webkit-fill-available; /* iOS Safari */
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 24px;
+            /* 📱 Padding dinâmico para teclado */
+            padding-bottom: max(24px, env(keyboard-inset-height, 24px));
+            /* 📱 Ajuste para safe areas */
+            padding-top: max(24px, env(safe-area-inset-top, 24px));
+            padding-left: max(24px, env(safe-area-inset-left, 24px));
+            padding-right: max(24px, env(safe-area-inset-right, 24px));
         }
 
         .form-container {
             background: var(--lotus-white);
             border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            box-shadow: var(--shadow-strong);
             overflow: hidden;
-            max-width: 900px;
+            max-width: 1100px;
             width: 100%;
             position: relative;
+            border: 1px solid rgba(255, 198, 41, 0.08);
+            /* 📱 Scroll container para mobile */
+            max-height: none;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
+        /* Header com identidade visual Lotus */
         .header {
-            background: var(--lotus-yellow);
-            padding: 40px;
+            background: linear-gradient(135deg, var(--lotus-yellow) 0%, var(--lotus-yellow-light) 100%);
+            padding: 60px 40px;
             text-align: center;
             position: relative;
             overflow: hidden;
         }
 
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        }
+
         .logo {
-            width: 120px;
-            height: 120px;
-            background: var(--lotus-yellow);
-            border-radius: 16px;
-            display: flex;
+            position: relative;
+            z-index: 2;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            width: 140px;
+            height: 140px;
+            background: var(--lotus-white);
+            border-radius: 20px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-medium);
         }
 
         .logo-text {
-            font-size: 36px;
+            font-size: 42px;
             font-weight: 800;
-            color: var(--lotus-dark);
-            letter-spacing: -1px;
+            color: var(--lotus-charcoal);
+            letter-spacing: -2px;
+            text-transform: lowercase;
         }
 
         .header-title {
-            font-size: 32px;
+            position: relative;
+            z-index: 2;
+            font-size: 40px;
             font-weight: 700;
-            color: var(--lotus-dark);
-            margin-bottom: 0;
+            color: var(--lotus-charcoal);
+            margin-bottom: 16px;
+            letter-spacing: -1.5px;
         }
 
+        .header-subtitle {
+            position: relative;
+            z-index: 2;
+            font-size: 18px;
+            color: var(--lotus-charcoal);
+            opacity: 0.8;
+            font-weight: 400;
+        }
+
+        /* Progress com design moderno */
         .progress-container {
-            padding: 30px 40px 20px;
             background: var(--lotus-white);
+            padding: 40px;
+            border-bottom: 1px solid var(--lotus-concrete);
+        }
+
+        .progress-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .progress-labels {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 16px;
+            margin-bottom: 24px;
         }
 
         .progress-label {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
-            color: var(--lotus-gray);
+            color: var(--lotus-gray-light);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
             transition: all 0.3s ease;
+            text-align: center;
+            flex: 1;
+            position: relative;
         }
 
         .progress-label.active {
@@ -118,54 +212,75 @@
             
             .progress-label.active {
                 display: block;
-                font-size: 16px;
+                font-size: 14px;
             }
         }
 
         .progress-bar {
-            height: 8px;
-            background: #E5E7EB;
-            border-radius: 4px;
+            height: 4px;
+            background: var(--lotus-concrete);
+            border-radius: 2px;
             overflow: hidden;
             position: relative;
+            margin-bottom: 32px;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--lotus-yellow) 0%, #FFD93D 100%);
-            border-radius: 4px;
-            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(90deg, var(--lotus-yellow) 0%, var(--lotus-yellow-light) 100%);
+            border-radius: 2px;
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-40px); }
+            100% { transform: translateX(40px); }
         }
 
         .step-indicators {
             display: flex;
             justify-content: center;
-            gap: 12px;
-            margin-top: 20px;
+            gap: 16px;
         }
 
         .step-dot {
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #D1D5DB;
-            transition: all 0.3s ease;
+            background: var(--lotus-concrete);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
+            position: relative;
         }
 
         .step-dot.active {
             background: var(--lotus-yellow);
-            transform: scale(1.2);
-            box-shadow: 0 0 0 4px rgba(255, 198, 41, 0.2);
+            transform: scale(1.4);
+            box-shadow: 0 0 0 8px rgba(255, 198, 41, 0.15);
         }
 
+        /* Conteúdo do formulário */
         .form-content {
-            padding: 40px;
+            padding: 60px 50px;
+            /* 📱 Padding dinâmico para teclado mobile */
+            padding-bottom: max(60px, calc(50px + env(keyboard-inset-height, 0px)));
         }
 
         .step {
             display: none;
-            animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .step.active {
@@ -175,7 +290,7 @@
         @keyframes slideIn {
             from { 
                 opacity: 0; 
-                transform: translateY(30px);
+                transform: translateY(40px);
             }
             to { 
                 opacity: 1; 
@@ -183,29 +298,34 @@
             }
         }
 
-        .step-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--lotus-dark);
-            margin-bottom: 12px;
+        .step-header {
             text-align: center;
+            margin-bottom: 56px;
+        }
+
+        .step-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--lotus-charcoal);
+            margin-bottom: 20px;
+            letter-spacing: -1.5px;
+            line-height: 1.2;
         }
 
         .step-description {
             font-size: 16px;
-            color: var(--lotus-gray);
-            text-align: center;
-            margin-bottom: 40px;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
+            color: var(--lotus-gray-medium);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
         }
 
+        /* Grid responsivo */
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            margin-bottom: 40px;
         }
 
         .form-group {
@@ -216,37 +336,98 @@
             grid-column: 1 / -1;
         }
 
+        /* Labels com estilo moderno */
         .form-label {
             display: block;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
-            color: var(--lotus-dark);
-            margin-bottom: 8px;
+            color: var(--lotus-charcoal);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
         }
 
+        .form-label::after {
+            content: '*';
+            color: var(--error-red);
+            margin-left: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .form-group:has([required]) .form-label::after {
+            opacity: 1;
+        }
+
+        /* Selects customizados */
+        select.form-input {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 16px center;
+            background-repeat: no-repeat;
+            background-size: 20px;
+            padding-right: 56px;
+        }
+
+        select.form-input:focus {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23FFC629' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+        }
+
+        /* 📱 Inputs modernos com otimizações mobile */
         .form-input {
             width: 100%;
-            padding: 16px 20px;
-            border: 2px solid #E5E7EB;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 500;
+            padding: 20px 24px;
+            border: 2px solid var(--lotus-concrete);
+            border-radius: 16px;
+            font-size: 16px; /* Evita zoom no iOS */
+            font-weight: 400;
             background: var(--lotus-white);
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
             outline: none;
+            color: var(--lotus-charcoal);
+            font-family: inherit;
+            /* 📱 Scroll margin para campos em foco */
+            scroll-margin-top: 120px;
+            scroll-margin-bottom: 120px;
+            /* 📱 Otimizações de toque */
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .form-input:focus {
             border-color: var(--lotus-yellow);
-            box-shadow: 0 0 0 4px rgba(255, 198, 41, 0.1);
+            box-shadow: 0 0 0 4px rgba(255, 198, 41, 0.08);
             transform: translateY(-2px);
+            background: var(--lotus-cream);
         }
 
+        .form-input::placeholder {
+            color: var(--lotus-gray-light);
+            font-weight: 400;
+        }
+
+        /* 📱 Ajuste específico para inputs em mobile */
+        @media (max-width: 768px) {
+            .form-input {
+                font-size: 16px; /* Evita zoom automático no iOS */
+                scroll-margin-top: 150px; /* Mais espaço para teclado */
+                scroll-margin-bottom: 150px;
+            }
+            
+            /* Ajuste quando input está em foco e teclado visível */
+            .form-input:focus {
+                scroll-behavior: smooth;
+            }
+        }
+
+        /* Radio buttons modernos */
         .radio-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 12px;
-            margin-top: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
         }
 
         .radio-item {
@@ -258,82 +439,66 @@
         }
 
         .radio-label {
-            display: block;
-            padding: 16px 20px;
-            background: var(--lotus-light-gray);
-            border: 2px solid #E5E7EB;
-            border-radius: 12px;
-            text-align: center;
-            font-weight: 600;
-            color: var(--lotus-gray);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            user-select: none;
-        }
-
-        .radio-input:checked + .radio-label {
-            background: var(--lotus-yellow);
-            border-color: var(--lotus-yellow);
-            color: var(--lotus-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 198, 41, 0.3);
-        }
-
-        /* Estilos para a seção do cônjuge */
-        .spouse-section {
-            margin-top: 40px;
-            padding: 30px;
-            background: linear-gradient(135deg, #FFF9E6 0%, #FFF5D6 100%);
-            border: 2px solid var(--lotus-yellow);
-            border-radius: 16px;
-            display: none;
-            animation: slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .spouse-section.show {
-            display: block;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .spouse-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .spouse-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--lotus-yellow);
-            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            padding: 20px 24px;
+            background: var(--lotus-white);
+            border: 2px solid var(--lotus-concrete);
+            border-radius: 16px;
+            text-align: center;
+            font-weight: 500;
+            color: var(--lotus-gray-medium);
+            cursor: pointer;
+            transition: all 0.4s ease;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+            min-height: 64px;
+            /* 📱 Otimizações de toque */
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .spouse-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--lotus-dark);
+        .radio-label::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--lotus-yellow);
+            transition: left 0.4s ease;
+            z-index: 1;
         }
 
+        .radio-label span {
+            position: relative;
+            z-index: 2;
+            transition: color 0.4s ease;
+        }
+
+        .radio-input:checked + .radio-label::before {
+            left: 0;
+        }
+
+        .radio-input:checked + .radio-label {
+            border-color: var(--lotus-yellow);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .radio-input:checked + .radio-label span {
+            color: var(--lotus-charcoal);
+            font-weight: 600;
+        }
+
+        /* Cards de empreendimento */
         .empreendimento-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 24px;
-            margin-top: 32px;
+            margin-top: 40px;
         }
 
         .empreendimento-card {
@@ -348,259 +513,149 @@
         .empreendimento-label {
             display: block;
             background: var(--lotus-white);
-            border: 3px solid #E5E7EB;
+            border: 2px solid var(--lotus-concrete);
             border-radius: 20px;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             user-select: none;
             position: relative;
             overflow: hidden;
-            height: 320px;
-        }
-
-        .empreendimento-image {
-            width: 100%;
             height: 200px;
-            object-fit: cover;
-            border-radius: 16px 16px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* 📱 Otimizações de toque */
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .empreendimento-content {
-            padding: 24px;
             text-align: center;
+            padding: 40px 24px;
         }
 
         .empreendimento-name {
             font-weight: 800;
-            font-size: 28px;
-            color: var(--lotus-gray);
+            font-size: 32px;
+            color: var(--lotus-gray-medium);
             margin: 0;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        .empreendimento-subtitle {
+            font-size: 12px;
+            color: var(--lotus-gray-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 12px;
+            opacity: 0.8;
+            font-weight: 500;
         }
 
         .empreendimento-input:checked + .empreendimento-label {
             border-color: var(--lotus-yellow);
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(255, 198, 41, 0.3);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-strong);
+            background: linear-gradient(135deg, var(--lotus-yellow) 0%, var(--lotus-yellow-light) 100%);
         }
 
         .empreendimento-input:checked + .empreendimento-label .empreendimento-name {
-            color: var(--lotus-yellow);
+            color: var(--lotus-charcoal);
         }
 
-        /* Estilos para upload de documentos */
-        .document-upload-section {
-            margin-top: 32px;
+        .empreendimento-input:checked + .empreendimento-label .empreendimento-subtitle {
+            color: var(--lotus-charcoal);
+            opacity: 0.8;
         }
 
-        .upload-container {
-            background: linear-gradient(135deg, #FFF9E6 0%, #FFF5D6 100%);
-            border: 3px dashed var(--lotus-yellow);
-            border-radius: 20px;
+        /* Seções especiais */
+        .special-section {
+            background: var(--lotus-cream);
+            border: 2px solid rgba(255, 198, 41, 0.1);
+            border-radius: 24px;
             padding: 40px;
+            margin-top: 48px;
+        }
+
+        .section-header {
             text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            margin-bottom: 32px;
+            margin-bottom: 40px;
         }
 
-        .upload-container.drag-over {
-            background: linear-gradient(135deg, #FFE4B5 0%, #FFD700 100%);
-            border-color: var(--lotus-dark);
-            transform: scale(1.02);
-            box-shadow: 0 10px 30px rgba(255, 198, 41, 0.3);
-        }
-
-        .upload-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .upload-title {
-            font-size: 20px;
+        .section-title {
+            font-size: 28px;
             font-weight: 700;
-            color: var(--lotus-dark);
-            margin-bottom: 8px;
+            color: var(--lotus-charcoal);
+            margin-bottom: 12px;
+            letter-spacing: -1px;
         }
 
-        .upload-subtitle {
-            font-size: 14px;
-            color: var(--lotus-gray);
-            margin-bottom: 20px;
+        .section-subtitle {
+            color: var(--lotus-gray-medium);
+            font-size: 15px;
         }
 
-        .upload-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            background: var(--lotus-yellow);
-            color: var(--lotus-dark);
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        /* 📄 SEÇÃO DE DOCUMENTOS */
+        .document-section {
+            background: var(--lotus-cream);
+            border: 2px solid rgba(255, 198, 41, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            margin-top: 48px;
         }
 
-        .upload-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 198, 41, 0.3);
-        }
-
-        .file-input-global {
-            display: none;
-        }
-
-        .files-list {
-            display: grid;
-            gap: 12px;
-            margin-top: 24px;
-        }
-
-        .file-item {
-            background: var(--lotus-white);
-            border: 2px solid #E5E7EB;
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.3s ease;
-            animation: slideIn 0.3s ease;
-        }
-
-        .file-item:hover {
-            border-color: var(--lotus-yellow);
-            transform: translateX(4px);
-        }
-
-        .file-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--lotus-light-gray);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-
-        .file-info {
-            flex: 1;
-        }
-
-        .file-name {
-            font-weight: 600;
-            color: var(--lotus-dark);
-            margin-bottom: 4px;
-            display: block;
-        }
-
-        .file-details {
-            font-size: 12px;
-            color: var(--lotus-gray);
-        }
-
-        .file-category {
-            padding: 4px 8px;
-            background: var(--lotus-yellow);
-            color: var(--lotus-dark);
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .file-remove {
-            width: 32px;
-            height: 32px;
-            background: #FEE2E2;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: var(--error-red);
-        }
-
-        .file-remove:hover {
-            background: var(--error-red);
-            color: white;
-            transform: rotate(90deg);
-        }
-
-        .document-categories {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-top: 32px;
-        }
-
-        .category-card {
-            background: var(--lotus-white);
-            border: 2px solid #E5E7EB;
-            border-radius: 12px;
-            padding: 20px;
+        .document-header {
             text-align: center;
-            transition: all 0.3s ease;
+            margin-bottom: 40px;
         }
 
-        .category-card.has-files {
-            border-color: var(--success-green);
-            background: #F0FDF4;
+        .document-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--lotus-charcoal);
+            margin-bottom: 12px;
+            letter-spacing: -1px;
         }
 
-        .category-icon {
-            font-size: 32px;
-            margin-bottom: 8px;
+        .document-subtitle {
+            color: var(--lotus-gray-medium);
+            font-size: 15px;
         }
 
-        .category-name {
-            font-weight: 600;
-            color: var(--lotus-dark);
-            margin-bottom: 4px;
-        }
-
-        .category-count {
-            font-size: 12px;
-            color: var(--lotus-gray);
-        }
-
-        .category-count.success {
-            color: var(--success-green);
-            font-weight: 600;
-        }
-
+        /* Info dos documentos necessários */
         .required-docs-info {
             background: #FEF3C7;
-            border: 1px solid #FCD34D;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 24px;
+            border: 2px solid #FCD34D;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 32px;
             display: flex;
-            align-items: center;
-            gap: 12px;
+            align-items: flex-start;
+            gap: 16px;
         }
 
         .required-docs-icon {
             font-size: 24px;
+            color: #F59E0B;
+            margin-top: 2px;
         }
 
         .required-docs-text {
             flex: 1;
             font-size: 14px;
-            color: var(--lotus-dark);
+            color: var(--lotus-charcoal);
+            line-height: 1.6;
         }
 
-        /* Checkbox customizado */
+        /* Opção de enviar documentos depois */
         .send-later-option {
-            margin: 24px 0;
-            background: #FEF3C7;
+            margin: 32px 0;
+            background: linear-gradient(135deg, #FEF3C7 0%, #FEF9C3 100%);
             border: 2px solid #FCD34D;
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 16px;
+            padding: 24px;
         }
 
         .checkbox-container {
@@ -608,6 +663,9 @@
             align-items: flex-start;
             cursor: pointer;
             user-select: none;
+            /* 📱 Otimizações de toque */
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .checkbox-input {
@@ -620,7 +678,8 @@
             min-width: 24px;
             border: 2px solid var(--lotus-yellow);
             border-radius: 6px;
-            margin-right: 12px;
+            margin-right: 16px;
+            margin-top: 2px;
             position: relative;
             transition: all 0.3s ease;
             background: white;
@@ -637,62 +696,294 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: var(--lotus-dark);
+            color: var(--lotus-charcoal);
             font-weight: bold;
             font-size: 14px;
         }
 
         .checkbox-label {
             flex: 1;
-            color: var(--lotus-dark);
-            line-height: 1.5;
+            color: var(--lotus-charcoal);
+            line-height: 1.6;
         }
 
         .checkbox-label small {
-            color: var(--lotus-gray);
+            color: var(--lotus-gray-medium);
             font-size: 13px;
+            display: block;
+            margin-top: 4px;
         }
 
-        /* Info card para envio posterior */
-        .info-card {
-            background: linear-gradient(135deg, #E0F2FE 0%, #DBEAFE 100%);
-            border: 2px solid #3B82F6;
-            border-radius: 16px;
-            padding: 32px;
+        /* Container de upload de documentos */
+        .upload-container {
+            background: var(--lotus-white);
+            border: 3px dashed var(--lotus-yellow);
+            border-radius: 20px;
+            padding: 48px 32px;
             text-align: center;
-            margin-top: 24px;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+            /* 📱 Otimizações de toque */
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .upload-container.drag-over {
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFE4B5 100%);
+            border-color: var(--lotus-yellow-dark);
+            transform: scale(1.02);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .upload-container.hidden {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--lotus-yellow);
+        }
+
+        .upload-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--lotus-charcoal);
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .upload-subtitle {
+            font-size: 16px;
+            color: var(--lotus-gray-medium);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .upload-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, var(--lotus-yellow) 0%, var(--lotus-yellow-light) 100%);
+            color: var(--lotus-charcoal);
+            border: none;
+            border-radius: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            /* 📱 Otimizações de toque */
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .upload-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .file-input-global {
+            display: none;
+        }
+
+        /* Lista de arquivos enviados */
+        .files-list {
+            display: grid;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .file-item {
+            background: var(--lotus-white);
+            border: 2px solid var(--lotus-concrete);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s ease;
+            animation: slideIn 0.4s ease;
+        }
+
+        .file-item:hover {
+            border-color: var(--lotus-yellow);
+            transform: translateX(4px);
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .file-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--lotus-concrete);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--lotus-gray-medium);
+        }
+
+        .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: var(--lotus-charcoal);
+            margin-bottom: 4px;
+            display: block;
+            word-break: break-word;
+        }
+
+        .file-details {
+            font-size: 12px;
+            color: var(--lotus-gray-medium);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .file-category {
+            padding: 4px 8px;
+            background: var(--lotus-yellow);
+            color: var(--lotus-charcoal);
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .file-remove {
+            width: 40px;
+            height: 40px;
+            background: #FEE2E2;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--error-red);
+            font-size: 18px;
+            /* 📱 Otimizações de toque */
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .file-remove:hover {
+            background: var(--error-red);
+            color: white;
+            transform: rotate(90deg) scale(1.1);
+        }
+
+        /* Categorias de documentos */
+        .document-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .category-card {
+            background: var(--lotus-white);
+            border: 2px solid var(--lotus-concrete);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .category-card.has-files {
+            border-color: var(--success-green);
+            background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
+        }
+
+        .category-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            color: var(--lotus-gray-medium);
+        }
+
+        .category-card.has-files .category-icon {
+            color: var(--success-green);
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: var(--lotus-charcoal);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .category-count {
+            font-size: 12px;
+            color: var(--lotus-gray-medium);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .category-count.success {
+            color: var(--success-green);
+            font-weight: 600;
+        }
+
+        /* Mensagem de envio posterior */
+        .send-later-message {
+            display: none;
+            margin-top: 32px;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #E0F2FE 0%, #F0F9FF 100%);
+            border: 2px solid var(--info-blue);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
         }
 
         .info-icon {
             font-size: 48px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            color: var(--info-blue);
         }
 
         .info-title {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 700;
-            color: var(--lotus-dark);
-            margin-bottom: 12px;
+            color: var(--lotus-charcoal);
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
         }
 
         .info-text {
-            color: var(--lotus-gray);
-            margin-bottom: 24px;
+            color: var(--lotus-gray-medium);
+            margin-bottom: 32px;
             line-height: 1.6;
+            font-size: 16px;
         }
 
         .contact-info {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 16px;
+            padding: 24px;
             text-align: left;
             max-width: 400px;
             margin: 0 auto;
+            box-shadow: var(--shadow-subtle);
         }
 
         .contact-info p {
-            margin-bottom: 12px;
-            color: var(--lotus-dark);
+            margin-bottom: 16px;
+            color: var(--lotus-charcoal);
+            font-weight: 600;
         }
 
         .contact-info ul {
@@ -703,42 +994,37 @@
 
         .contact-info li {
             padding: 8px 0;
-            color: var(--lotus-gray);
+            color: var(--lotus-gray-medium);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        /* Transição suave */
-        #uploadSection {
-            transition: opacity 0.3s ease, max-height 0.5s ease;
-            overflow: hidden;
-        }
-
-        #uploadSection.hidden {
-            opacity: 0.3;
-            pointer-events: none;
-        }
-
+        /* Summary card */
         .summary-card {
-            background: linear-gradient(135deg, var(--lotus-light-gray) 0%, #F9FAFB 100%);
-            border: 2px solid #E5E7EB;
-            border-radius: 20px;
-            padding: 32px;
-            margin-top: 32px;
+            background: var(--lotus-white);
+            border: 2px solid rgba(255, 198, 41, 0.2);
+            border-radius: 24px;
+            padding: 40px;
+            margin-top: 48px;
+            box-shadow: var(--shadow-medium);
         }
 
         .summary-title {
-            font-size: 22px;
+            font-size: 28px;
             font-weight: 700;
-            color: var(--lotus-dark);
-            margin-bottom: 24px;
+            color: var(--lotus-charcoal);
+            margin-bottom: 32px;
             text-align: center;
+            letter-spacing: -1px;
         }
 
         .summary-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid #E5E7EB;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--lotus-concrete);
         }
 
         .summary-item:last-child {
@@ -747,119 +1033,172 @@
 
         .summary-label {
             font-weight: 600;
-            color: var(--lotus-gray);
+            color: var(--lotus-gray-medium);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-size: 12px;
         }
 
         .summary-value {
-            font-weight: 700;
-            color: var(--lotus-dark);
+            font-weight: 600;
+            color: var(--lotus-charcoal);
             text-align: right;
+            font-size: 16px;
         }
 
+        /* Navegação */
         .nav-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 40px;
-            gap: 20px;
+            margin-top: 64px;
+            gap: 24px;
+            /* 📱 Margin extra para teclado mobile */
+            margin-bottom: max(24px, env(keyboard-inset-height, 24px));
         }
 
         .btn {
-            padding: 16px 32px;
+            padding: 20px 40px;
             border: none;
-            border-radius: 12px;
+            border-radius: 16px;
             font-size: 16px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 140px;
+            transition: all 0.4s ease;
+            min-width: 180px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            font-family: inherit;
+            /* 📱 Otimizações de toque */
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn-back {
-            background: var(--lotus-light-gray);
-            color: var(--lotus-gray);
-            border: 2px solid #E5E7EB;
+            background: var(--lotus-concrete);
+            color: var(--lotus-gray-medium);
+            border: 2px solid var(--lotus-concrete);
         }
 
         .btn-back:hover {
-            background: #E5E7EB;
+            background: var(--lotus-gray-light);
+            color: var(--lotus-white);
             transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
         }
 
         .btn-next {
-            background: linear-gradient(135deg, var(--lotus-yellow) 0%, #FFD93D 100%);
-            color: var(--lotus-dark);
+            background: linear-gradient(135deg, var(--lotus-yellow) 0%, var(--lotus-yellow-light) 100%);
+            color: var(--lotus-charcoal);
             border: 2px solid var(--lotus-yellow);
-            box-shadow: 0 4px 15px rgba(255, 198, 41, 0.3);
+            box-shadow: var(--shadow-medium);
         }
 
         .btn-next:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 198, 41, 0.4);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-strong);
         }
 
         .btn-next:disabled {
-            background: #D1D5DB;
-            color: #9CA3AF;
-            border-color: #D1D5DB;
+            background: var(--lotus-concrete);
+            color: var(--lotus-gray-light);
+            border-color: var(--lotus-concrete);
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
 
+        /* Success message */
         .success-message {
             text-align: center;
-            padding: 60px 40px;
+            padding: 80px 50px;
             display: none;
         }
 
         .success-icon {
-            width: 80px;
-            height: 80px;
-            background: var(--success-green);
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--lotus-yellow) 0%, var(--lotus-yellow-light) 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 24px;
-            animation: bounceIn 0.8s ease;
+            margin: 0 auto 40px;
+            animation: bounceIn 1.2s ease;
+            box-shadow: var(--shadow-strong);
         }
 
         @keyframes bounceIn {
             0% { transform: scale(0); }
-            50% { transform: scale(1.1); }
+            50% { transform: scale(1.15); }
             100% { transform: scale(1); }
         }
 
         .success-title {
-            font-size: 32px;
+            font-size: 40px;
             font-weight: 700;
-            color: var(--lotus-dark);
-            margin-bottom: 16px;
+            color: var(--lotus-charcoal);
+            margin-bottom: 20px;
+            letter-spacing: -1.5px;
         }
 
         .success-subtitle {
             font-size: 18px;
-            color: var(--lotus-gray);
+            color: var(--lotus-gray-medium);
+            margin-bottom: 48px;
         }
 
+        /* Footer moderno */
         .footer {
-            background: #2c3e50;
-            color: white;
-            padding: 25px;
+            background: var(--lotus-charcoal);
+            color: var(--lotus-white);
+            padding: 48px 40px;
             text-align: center;
-            font-size: 14px;
+            /* 📱 Padding para safe area */
+            padding-bottom: max(48px, env(safe-area-inset-bottom, 48px));
         }
 
+        .footer-logo {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--lotus-yellow);
+            text-transform: lowercase;
+            letter-spacing: -1px;
+        }
+
+        .footer p {
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        /* Loading */
         .loading-spinner {
             display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid var(--lotus-yellow);
-            border-top-color: transparent;
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--lotus-concrete);
+            border-top-color: var(--lotus-yellow);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto;
+            margin: 24px auto;
         }
 
         @keyframes spin {
@@ -870,37 +1209,99 @@
             display: block;
         }
 
-        .error-message {
-            display: none;
-            padding: 12px;
-            background: #FEE2E2;
-            border: 1px solid var(--error-red);
-            border-radius: 8px;
-            color: var(--error-red);
-            margin-top: 20px;
-            font-size: 14px;
+        /* Estados de erro */
+        .form-input.error {
+            border-color: var(--error-red);
+            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.08);
         }
 
-        .error-message.show {
-            display: block;
+        /* Micro-animações */
+        .form-input:focus,
+        .radio-label:hover,
+        .empreendimento-label:hover {
+            transform: translateY(-2px);
         }
 
+        .step-dot:hover {
+            transform: scale(1.2);
+        }
+
+        /* 📱 RESPONSIVE MOBILE com correções de teclado */
         @media (max-width: 768px) {
+            /* Viewport e container principal */
+            body {
+                min-height: 100vh;
+                min-height: 100dvh; /* Dynamic viewport height */
+                min-height: 100svh; /* Small viewport height */
+                min-height: calc(var(--vh, 1vh) * 100);
+                min-height: -webkit-fill-available;
+                scroll-behavior: smooth;
+            }
+
             .main-container {
-                padding: 10px;
+                padding: 16px;
+                min-height: 100vh;
+                min-height: 100dvh;
+                min-height: 100svh;
+                min-height: calc(var(--vh, 1vh) * 100);
+                min-height: -webkit-fill-available;
+                align-items: flex-start;
+                /* 📱 Safe areas para dispositivos com notch */
+                padding-top: max(16px, env(safe-area-inset-top, 16px));
+                padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+                padding-left: max(16px, env(safe-area-inset-left, 16px));
+                padding-right: max(16px, env(safe-area-inset-right, 16px));
+                /* 📱 Ajuste dinâmico para teclado */
+                padding-bottom: max(env(safe-area-inset-bottom, 16px), env(keyboard-inset-height, 16px));
             }
 
+            .form-container {
+                margin: 0;
+                width: 100%;
+                max-height: none;
+                min-height: auto;
+                border-radius: 16px;
+                /* 📱 Container scroll para teclado mobile */
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                scroll-behavior: smooth;
+                /* 📱 Ajuste para viewport quando teclado abre */
+                max-height: calc(100vh - 32px);
+                max-height: calc(100dvh - 32px);
+                max-height: calc(100svh - 32px);
+                max-height: calc(var(--vh, 1vh) * 100 - 32px);
+            }
+
+            /* Header mobile */
             .header {
-                padding: 30px 20px;
+                padding: 40px 24px;
             }
 
+            .logo {
+                width: 100px;
+                height: 100px;
+                margin-bottom: 24px;
+            }
+
+            .logo-text {
+                font-size: 32px;
+            }
+
+            .header-title {
+                font-size: 32px;
+            }
+
+            /* Form content mobile */
             .form-content {
-                padding: 30px 20px;
+                padding: 40px 24px;
+                /* 📱 Padding extra na parte inferior para teclado */
+                padding-bottom: max(40px, calc(40px + env(keyboard-inset-height, 0px)));
             }
 
+            /* Grid mobile */
             .form-grid {
                 grid-template-columns: 1fr;
-                gap: 20px;
+                gap: 24px;
             }
 
             .empreendimento-grid {
@@ -911,20 +1312,218 @@
                 grid-template-columns: 1fr;
             }
 
+            /* Navegação mobile */
             .nav-container {
                 flex-direction: column;
+                /* 📱 Espaçamento extra para botões com teclado */
+                margin-bottom: max(24px, calc(24px + env(keyboard-inset-height, 0px)));
+                padding-bottom: env(safe-area-inset-bottom, 0px);
             }
 
             .btn {
                 width: 100%;
+                min-width: auto;
+                padding: 18px 32px;
+            }
+
+            /* Títulos mobile */
+            .step-title {
+                font-size: 28px;
+            }
+
+            /* Seções especiais mobile */
+            .special-section,
+            .summary-card,
+            .document-section {
+                padding: 24px;
+                margin-top: 32px;
+            }
+
+            /* 📱 Inputs mobile com scroll inteligente */
+            .form-input {
+                /* Mais scroll margin para mobile */
+                scroll-margin-top: 180px;
+                scroll-margin-bottom: 180px;
+                /* Padding ajustado */
+                padding: 18px 20px;
+                font-size: 16px; /* Evita zoom automático no iOS */
+            }
+
+            /* 📱 Foco especial para inputs mobile */
+            .form-input:focus {
+                scroll-behavior: smooth;
+                /* Ajuste específico para viewport quando teclado aparece */
+                transform: translateY(-1px); /* Menos movimento para mobile */
+            }
+
+            /* 📱 Radio e empreendimento cards mobile */
+            .radio-label,
+            .empreendimento-label {
+                min-height: 56px;
+                padding: 16px 20px;
+            }
+
+            /* 📱 Progress container mobile */
+            .progress-container {
+                padding: 24px 20px;
+            }
+
+            /* Success message mobile */
+            .success-message {
+                padding: 60px 24px;
+            }
+
+            .success-icon {
+                width: 100px;
+                height: 100px;
+            }
+
+            .success-title {
+                font-size: 32px;
+            }
+
+            /* 📄 Documentos mobile */
+            .upload-container {
+                padding: 32px 20px;
+            }
+
+            .upload-title {
+                font-size: 20px;
+            }
+
+            .document-categories {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .category-card {
+                padding: 16px;
+            }
+
+            .file-item {
+                padding: 16px;
+                gap: 12px;
+            }
+
+            .file-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            .file-remove {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+
+            .required-docs-info {
+                padding: 16px;
+                gap: 12px;
+            }
+
+            .send-later-option {
+                padding: 20px;
+            }
+
+            .info-card {
+                padding: 32px 24px;
+            }
+
+            .contact-info {
+                padding: 20px;
+            }
+        }
+
+        /* 📱 Detectar altura pequena (landscape mobile) */
+        @media (max-height: 600px) and (max-width: 768px) {
+            .main-container {
+                align-items: flex-start;
+                padding-top: 8px;
+                padding-bottom: 8px;
+            }
+
+            .header {
+                padding: 24px;
+            }
+
+            .logo {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 16px;
+            }
+
+            .logo-text {
+                font-size: 24px;
+            }
+
+            .header-title {
+                font-size: 24px;
+                margin-bottom: 8px;
+            }
+
+            .header-subtitle {
+                font-size: 14px;
+            }
+
+            .form-content {
+                padding: 24px 20px;
+            }
+
+            .step-header {
+                margin-bottom: 32px;
             }
 
             .step-title {
                 font-size: 24px;
+                margin-bottom: 12px;
+            }
+        }
+
+        /* 📱 Suporte específico para diferentes dispositivos */
+        
+        /* iPhone X, 11, 12, 13, 14 series (notch) */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: env(safe-area-inset-left);
+                padding-right: env(safe-area-inset-right);
+            }
+        }
+
+        /* Android Chrome com Dynamic Island */
+        @supports (height: 100dvh) {
+            .main-container {
+                min-height: 100dvh;
+            }
+        }
+
+        /* iOS Safari específico */
+        @supports (-webkit-touch-callout: none) {
+            .main-container {
+                min-height: -webkit-fill-available;
             }
 
-            .spouse-section {
-                padding: 20px;
+            /* Ajuste para quando teclado aparece no iOS */
+            @media (max-width: 768px) {
+                .form-input:focus {
+                    /* iOS precisa de um delay maior para o scroll */
+                    scroll-behavior: smooth;
+                }
+            }
+        }
+
+        /* 📱 Detectar se Visual Viewport API está disponível */
+        @supports (height: 100vh) {
+            .keyboard-compensated {
+                /* Classe aplicada via JavaScript quando teclado está visível */
+                padding-bottom: var(--keyboard-height, 0px);
+            }
+        }
+
+        /* 📱 Otimizações para PWA/standalone */
+        @media (display-mode: standalone) {
+            .main-container {
+                padding-top: max(24px, env(safe-area-inset-top, 24px));
             }
         }
     </style>
@@ -932,387 +1531,537 @@
 <body>
     <div class="main-container">
         <div class="form-container">
-            <!-- Header -->
+            <!-- Header redesenhado com identidade Lotus -->
             <div class="header">
                 <div class="logo">
-                    <span class="logo-text">Lotus</span>
+                    <span class="logo-text">lotus</span>
                 </div>
                 <h1 class="header-title">Proposta de Compra</h1>
+                <p class="header-subtitle">Arquitetura autoral, sustentável e exclusiva</p>
             </div>
 
-            <!-- Progress -->
+            <!-- Progress moderno -->
             <div class="progress-container">
-                <div class="progress-labels">
-                    <span class="progress-label active" id="label1">Dados Pessoais</span>
-                    <span class="progress-label" id="label2">Empreendimento</span>
-                    <span class="progress-label" id="label3">Unidade</span>
-                    <span class="progress-label" id="label4">Documentos</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <div class="step-indicators">
-                    <div class="step-dot active" data-step="1"></div>
-                    <div class="step-dot" data-step="2"></div>
-                    <div class="step-dot" data-step="3"></div>
-                    <div class="step-dot" data-step="4"></div>
+                <div class="progress-wrapper">
+                    <div class="progress-labels">
+                        <span class="progress-label active" id="label1">Dados Pessoais</span>
+                        <span class="progress-label" id="label2">Endereço</span>
+                        <span class="progress-label" id="label3">Cônjuge</span>
+                        <span class="progress-label" id="label4">Empreendimento</span>
+                        <span class="progress-label" id="label5">Unidade</span>
+                        <span class="progress-label" id="label6">Documentos</span>
+                        <span class="progress-label" id="label7">Finalização</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="step-indicators">
+                        <div class="step-dot active" data-step="1"></div>
+                        <div class="step-dot" data-step="2"></div>
+                        <div class="step-dot" data-step="3"></div>
+                        <div class="step-dot" data-step="4"></div>
+                        <div class="step-dot" data-step="5"></div>
+                        <div class="step-dot" data-step="6"></div>
+                        <div class="step-dot" data-step="7"></div>
+                    </div>
                 </div>
             </div>
 
             <form class="form-content" id="lotusForm">
                 <!-- Step 1: Dados Pessoais -->
                 <div class="step active" id="step1">
-                    <h2 class="step-title">Vamos nos conhecer!</h2>
-                    <p class="step-description">Preencha seus dados pessoais para iniciarmos sua jornada</p>
+                    <div class="step-header">
+                        <h2 class="step-title">Dados Pessoais</h2>
+                        <p class="step-description">Vamos começar coletando suas informações pessoais para criar sua proposta exclusiva na Lotus</p>
+                    </div>
                     
                     <div class="form-grid">
                         <div class="form-group full-width">
-                            <label class="form-label" for="nome">Nome Completo *</label>
+                            <label class="form-label" for="nome">Nome Completo</label>
                             <input type="text" id="nome" name="nome" class="form-input" required 
-                                   placeholder="Digite seu nome completo">
+                                   placeholder="Seu nome completo" inputmode="text" autocomplete="name">
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label" for="cpf">CPF *</label>
-                            <input type="text" id="cpf" name="cpf" class="form-input" required 
-                                   placeholder="000.000.000-00" maxlength="14">
+                            <label class="form-label" for="cpfCnpj">CPF/CNPJ</label>
+                            <input type="text" id="cpfCnpj" name="cpfCnpj" class="form-input" required 
+                                   placeholder="000.000.000-00" inputmode="numeric" autocomplete="off">
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label" for="rg">RG *</label>
-                            <input type="text" id="rg" name="rg" class="form-input" required 
-                                   placeholder="0000000">
+                            <label class="form-label" for="rgInsEst">RG/Ins. Est.</label>
+                            <input type="text" id="rgInsEst" name="rgInsEst" class="form-input" required 
+                                   placeholder="00.000.000-0" inputmode="text" autocomplete="off">
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label" for="dataNascimento">Data de Nascimento *</label>
-                            <input type="date" id="dataNascimento" name="dataNascimento" class="form-input" required>
+                            <label class="form-label" for="orgaoExpedidor">Órgão Expedidor</label>
+                            <input type="text" id="orgaoExpedidor" name="orgaoExpedidor" class="form-input" required 
+                                   placeholder="SSP/DF" inputmode="text" autocomplete="off">
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label" for="telefone">Telefone/Celular *</label>
-                            <input type="tel" id="telefone" name="telefone" class="form-input" required 
-                                   placeholder="(61) 99999-9999">
+                            <label class="form-label" for="sexo">Sexo</label>
+                            <select id="sexo" name="sexo" class="form-input" required autocomplete="sex">
+                                <option value="">Selecione</option>
+                                <option value="masculino">Masculino</option>
+                                <option value="feminino">Feminino</option>
+                            </select>
                         </div>
                         
-                        <div class="form-group full-width">
-                            <label class="form-label" for="email">E-mail *</label>
+                        <div class="form-group">
+                            <label class="form-label" for="dataNascimento">Data de Nascimento</label>
+                            <input type="date" id="dataNascimento" name="dataNascimento" class="form-input" required autocomplete="bday">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="naturalidade">Naturalidade</label>
+                            <input type="text" id="naturalidade" name="naturalidade" class="form-input" required 
+                                   placeholder="Brasília" inputmode="text" autocomplete="off">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="nacionalidade">Nacionalidade</label>
+                            <input type="text" id="nacionalidade" name="nacionalidade" class="form-input" required 
+                                   placeholder="Brasileira" value="Brasileira" inputmode="text" autocomplete="country">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="telefoneCelular">Telefone Celular</label>
+                            <input type="tel" id="telefoneCelular" name="telefoneCelular" class="form-input" required 
+                                   placeholder="(61) 99999-9999" inputmode="tel" autocomplete="tel-national">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="telefoneComercial">Telefone Comercial</label>
+                            <input type="tel" id="telefoneComercial" name="telefoneComercial" class="form-input" 
+                                   placeholder="(61) 3333-3333" inputmode="tel" autocomplete="tel-national">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="email">E-mail</label>
                             <input type="email" id="email" name="email" class="form-input" required 
-                                   placeholder="seu@email.com">
+                                   placeholder="seu@email.com" inputmode="email" autocomplete="email">
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label" for="profissao">Profissão *</label>
+                            <label class="form-label" for="profissao">Profissão</label>
                             <input type="text" id="profissao" name="profissao" class="form-input" required 
-                                   placeholder="Sua profissão">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" for="renda">Renda Mensal (R$) *</label>
-                            <input type="number" id="renda" name="renda" class="form-input" required 
-                                   placeholder="5000.00" step="0.01">
+                                   placeholder="Sua profissão" inputmode="text" autocomplete="organization-title">
                         </div>
                         
                         <div class="form-group full-width">
-                            <label class="form-label">Estado Civil *</label>
+                            <label class="form-label">Estado Civil</label>
                             <div class="radio-grid">
                                 <div class="radio-item">
                                     <input type="radio" id="solteiro" name="estadoCivil" value="solteiro" class="radio-input" required>
-                                    <label for="solteiro" class="radio-label">Solteiro(a)</label>
+                                    <label for="solteiro" class="radio-label"><span>Solteiro(a)</span></label>
                                 </div>
                                 <div class="radio-item">
                                     <input type="radio" id="casado" name="estadoCivil" value="casado" class="radio-input">
-                                    <label for="casado" class="radio-label">Casado(a)</label>
+                                    <label for="casado" class="radio-label"><span>Casado(a)</span></label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="separado" name="estadoCivil" value="separado" class="radio-input">
+                                    <label for="separado" class="radio-label"><span>Separado Jud.</span></label>
                                 </div>
                                 <div class="radio-item">
                                     <input type="radio" id="divorciado" name="estadoCivil" value="divorciado" class="radio-input">
-                                    <label for="divorciado" class="radio-label">Divorciado(a)</label>
+                                    <label for="divorciado" class="radio-label"><span>Divorciado(a)</span></label>
                                 </div>
                                 <div class="radio-item">
                                     <input type="radio" id="viuvo" name="estadoCivil" value="viuvo" class="radio-input">
-                                    <label for="viuvo" class="radio-label">Viúvo(a)</label>
+                                    <label for="viuvo" class="radio-label"><span>Viúvo(a)</span></label>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Seção do Cônjuge (aparece apenas quando casado é selecionado) -->
-                    <div class="spouse-section" id="spouseSection">
-                        <div class="spouse-header">
-                            <div class="spouse-icon">💑</div>
-                            <h3 class="spouse-title">Dados do Cônjuge</h3>
-                        </div>
-                        
-                        <div class="form-grid">
-                            <div class="form-group full-width">
-                                <label class="form-label" for="nomeConjuge">Nome Completo do Cônjuge *</label>
-                                <input type="text" id="nomeConjuge" name="nomeConjuge" class="form-input spouse-field" 
-                                       placeholder="Digite o nome completo do cônjuge">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label" for="cpfConjuge">CPF do Cônjuge *</label>
-                                <input type="text" id="cpfConjuge" name="cpfConjuge" class="form-input spouse-field" 
-                                       placeholder="000.000.000-00" maxlength="14">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label" for="rgConjuge">RG do Cônjuge *</label>
-                                <input type="text" id="rgConjuge" name="rgConjuge" class="form-input spouse-field" 
-                                       placeholder="0000000">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label" for="dataNascimentoConjuge">Data de Nascimento *</label>
-                                <input type="date" id="dataNascimentoConjuge" name="dataNascimentoConjuge" class="form-input spouse-field">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label" for="telefoneConjuge">Telefone/Celular *</label>
-                                <input type="tel" id="telefoneConjuge" name="telefoneConjuge" class="form-input spouse-field" 
-                                       placeholder="(61) 99999-9999">
-                            </div>
-                            
-                            <div class="form-group full-width">
-                                <label class="form-label" for="emailConjuge">E-mail do Cônjuge</label>
-                                <input type="email" id="emailConjuge" name="emailConjuge" class="form-input" 
-                                       placeholder="conjuge@email.com">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label" for="profissaoConjuge">Profissão do Cônjuge *</label>
-                                <input type="text" id="profissaoConjuge" name="profissaoConjuge" class="form-input spouse-field" 
-                                       placeholder="Profissão do cônjuge">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label" for="rendaConjuge">Renda Mensal do Cônjuge (R$) *</label>
-                                <input type="number" id="rendaConjuge" name="rendaConjuge" class="form-input spouse-field" 
-                                       placeholder="5000.00" step="0.01">
-                            </div>
-                            
-                            <div class="form-group full-width">
-                                <label class="form-label">Regime de Casamento *</label>
-                                <div class="radio-grid">
-                                    <div class="radio-item">
-                                        <input type="radio" id="comunhaoParcial" name="regimeCasamento" value="comunhaoParcial" class="radio-input spouse-field">
-                                        <label for="comunhaoParcial" class="radio-label">Comunhão Parcial</label>
-                                    </div>
-                                    <div class="radio-item">
-                                        <input type="radio" id="comunhaoUniversal" name="regimeCasamento" value="comunhaoUniversal" class="radio-input spouse-field">
-                                        <label for="comunhaoUniversal" class="radio-label">Comunhão Universal</label>
-                                    </div>
-                                    <div class="radio-item">
-                                        <input type="radio" id="separacaoBens" name="regimeCasamento" value="separacaoBens" class="radio-input spouse-field">
-                                        <label for="separacaoBens" class="radio-label">Separação de Bens</label>
-                                    </div>
-                                    <div class="radio-item">
-                                        <input type="radio" id="participacaoFinal" name="regimeCasamento" value="participacaoFinal" class="radio-input spouse-field">
-                                        <label for="participacaoFinal" class="radio-label">Participação Final</label>
-                                    </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="uniao-estavel" name="estadoCivil" value="uniao-estavel" class="radio-input">
+                                    <label for="uniao-estavel" class="radio-label"><span>União Estável</span></label>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 2: Empreendimento -->
+                <!-- Step 2: Endereço -->
                 <div class="step" id="step2">
-                    <h2 class="step-title">Escolha seu futuro lar</h2>
-                    <p class="step-description">Selecione o empreendimento que mais combina com você</p>
+                    <div class="step-header">
+                        <h2 class="step-title">Endereço Residencial</h2>
+                        <p class="step-description">Informe seu endereço residencial atual para continuarmos com sua proposta</p>
+                    </div>
+
+                    <div class="special-section">
+                        <div class="section-header">
+                            <h3 class="section-title">Dados de Endereço</h3>
+                            <p class="section-subtitle">Preencha os dados do seu endereço atual</p>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label" for="cep">CEP</label>
+                                <input type="text" id="cep" name="cep" class="form-input" required 
+                                       placeholder="00000-000" inputmode="numeric" autocomplete="postal-code">
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label class="form-label" for="logradouro">Logradouro</label>
+                                <input type="text" id="logradouro" name="logradouro" class="form-input" required 
+                                       placeholder="Rua, Avenida, Quadra..." inputmode="text" autocomplete="address-line1">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="numero">Número</label>
+                                <input type="text" id="numero" name="numero" class="form-input" required 
+                                       placeholder="123" inputmode="numeric" autocomplete="off">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="complemento">Complemento</label>
+                                <input type="text" id="complemento" name="complemento" class="form-input" 
+                                       placeholder="Apt, Bloco, Casa..." inputmode="text" autocomplete="address-line2">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="bairro">Bairro</label>
+                                <input type="text" id="bairro" name="bairro" class="form-input" required 
+                                       placeholder="Nome do bairro" inputmode="text" autocomplete="address-level2">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="cidade">Cidade</label>
+                                <input type="text" id="cidade" name="cidade" class="form-input" required 
+                                       placeholder="Nome da cidade" inputmode="text" autocomplete="address-level2">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="uf">UF</label>
+                                <select id="uf" name="uf" class="form-input" required autocomplete="address-level1">
+                                    <option value="">Selecione</option>
+                                    <option value="DF">DF</option>
+                                    <option value="GO">GO</option>
+                                    <option value="SP">SP</option>
+                                    <option value="RJ">RJ</option>
+                                    <option value="MG">MG</option>
+                                    <option value="AC">AC</option>
+                                    <option value="AL">AL</option>
+                                    <option value="AP">AP</option>
+                                    <option value="AM">AM</option>
+                                    <option value="BA">BA</option>
+                                    <option value="CE">CE</option>
+                                    <option value="ES">ES</option>
+                                    <option value="MA">MA</option>
+                                    <option value="MT">MT</option>
+                                    <option value="MS">MS</option>
+                                    <option value="PA">PA</option>
+                                    <option value="PB">PB</option>
+                                    <option value="PR">PR</option>
+                                    <option value="PE">PE</option>
+                                    <option value="PI">PI</option>
+                                    <option value="RN">RN</option>
+                                    <option value="RS">RS</option>
+                                    <option value="RO">RO</option>
+                                    <option value="RR">RR</option>
+                                    <option value="SC">SC</option>
+                                    <option value="SE">SE</option>
+                                    <option value="TO">TO</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Cônjuge -->
+                <div class="step" id="step3">
+                    <div class="step-header">
+                        <h2 class="step-title">Cônjuge / 2º Proponente</h2>
+                        <p class="step-description">Informe os dados completos do seu cônjuge ou segundo proponente</p>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label class="form-label" for="nomeConjuge">Nome Completo</label>
+                            <input type="text" id="nomeConjuge" name="nomeConjuge" class="form-input spouse-field" 
+                                   placeholder="Nome completo do cônjuge" inputmode="text" autocomplete="name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="cpfConjuge">CPF</label>
+                            <input type="text" id="cpfConjuge" name="cpfConjuge" class="form-input spouse-field" 
+                                   placeholder="000.000.000-00" inputmode="numeric" autocomplete="off">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="rgConjuge">RG/Ins. Est.</label>
+                            <input type="text" id="rgConjuge" name="rgConjuge" class="form-input spouse-field" 
+                                   placeholder="00.000.000-0" inputmode="text" autocomplete="off">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="emailConjuge">E-mail</label>
+                            <input type="email" id="emailConjuge" name="emailConjuge" class="form-input" 
+                                   placeholder="conjuge@email.com" inputmode="email" autocomplete="email">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="profissaoConjuge">Profissão</label>
+                            <input type="text" id="profissaoConjuge" name="profissaoConjuge" class="form-input spouse-field" 
+                                   placeholder="Profissão do cônjuge" inputmode="text" autocomplete="organization-title">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Empreendimento -->
+                <div class="step" id="step4">
+                    <div class="step-header">
+                        <h2 class="step-title">Escolha seu Empreendimento</h2>
+                        <p class="step-description">Selecione o empreendimento Lotus que mais combina com seu estilo de vida</p>
+                    </div>
                     
                     <div class="empreendimento-grid">
                         <div class="empreendimento-card">
                             <input type="radio" id="haya" name="empreendimento" value="haya" class="empreendimento-input" required>
                             <label for="haya" class="empreendimento-label">
-                                <img src="https://lotuscidade.com.br/wp-content/uploads/2025/04/240206-haya-0125-edit.jpg" 
-                                     alt="Empreendimento Haya" class="empreendimento-image">
                                 <div class="empreendimento-content">
                                     <h3 class="empreendimento-name">HAYA</h3>
+                                    <p class="empreendimento-subtitle">Residencial</p>
                                 </div>
                             </label>
                         </div>
                         <div class="empreendimento-card">
                             <input type="radio" id="kasa" name="empreendimento" value="kasa" class="empreendimento-input">
                             <label for="kasa" class="empreendimento-label">
-                                <img src="https://lotuscidade.com.br/wp-content/uploads/2025/04/lot-402-cam01-fachada-diagonal-rd.png" 
-                                     alt="Empreendimento Kasa" class="empreendimento-image">
                                 <div class="empreendimento-content">
                                     <h3 class="empreendimento-name">KASA</h3>
+                                    <p class="empreendimento-subtitle">Residencial</p>
                                 </div>
                             </label>
                         </div>
                         <div class="empreendimento-card">
                             <input type="radio" id="vert" name="empreendimento" value="vert" class="empreendimento-input">
                             <label for="vert" class="empreendimento-label">
-                                <img src="https://lotuscidade.com.br/wp-content/uploads/2025/04/116-deta-ima-004-deta-paisa-r00.png" 
-                                     alt="Empreendimento Vert" class="empreendimento-image">
                                 <div class="empreendimento-content">
                                     <h3 class="empreendimento-name">VERT</h3>
+                                    <p class="empreendimento-subtitle">Residencial</p>
                                 </div>
                             </label>
                         </div>
                         <div class="empreendimento-card">
                             <input type="radio" id="alma" name="empreendimento" value="alma" class="empreendimento-input">
                             <label for="alma" class="empreendimento-label">
-                                <img src="https://lotuscidade.com.br/wp-content/uploads/2025/04/230510-edificio-alma-0220.jpg" 
-                                     alt="Empreendimento Alma" class="empreendimento-image">
                                 <div class="empreendimento-content">
                                     <h3 class="empreendimento-name">ALMA</h3>
+                                    <p class="empreendimento-subtitle">Residencial</p>
                                 </div>
                             </label>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 3: Unidade -->
-                <div class="step" id="step3">
-                    <h2 class="step-title">Escolha sua unidade</h2>
-                    <p class="step-description">Informe o número da unidade que você deseja adquirir</p>
+                <!-- Step 5: Unidade -->
+                <div class="step" id="step5">
+                    <div class="step-header">
+                        <h2 class="step-title">Unidade e Investimento</h2>
+                        <p class="step-description">Identifique a unidade desejada e informe os valores do seu investimento</p>
+                    </div>
                     
                     <div class="form-grid">
                         <div class="form-group full-width">
-                            <label class="form-label" for="unidadeNumero">Número da Unidade *</label>
+                            <label class="form-label" for="unidadeNumero">Número da Unidade</label>
                             <input type="text" id="unidadeNumero" name="unidadeNumero" class="form-input" required 
-                                   placeholder="Ex: 101, 205, 3004, Torre A - Apt 1502">
+                                   placeholder="Ex: 101, 205, 3004, Torre A - Apt 1502" inputmode="text" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="special-section">
+                        <div class="section-header">
+                            <h3 class="section-title">Valores do Investimento</h3>
+                            <p class="section-subtitle">Informe os valores relacionados à aquisição do imóvel</p>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label" for="valorImovel">Valor do Imóvel (R$)</label>
+                                <input type="text" id="valorImovel" name="valorImovel" class="form-input" required 
+                                       placeholder="450.000,00" inputmode="decimal" autocomplete="off">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="valorEntrada">Valor de Entrada (R$)</label>
+                                <input type="text" id="valorEntrada" name="valorEntrada" class="form-input" required 
+                                       placeholder="90.000,00" inputmode="decimal" autocomplete="off">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="valorFinanciar">Valor a Financiar (R$)</label>
+                                <input type="text" id="valorFinanciar" name="valorFinanciar" class="form-input" readonly 
+                                       placeholder="360.000,00" tabindex="-1">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 4: Documentos -->
-                <div class="step" id="step4">
-                    <h2 class="step-title">Envio de Documentos</h2>
-                    <p class="step-description">Anexe os documentos necessários para análise da proposta</p>
-                    
-                    <div class="required-docs-info">
-                        <span class="required-docs-icon">ℹ️</span>
-                        <div class="required-docs-text">
-                            <strong>Documentos necessários:</strong> RG, CPF, Comprovante de Residência e Comprovante de Renda.
-                            <span id="spouseDocsInfo" style="display: none;">
-                                <br><strong>Documentos do cônjuge:</strong> Certidão de Casamento, RG do Cônjuge, CPF do Cônjuge, Comprovante de Renda do Cônjuge.
-                            </span>
-                        </div>
+                <!-- Step 6: Documentos -->
+                <div class="step" id="step6">
+                    <div class="step-header">
+                        <h2 class="step-title">Envio de Documentos</h2>
+                        <p class="step-description">Anexe os documentos necessários para análise da sua proposta</p>
                     </div>
 
-                    <!-- Opção de enviar depois -->
-                    <div class="send-later-option">
-                        <label class="checkbox-container">
-                            <input type="checkbox" id="sendDocsLater" class="checkbox-input">
-                            <span class="checkbox-custom"></span>
-                            <span class="checkbox-label">
-                                <strong>Enviar documentos posteriormente</strong>
-                                <br>
-                                <small>Você poderá enviar os documentos por e-mail ou WhatsApp</small>
-                            </span>
-                        </label>
+                    <div class="document-section">
+                        <div class="document-header">
+                            <h3 class="document-title">Documentação</h3>
+                            <p class="document-subtitle">Você pode anexar os documentos agora ou enviá-los posteriormente</p>
+                        </div>
+
+                        <!-- Info dos documentos necessários -->
+                        <div class="required-docs-info">
+                            <span class="required-docs-icon">ℹ️</span>
+                            <div class="required-docs-text">
+                                <strong>Documentos necessários:</strong> RG, CPF, Comprovante de Residência e Comprovante de Renda.
+                                <span id="spouseDocsInfo" style="display: none;">
+                                    <br><strong>Documentos do cônjuge:</strong> Certidão de Casamento, RG do Cônjuge, CPF do Cônjuge, Comprovante de Renda do Cônjuge.
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Opção de enviar depois -->
+                        <div class="send-later-option">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="sendDocsLater" class="checkbox-input">
+                                <span class="checkbox-custom"></span>
+                                <span class="checkbox-label">
+                                    <strong>Enviar documentos posteriormente</strong>
+                                    <small>Você receberá instruções por e-mail e WhatsApp para envio dos documentos</small>
+                                </span>
+                            </label>
+                        </div>
+
+                        <!-- Container de Upload -->
+                        <div id="uploadSection">
+                            <!-- Área de Upload Drag & Drop -->
+                            <div class="upload-container" id="uploadContainer">
+                                <div class="upload-icon">📤</div>
+                                <h3 class="upload-title">Arraste seus documentos aqui</h3>
+                                <p class="upload-subtitle">ou clique para selecionar múltiplos arquivos</p>
+                                <button type="button" class="upload-button" onclick="document.getElementById('fileInputGlobal').click()">
+                                    <span>📁</span>
+                                    <span>Selecionar Arquivos</span>
+                                </button>
+                                <p class="upload-subtitle" style="margin-top: 16px; font-size: 12px; opacity: 0.8;">
+                                    Formatos aceitos: PDF, JPG, JPEG, PNG • Máximo 10MB por arquivo
+                                </p>
+                            </div>
+
+                            <input type="file" id="fileInputGlobal" class="file-input-global" multiple accept=".pdf,.jpg,.jpeg,.png">
+
+                            <!-- Lista de Arquivos Enviados -->
+                            <div class="files-list" id="filesList"></div>
+
+                            <!-- Categorias de Documentos -->
+                            <div class="document-categories" id="documentCategories">
+                                <div class="category-card" data-category="rg">
+                                    <div class="category-icon">🆔</div>
+                                    <div class="category-name">RG</div>
+                                    <div class="category-count">0 arquivo(s)</div>
+                                </div>
+                                <div class="category-card" data-category="cpf">
+                                    <div class="category-icon">📋</div>
+                                    <div class="category-name">CPF</div>
+                                    <div class="category-count">0 arquivo(s)</div>
+                                </div>
+                                <div class="category-card" data-category="residencia">
+                                    <div class="category-icon">🏠</div>
+                                    <div class="category-name">Comp. Residência</div>
+                                    <div class="category-count">0 arquivo(s)</div>
+                                </div>
+                                <div class="category-card" data-category="renda">
+                                    <div class="category-icon">💰</div>
+                                    <div class="category-name">Comp. Renda</div>
+                                    <div class="category-count">0 arquivo(s)</div>
+                                </div>
+                                <div class="category-card spouse-doc" data-category="casamento" style="display: none;">
+                                    <div class="category-icon">💍</div>
+                                    <div class="category-name">Cert. Casamento</div>
+                                    <div class="category-count">0 arquivo(s)</div>
+                                </div>
+                                <div class="category-card spouse-doc" data-category="rg-conjuge" style="display: none;">
+                                    <div class="category-icon">🆔</div>
+                                    <div class="category-name">RG Cônjuge</div>
+                                    <div class="category-count">0 arquivo(s)</div>
+                                </div>
+                                <div class="category-card spouse-doc" data-category="cpf-conjuge" style="display: none;">
+                                    <div class="category-icon">📋</div>
+                                    <div class="category-name">CPF Cônjuge</div>
+                                    <div class="category-count">0 arquivo(s)</div>
+                                </div>
+                                <div class="category-card spouse-doc" data-category="renda-conjuge" style="display: none;">
+                                    <div class="category-icon">💰</div>
+                                    <div class="category-name">Renda Cônjuge</div>
+                                    <div class="category-count">0 arquivo(s)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mensagem quando escolhe enviar depois -->
+                        <div id="sendLaterMessage" class="send-later-message">
+                            <div class="info-card">
+                                <div class="info-icon">📧</div>
+                                <h3 class="info-title">Documentos serão enviados posteriormente</h3>
+                                <p class="info-text">
+                                    Após o envio da proposta, você receberá instruções por e-mail e WhatsApp 
+                                    sobre como enviar os documentos necessários.
+                                </p>
+                                <div class="contact-info">
+                                    <p><strong>Você poderá enviar por:</strong></p>
+                                    <ul>
+                                        <li>📧 E-mail: documentos@lotuscidade.com.br</li>
+                                        <li>📱 WhatsApp: (61) 99999-9999</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                </div>
 
-                    <!-- Container de Upload (ocultável) -->
-                    <div id="uploadSection">
-                        <!-- Área de Upload Drag & Drop -->
-                        <div class="upload-container" id="uploadContainer">
-                            <div class="upload-icon">📤</div>
-                            <h3 class="upload-title">Arraste seus documentos aqui</h3>
-                            <p class="upload-subtitle">ou clique para selecionar múltiplos arquivos</p>
-                            <button type="button" class="upload-button" onclick="document.getElementById('fileInputGlobal').click()">
-                                <span>📁</span>
-                                <span>Selecionar Arquivos</span>
-                            </button>
-                            <p class="upload-subtitle" style="margin-top: 12px; font-size: 12px;">
-                                Formatos aceitos: PDF, JPG, JPEG, PNG • Máximo 10MB por arquivo
-                            </p>
-                        </div>
-
-                        <input type="file" id="fileInputGlobal" class="file-input-global" multiple accept=".pdf,.jpg,.jpeg,.png">
-
-                        <!-- Lista de Arquivos Enviados -->
-                        <div class="files-list" id="filesList"></div>
-
-                        <!-- Categorias de Documentos -->
-                        <div class="document-categories" id="documentCategories">
-                            <div class="category-card" data-category="rg">
-                                <div class="category-icon">🆔</div>
-                                <div class="category-name">RG</div>
-                                <div class="category-count">0 arquivo(s)</div>
-                            </div>
-                            <div class="category-card" data-category="cpf">
-                                <div class="category-icon">📋</div>
-                                <div class="category-name">CPF</div>
-                                <div class="category-count">0 arquivo(s)</div>
-                            </div>
-                            <div class="category-card" data-category="residencia">
-                                <div class="category-icon">🏠</div>
-                                <div class="category-name">Comp. Residência</div>
-                                <div class="category-count">0 arquivo(s)</div>
-                            </div>
-                            <div class="category-card" data-category="renda">
-                                <div class="category-icon">💰</div>
-                                <div class="category-name">Comp. Renda</div>
-                                <div class="category-count">0 arquivo(s)</div>
-                            </div>
-                            <div class="category-card spouse-doc" data-category="casamento" style="display: none;">
-                                <div class="category-icon">💍</div>
-                                <div class="category-name">Cert. Casamento</div>
-                                <div class="category-count">0 arquivo(s)</div>
-                            </div>
-                            <div class="category-card spouse-doc" data-category="rg-conjuge" style="display: none;">
-                                <div class="category-icon">🆔</div>
-                                <div class="category-name">RG Cônjuge</div>
-                                <div class="category-count">0 arquivo(s)</div>
-                            </div>
-                            <div class="category-card spouse-doc" data-category="cpf-conjuge" style="display: none;">
-                                <div class="category-icon">📋</div>
-                                <div class="category-name">CPF Cônjuge</div>
-                                <div class="category-count">0 arquivo(s)</div>
-                            </div>
-                            <div class="category-card spouse-doc" data-category="renda-conjuge" style="display: none;">
-                                <div class="category-icon">💰</div>
-                                <div class="category-name">Renda Cônjuge</div>
-                                <div class="category-count">0 arquivo(s)</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Mensagem quando escolhe enviar depois -->
-                    <div id="sendLaterMessage" style="display: none;">
-                        <div class="info-card">
-                            <div class="info-icon">📧</div>
-                            <h3 class="info-title">Documentos serão enviados posteriormente</h3>
-                            <p class="info-text">
-                                Após o envio da proposta, você receberá instruções por e-mail e WhatsApp 
-                                sobre como enviar os documentos necessários.
-                            </p>
-                            <div class="contact-info">
-                                <p><strong>Você poderá enviar por:</strong></p>
-                                <ul>
-                                    <li>📧 E-mail: documentos@lotuscidade.com.br</li>
-                                    <li>📱 WhatsApp: (61) 99999-9999</li>
-                                </ul>
-                            </div>
-                        </div>
+                <!-- Step 7: Finalização -->
+                <div class="step" id="step7">
+                    <div class="step-header">
+                        <h2 class="step-title">Finalização da Proposta</h2>
+                        <p class="step-description">Revise os dados da sua proposta antes de enviar</p>
                     </div>
 
                     <!-- Summary -->
                     <div class="summary-card">
-                        <h3 class="summary-title">Resumo da sua proposta</h3>
+                        <h3 class="summary-title">Resumo da sua Proposta Lotus</h3>
                         <div class="summary-item">
-                            <span class="summary-label">Cliente:</span>
+                            <span class="summary-label">Cliente</span>
                             <span class="summary-value" id="summaryNome">-</span>
                         </div>
                         <div class="summary-item" id="summaryConjugeItem" style="display: none;">
-                            <span class="summary-label">Cônjuge:</span>
+                            <span class="summary-label">Cônjuge</span>
                             <span class="summary-value" id="summaryConjuge">-</span>
                         </div>
                         <div class="summary-item">
-                            <span class="summary-label">Empreendimento:</span>
+                            <span class="summary-label">Empreendimento</span>
                             <span class="summary-value" id="summaryEmpreendimento">-</span>
                         </div>
                         <div class="summary-item">
-                            <span class="summary-label">Unidade:</span>
+                            <span class="summary-label">Unidade</span>
                             <span class="summary-value" id="summaryUnidade">-</span>
                         </div>
                         <div class="summary-item">
-                            <span class="summary-label">Documentos:</span>
+                            <span class="summary-label">Valor do Imóvel</span>
+                            <span class="summary-value" id="summaryValorImovel">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Valor de Entrada</span>
+                            <span class="summary-value" id="summaryValorEntrada">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Valor a Financiar</span>
+                            <span class="summary-value" id="summaryValorFinanciar">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Documentos</span>
                             <span class="summary-value" id="summaryDocumentos">-</span>
                         </div>
                     </div>
@@ -1329,49 +2078,225 @@
                 </div>
                 
                 <div class="loading-spinner" id="loadingSpinner"></div>
-                <div class="error-message" id="errorMessage"></div>
             </form>
 
             <!-- Success Message -->
             <div class="success-message" id="successMessage">
                 <div class="success-icon">
-                    <svg width="40" height="40" fill="white" viewBox="0 0 24 24">
+                    <svg width="60" height="60" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                     </svg>
                 </div>
-                <h2 class="success-title">Proposta enviada com sucesso!</h2>
-                <p class="success-subtitle">Seus dados foram registrados e em breve entraremos em contato</p>
+                <h2 class="success-title">Proposta Enviada!</h2>
+                <p class="success-subtitle">Sua proposta Lotus foi processada com sucesso. Nossa equipe entrará em contato em breve.</p>
             </div>
         </div>
     </div>
 
     <div class="footer">
-        <p><strong>Lotus Cidade</strong> • www.lotuscidade.com.br</p>
+        <div class="footer-logo">lotus</div>
+        <p><strong>Lotus Cidade</strong> • lotuscidade.com.br</p>
         <p>Setor Comercial Sul, Quadra 9, Ed. Parque Cidade Corporate, Torre A, Sala 1105, Brasília-DF</p>
+        <p>Arquitetura autoral • Sustentabilidade • Exclusividade</p>
     </div>
 
     <script>
-        // Configuração do Webhook N8N
+        // 📱 Configuração avançada de viewport para mobile
         const WEBHOOK_URL = 'https://n8n.nexuso2.com/webhook-test/139ad785-deff-49c3-84ee-ef8ae07b9a64';
         
         // Variáveis globais
         let currentStep = 1;
-        const totalSteps = 4;
+        const totalSteps = 7; // ✅ Agora com step de documentos
         const formData = {};
         const uploadedFiles = [];
         const fileCategories = {};
 
-        // Inicialização
+        // 📱 Sistema de detecção e compensação de teclado mobile
+        class MobileKeyboardHandler {
+            constructor() {
+                this.isKeyboardVisible = false;
+                this.keyboardHeight = 0;
+                this.activeInput = null;
+                this.originalViewportHeight = window.innerHeight;
+                this.setupViewportHandling();
+                this.setupVisualViewport();
+                this.setupInputFocusHandling();
+            }
+
+            // 📱 Configurar manipulação de viewport dinâmico
+            setupViewportHandling() {
+                // Atualizar variável CSS de viewport height
+                const updateVH = () => {
+                    const vh = window.innerHeight * 0.01;
+                    document.documentElement.style.setProperty('--vh', `${vh}px`);
+                };
+
+                updateVH();
+
+                // Listeners para mudanças de viewport
+                window.addEventListener('resize', () => {
+                    setTimeout(updateVH, 100);
+                });
+
+                window.addEventListener('orientationchange', () => {
+                    setTimeout(() => {
+                        updateVH();
+                        this.originalViewportHeight = window.innerHeight;
+                    }, 300);
+                });
+
+                // Listener para mudanças na tela (útil para PWAs)
+                if (screen && screen.orientation) {
+                    screen.orientation.addEventListener('change', () => {
+                        setTimeout(updateVH, 200);
+                    });
+                }
+            }
+
+            // 📱 Configurar Visual Viewport API (melhor detecção de teclado)
+            setupVisualViewport() {
+                if (window.visualViewport) {
+                    const visualViewport = window.visualViewport;
+
+                    visualViewport.addEventListener('resize', () => {
+                        this.handleViewportChange();
+                    });
+
+                    visualViewport.addEventListener('scroll', () => {
+                        this.handleViewportScroll();
+                    });
+                }
+            }
+
+            // 📱 Manipular mudanças no viewport (detectar teclado)
+            handleViewportChange() {
+                if (!window.visualViewport) return;
+
+                const viewport = window.visualViewport;
+                const heightDifference = window.innerHeight - viewport.height;
+                const wasKeyboardVisible = this.isKeyboardVisible;
+
+                // Detectar se teclado está visível (diferença significativa na altura)
+                this.isKeyboardVisible = heightDifference > 150; // threshold para detectar teclado
+                this.keyboardHeight = this.isKeyboardVisible ? heightDifference : 0;
+
+                // Atualizar variável CSS com altura do teclado
+                document.documentElement.style.setProperty('--keyboard-height', `${this.keyboardHeight}px`);
+
+                // Aplicar/remover classe para compensação de teclado
+                const container = document.querySelector('.main-container');
+                if (this.isKeyboardVisible) {
+                    container.classList.add('keyboard-compensated');
+                } else {
+                    container.classList.remove('keyboard-compensated');
+                }
+
+                // Se teclado acabou de aparecer e há input ativo
+                if (this.isKeyboardVisible && !wasKeyboardVisible && this.activeInput) {
+                    setTimeout(() => this.scrollToActiveInput(), 100);
+                }
+
+                console.log(`🔧 Keyboard: ${this.isKeyboardVisible ? 'visible' : 'hidden'}, Height: ${this.keyboardHeight}px`);
+            }
+
+            // 📱 Manipular scroll do viewport
+            handleViewportScroll() {
+                // Opcional: ajustes adicionais quando viewport faz scroll
+            }
+
+            // 📱 Configurar manipulação de foco em inputs
+            setupInputFocusHandling() {
+                const inputs = document.querySelectorAll('.form-input');
+
+                inputs.forEach(input => {
+                    input.addEventListener('focus', (e) => {
+                        this.activeInput = e.target;
+                        this.handleInputFocus(e.target);
+                    });
+
+                    input.addEventListener('blur', (e) => {
+                        this.activeInput = null;
+                        this.handleInputBlur(e.target);
+                    });
+
+                    // Prevenir comportamento padrão que pode interferir
+                    input.addEventListener('touchstart', (e) => {
+                        e.currentTarget.style.touchAction = 'manipulation';
+                    }, { passive: true });
+                });
+            }
+
+            // 📱 Manipular foco em input
+            handleInputFocus(input) {
+                console.log(`📱 Input focused:`, input.id);
+
+                // Aguardar teclado aparecer antes de fazer scroll
+                setTimeout(() => {
+                    if (this.activeInput === input) {
+                        this.scrollToActiveInput();
+                    }
+                }, 300); // Delay para iOS
+            }
+
+            // 📱 Manipular perda de foco em input
+            handleInputBlur(input) {
+                console.log(`📱 Input blurred:`, input.id);
+            }
+
+            // 📱 Scroll inteligente para input ativo
+            scrollToActiveInput() {
+                if (!this.activeInput) return;
+
+                const input = this.activeInput;
+                const rect = input.getBoundingClientRect();
+                const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+                
+                // Calcular posição ideal (1/3 da tela do topo)
+                const idealPosition = viewportHeight / 3;
+                const currentPosition = rect.top;
+                
+                // Se input está muito baixo ou muito alto
+                if (currentPosition > viewportHeight - 100 || currentPosition < 100) {
+                    const scrollOffset = currentPosition - idealPosition;
+                    
+                    console.log(`📱 Scrolling to input. Current: ${currentPosition}px, Ideal: ${idealPosition}px, Offset: ${scrollOffset}px`);
+                    
+                    window.scrollBy({
+                        top: scrollOffset,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        }
+
+        // 📱 Inicialização
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Lotus Form - Mobile Optimized Version with Documents');
+
+            // Inicializar handler de teclado mobile
+            const keyboardHandler = new MobileKeyboardHandler();
+            window.keyboardHandler = keyboardHandler; // Para debug
+
+            // Configurações tradicionais
             updateProgress();
             setupEventListeners();
-            setupMaritalStatusHandler();
             setupInputMasks();
-            setupDragAndDrop();
-            setupSendLaterOption();
+            setupMaritalStatusHandler();
+            setupValueCalculations();
+            setupCepLookup();
+            setupFileUpload(); // ✅ Documentos
+            setupSendLaterOption(); // ✅ Documentos
+
+            // Debug: informações do dispositivo
+            console.log(`📱 Device Info:
+                - Screen: ${screen.width}x${screen.height}
+                - Window: ${window.innerWidth}x${window.innerHeight}
+                - Visual Viewport: ${window.visualViewport ? 'supported' : 'not supported'}
+                - User Agent: ${navigator.userAgent.includes('iPhone') ? 'iPhone' : navigator.userAgent.includes('Android') ? 'Android' : 'Other'}
+            `);
         });
 
-        // Configurar opção de enviar depois
+        // ✅ Configurar opção de enviar documentos depois
         function setupSendLaterOption() {
             const checkbox = document.getElementById('sendDocsLater');
             const uploadSection = document.getElementById('uploadSection');
@@ -1398,27 +2323,12 @@
             });
         }
 
-        // Atualizar resumo de documentos
-        function updateDocumentSummary() {
-            const summaryDocumentos = document.getElementById('summaryDocumentos');
-            const sendDocsLater = document.getElementById('sendDocsLater').checked;
-            
-            if (summaryDocumentos) {
-                if (sendDocsLater) {
-                    summaryDocumentos.textContent = 'Envio posterior';
-                } else {
-                    const count = uploadedFiles.length;
-                    summaryDocumentos.textContent = count > 0 ? `${count} arquivo(s)` : 'Nenhum arquivo';
-                }
-            }
-        }
-
-        // Configurar Drag and Drop
-        function setupDragAndDrop() {
-            const uploadContainer = document.getElementById('uploadContainer');
+        // ✅ Configurar upload de arquivos
+        function setupFileUpload() {
             const fileInput = document.getElementById('fileInputGlobal');
+            const uploadContainer = document.getElementById('uploadContainer');
 
-            // Prevenir comportamento padrão do browser
+            // Drag and drop
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
                 uploadContainer.addEventListener(eventName, preventDefaults, false);
                 document.body.addEventListener(eventName, preventDefaults, false);
@@ -1429,7 +2339,7 @@
                 e.stopPropagation();
             }
 
-            // Adicionar efeitos visuais
+            // Efeitos visuais
             ['dragenter', 'dragover'].forEach(eventName => {
                 uploadContainer.addEventListener(eventName, highlight, false);
             });
@@ -1461,13 +2371,13 @@
             });
         }
 
-        // Processar arquivos
+        // ✅ Processar arquivos
         function handleFiles(files) {
             ([...files]).forEach(processFile);
-            updateDocumentCount();
+            updateDocumentSummary();
         }
 
-        // Processar arquivo individual
+        // ✅ Processar arquivo individual
         function processFile(file) {
             // Validar tipo de arquivo
             const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
@@ -1506,7 +2416,7 @@
             updateCategoryCards();
         }
 
-        // Detectar categoria do documento pelo nome
+        // ✅ Detectar categoria do documento pelo nome
         function detectCategory(filename) {
             const lowerName = filename.toLowerCase();
             
@@ -1537,7 +2447,7 @@
             }
         }
 
-        // Adicionar arquivo à lista visual
+        // ✅ Adicionar arquivo à lista visual
         function addFileToList(fileObj) {
             const filesList = document.getElementById('filesList');
             const fileSize = (fileObj.size / 1024).toFixed(2);
@@ -1564,7 +2474,7 @@
                 <div class="file-info">
                     <span class="file-name">${fileObj.name}</span>
                     <div class="file-details">
-                        <span>${fileSize} KB</span> • 
+                        <span>${fileSize} KB</span>
                         <span class="file-category">${categoryLabels[fileObj.category]}</span>
                     </div>
                 </div>
@@ -1574,7 +2484,7 @@
             filesList.appendChild(fileItem);
         }
 
-        // Remover arquivo
+        // ✅ Remover arquivo
         function removeFile(fileId) {
             // Remover da lista
             const index = uploadedFiles.findIndex(f => f.id === fileId);
@@ -1602,10 +2512,10 @@
             }
             
             updateCategoryCards();
-            updateDocumentCount();
+            updateDocumentSummary();
         }
 
-        // Atualizar cards de categoria
+        // ✅ Atualizar cards de categoria
         function updateCategoryCards() {
             const categories = ['rg', 'cpf', 'residencia', 'renda', 'casamento', 'rg-conjuge', 'cpf-conjuge', 'renda-conjuge'];
             
@@ -1628,7 +2538,22 @@
             });
         }
 
-        // Atualizar visibilidade dos documentos do cônjuge
+        // ✅ Atualizar resumo de documentos
+        function updateDocumentSummary() {
+            const summaryDocumentos = document.getElementById('summaryDocumentos');
+            const sendDocsLater = document.getElementById('sendDocsLater').checked;
+            
+            if (summaryDocumentos) {
+                if (sendDocsLater) {
+                    summaryDocumentos.textContent = 'Envio posterior';
+                } else {
+                    const count = uploadedFiles.length;
+                    summaryDocumentos.textContent = count > 0 ? `${count} arquivo(s)` : 'Nenhum arquivo';
+                }
+            }
+        }
+
+        // ✅ Atualizar visibilidade dos documentos do cônjuge
         function updateSpouseDocuments(show) {
             const spouseDocs = document.querySelectorAll('.spouse-doc');
             const spouseInfo = document.getElementById('spouseDocsInfo');
@@ -1642,89 +2567,179 @@
             }
         }
 
-        // Configurar manipulador do estado civil
-        function setupMaritalStatusHandler() {
-            const maritalStatusInputs = document.querySelectorAll('input[name="estadoCivil"]');
-            const spouseSection = document.getElementById('spouseSection');
-            const spouseFields = document.querySelectorAll('.spouse-field');
-
-            maritalStatusInputs.forEach(input => {
-                input.addEventListener('change', function() {
-                    const isMarried = this.value === 'casado';
-                    
-                    // Mostrar/ocultar seção do cônjuge
-                    if (isMarried) {
-                        spouseSection.classList.add('show');
-                        // Tornar campos do cônjuge obrigatórios
-                        spouseFields.forEach(field => {
-                            if (field.type !== 'email' && !field.id.includes('emailConjuge')) {
-                                field.setAttribute('required', 'required');
-                            }
-                        });
-                    } else {
-                        spouseSection.classList.remove('show');
-                        // Remover obrigatoriedade dos campos do cônjuge
-                        spouseFields.forEach(field => {
-                            field.removeAttribute('required');
-                            field.value = ''; // Limpar campos
-                        });
-                    }
-
-                    // Atualizar visibilidade dos documentos do cônjuge no step 4
-                    updateSpouseDocuments(isMarried);
-                });
-            });
-        }
-
-        // Atualizar contagem de documentos
-        function updateDocumentCount() {
-            updateDocumentSummary();
-        }
-
-        // Configurar máscaras de entrada
-        function setupInputMasks() {
-            // Máscara CPF
-            const cpfInputs = [document.getElementById('cpf'), document.getElementById('cpfConjuge')];
-            cpfInputs.forEach(input => {
-                if (input) {
-                    input.addEventListener('input', function(e) {
-                        let value = e.target.value.replace(/\D/g, '');
-                        if (value.length <= 11) {
-                            value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-                        }
-                        e.target.value = value;
-                    });
-                }
-            });
-
-            // Máscara Telefone
-            const phoneInputs = [document.getElementById('telefone'), document.getElementById('telefoneConjuge')];
-            phoneInputs.forEach(input => {
-                if (input) {
-                    input.addEventListener('input', function(e) {
-                        let value = e.target.value.replace(/\D/g, '');
-                        if (value.length <= 11) {
-                            value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-                        }
-                        e.target.value = value;
-                    });
-                }
-            });
-        }
-
         // Configurar event listeners
         function setupEventListeners() {
             document.getElementById('btnNext').addEventListener('click', nextStep);
             document.getElementById('btnBack').addEventListener('click', prevStep);
 
-            // Adicionar listeners para os indicadores de passo
             document.querySelectorAll('.step-dot').forEach(dot => {
                 dot.addEventListener('click', function() {
                     const targetStep = parseInt(this.dataset.step);
-                    if (targetStep <= currentStep) {
+                    if (targetStep <= currentStep || targetStep === currentStep + 1) {
                         goToStep(targetStep);
                     }
                 });
+            });
+        }
+
+        // Configurar máscaras de entrada
+        function setupInputMasks() {
+            // Máscara CPF/CNPJ
+            const cpfCnpjInput = document.getElementById('cpfCnpj');
+            cpfCnpjInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                
+                if (value.length <= 11) {
+                    // CPF
+                    value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                    value = value.replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+                    value = value.replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4');
+                } else {
+                    // CNPJ
+                    value = value.replace(/(\d{2})(\d)/, '$1.$2');
+                    value = value.replace(/(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                    value = value.replace(/(\d{2})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3/$4');
+                    value = value.replace(/(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d)/, '$1.$2.$3/$4-$5');
+                }
+                
+                e.target.value = value;
+            });
+
+            // Máscara CPF cônjuge
+            const cpfConjugeInput = document.getElementById('cpfConjuge');
+            if (cpfConjugeInput) {
+                cpfConjugeInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                    value = value.replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+                    value = value.replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4');
+                    e.target.value = value;
+                });
+            }
+
+            // Máscara telefone
+            const phoneInputs = ['telefoneCelular', 'telefoneComercial'];
+            phoneInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.addEventListener('input', function(e) {
+                        let value = e.target.value.replace(/\D/g, '');
+                        
+                        if (value.length >= 2) {
+                            value = value.replace(/(\d{2})(\d)/, '($1) $2');
+                        }
+                        if (value.length >= 10) {
+                            if (value.length === 14) { // (11) 12345-6789
+                                value = value.replace(/(\(\d{2}\) \d{4})(\d)/, '$1-$2');
+                            } else if (value.length === 15) { // (11) 12345-67890
+                                value = value.replace(/(\(\d{2}\) \d{5})(\d)/, '$1-$2');
+                            }
+                        }
+                        
+                        e.target.value = value;
+                    });
+                }
+            });
+
+            // Máscara CEP
+            const cepInput = document.getElementById('cep');
+            cepInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 5) {
+                    value = value.replace(/(\d{5})(\d)/, '$1-$2');
+                }
+                e.target.value = value;
+            });
+        }
+
+        // Configurar estado civil
+        function setupMaritalStatusHandler() {
+            const estadoCivilInputs = document.querySelectorAll('input[name="estadoCivil"]');
+            
+            estadoCivilInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const isMarriedOrUnion = this.value === 'casado' || this.value === 'uniao-estavel';
+                    updateSpouseVisibility(isMarriedOrUnion);
+                    updateSpouseDocuments(isMarriedOrUnion); // ✅ Atualizar docs do cônjuge
+                });
+            });
+        }
+
+        function updateSpouseVisibility(show) {
+            const spouseFields = document.querySelectorAll('.spouse-field');
+            spouseFields.forEach(field => {
+                if (show) {
+                    field.setAttribute('required', 'required');
+                } else {
+                    field.removeAttribute('required');
+                    field.value = '';
+                }
+            });
+        }
+
+        // Configurar cálculos de valores
+        function setupValueCalculations() {
+            const valorImovelInput = document.getElementById('valorImovel');
+            const valorEntradaInput = document.getElementById('valorEntrada');
+            const valorFinanciarInput = document.getElementById('valorFinanciar');
+
+            function formatCurrency(input) {
+                let value = input.value.replace(/\D/g, '');
+                value = (parseInt(value) / 100).toFixed(2);
+                value = value.replace('.', ',');
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                input.value = value;
+                return parseFloat(value.replace(/\./g, '').replace(',', '.'));
+            }
+
+            function calculateFinancing() {
+                const valorImovel = parseFloat(valorImovelInput.value.replace(/\./g, '').replace(',', '.')) || 0;
+                const valorEntrada = parseFloat(valorEntradaInput.value.replace(/\./g, '').replace(',', '.')) || 0;
+                const valorFinanciar = valorImovel - valorEntrada;
+                
+                if (valorFinanciar >= 0) {
+                    let formattedValue = valorFinanciar.toFixed(2);
+                    formattedValue = formattedValue.replace('.', ',');
+                    formattedValue = formattedValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    valorFinanciarInput.value = formattedValue;
+                }
+            }
+
+            valorImovelInput.addEventListener('input', function() {
+                formatCurrency(this);
+                calculateFinancing();
+            });
+
+            valorEntradaInput.addEventListener('input', function() {
+                formatCurrency(this);
+                calculateFinancing();
+            });
+        }
+
+        // Configurar busca de CEP
+        function setupCepLookup() {
+            const cepInput = document.getElementById('cep');
+            
+            cepInput.addEventListener('blur', async function() {
+                const cep = this.value.replace(/\D/g, '');
+                
+                if (cep.length === 8) {
+                    try {
+                        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                        const data = await response.json();
+                        
+                        if (!data.erro) {
+                            document.getElementById('logradouro').value = data.logradouro || '';
+                            document.getElementById('bairro').value = data.bairro || '';
+                            document.getElementById('cidade').value = data.localidade || '';
+                            document.getElementById('uf').value = data.uf || '';
+                            
+                            document.getElementById('numero').focus();
+                        }
+                    } catch (error) {
+                        console.log('Erro ao buscar CEP:', error);
+                    }
+                }
             });
         }
 
@@ -1734,7 +2749,8 @@
                 saveStepData();
                 
                 if (currentStep < totalSteps) {
-                    currentStep++;
+                    const nextValidStep = getNextValidStep();
+                    currentStep = nextValidStep;
                     showStep(currentStep);
                     updateProgress();
                 } else {
@@ -1745,62 +2761,93 @@
 
         function prevStep() {
             if (currentStep > 1) {
-                currentStep--;
+                const prevValidStep = getPrevValidStep();
+                currentStep = prevValidStep;
                 showStep(currentStep);
                 updateProgress();
             }
         }
 
         function goToStep(step) {
+            // Verificar se deve pular step do cônjuge
+            if (step === 3 && !shouldShowSpouseStep()) {
+                step = step === currentStep - 1 ? 2 : 4;
+            }
+            
             currentStep = step;
             showStep(currentStep);
             updateProgress();
         }
 
+        function getNextValidStep() {
+            let nextStep = currentStep + 1;
+            if (nextStep === 3 && !shouldShowSpouseStep()) {
+                nextStep = 4;
+            }
+            return nextStep;
+        }
+
+        function getPrevValidStep() {
+            let prevStep = currentStep - 1;
+            if (prevStep === 3 && !shouldShowSpouseStep()) {
+                prevStep = 2;
+            }
+            return prevStep;
+        }
+
+        function shouldShowSpouseStep() {
+            const estadoCivil = getSelectedRadioValue('estadoCivil');
+            return estadoCivil === 'casado' || estadoCivil === 'uniao-estavel';
+        }
+
+        function getSelectedRadioValue(name) {
+            const radio = document.querySelector(`input[name="${name}"]:checked`);
+            return radio ? radio.value : '';
+        }
+
         function showStep(step) {
-            // Ocultar todos os passos
             document.querySelectorAll('.step').forEach(s => {
                 s.classList.remove('active');
             });
 
-            // Mostrar passo atual
             document.getElementById(`step${step}`).classList.add('active');
 
-            // Atualizar botões de navegação
             const btnBack = document.getElementById('btnBack');
             const btnNext = document.getElementById('btnNext');
 
             btnBack.style.display = step === 1 ? 'none' : 'block';
             btnNext.textContent = step === totalSteps ? 'Enviar Proposta' : 'Continuar →';
 
-            // Atualizar resumo se estiver no último passo
             if (step === totalSteps) {
                 updateSummary();
-                // Atualizar visibilidade dos documentos do cônjuge
-                updateSpouseDocuments(formData.estadoCivil === 'casado');
+            }
+
+            // 📱 Scroll para o topo do novo step em mobile
+            if (window.innerWidth <= 768) {
+                const stepElement = document.getElementById(`step${step}`);
+                stepElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
 
-        // Validação de passos
+        // Validação
         function validateStep() {
             const currentStepElement = document.getElementById(`step${currentStep}`);
             const requiredFields = currentStepElement.querySelectorAll('[required]');
             let isValid = true;
 
             requiredFields.forEach(field => {
-                // Verificar se o campo está visível (para campos do cônjuge)
                 const isVisible = field.offsetParent !== null;
                 
                 if (isVisible && !field.value) {
-                    field.style.borderColor = 'var(--error-red)';
+                    field.classList.add('error');
                     isValid = false;
                 } else {
-                    field.style.borderColor = '#E5E7EB';
+                    field.classList.remove('error');
                 }
             });
 
-            // Validar documentos no último passo (apenas se não marcou enviar depois)
-            if (currentStep === totalSteps) {
+            // ✅ Validar documentos no step 6 (apenas se não marcou enviar depois)
+            if (currentStep === 6) {
                 const sendDocsLater = document.getElementById('sendDocsLater').checked;
                 if (!sendDocsLater && uploadedFiles.length === 0) {
                     alert('Por favor, anexe pelo menos um documento ou marque a opção "Enviar documentos posteriormente".');
@@ -1808,8 +2855,13 @@
                 }
             }
 
-            if (!isValid && currentStep < totalSteps) {
-                alert('Por favor, preencha todos os campos obrigatórios.');
+            if (!isValid) {
+                // Scroll to first error
+                const firstError = currentStepElement.querySelector('.error');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
             }
 
             return isValid;
@@ -1825,6 +2877,8 @@
                     if (input.checked) {
                         formData[input.name] = input.value;
                     }
+                } else if (input.type === 'checkbox') {
+                    formData[input.name] = input.checked;
                 } else if (input.type !== 'file') {
                     formData[input.name] = input.value;
                 }
@@ -1835,8 +2889,8 @@
         function updateSummary() {
             document.getElementById('summaryNome').textContent = formData.nome || '-';
             
-            // Mostrar cônjuge se casado
-            if (formData.estadoCivil === 'casado' && formData.nomeConjuge) {
+            const isMarriedOrUnion = formData.estadoCivil === 'casado' || formData.estadoCivil === 'uniao-estavel';
+            if (isMarriedOrUnion && formData.nomeConjuge) {
                 document.getElementById('summaryConjugeItem').style.display = 'flex';
                 document.getElementById('summaryConjuge').textContent = formData.nomeConjuge;
             } else {
@@ -1854,27 +2908,86 @@
                 empreendimentoNames[formData.empreendimento] || '-';
             document.getElementById('summaryUnidade').textContent = formData.unidadeNumero || '-';
             
-            updateDocumentSummary();
+            // Atualizar valores se existirem
+            if (formData.valorImovel) {
+                document.getElementById('summaryValorImovel').textContent = `R$ ${formData.valorImovel}`;
+            }
+            if (formData.valorEntrada) {
+                document.getElementById('summaryValorEntrada').textContent = `R$ ${formData.valorEntrada}`;
+            }
+            if (formData.valorFinanciar) {
+                document.getElementById('summaryValorFinanciar').textContent = `R$ ${formData.valorFinanciar}`;
+            }
+            
+            updateDocumentSummary(); // ✅ Atualizar documentos
         }
 
         // Atualizar barra de progresso
         function updateProgress() {
-            const progressPercentage = (currentStep / totalSteps) * 100;
+            // Calcular progresso
+            let totalValidSteps = shouldShowSpouseStep() ? totalSteps : totalSteps - 1;
+            let currentValidStep = currentStep;
+            
+            // Se não mostra cônjuge e currentStep > 3, ajustar para cálculo do progresso
+            if (!shouldShowSpouseStep() && currentStep > 3) {
+                currentValidStep = currentStep - 1;
+            }
+            
+            const progressPercentage = (currentValidStep / totalValidSteps) * 100;
             document.getElementById('progressFill').style.width = `${progressPercentage}%`;
 
-            // Atualizar labels de progresso
+            // Atualizar labels
             for (let i = 1; i <= totalSteps; i++) {
                 const label = document.getElementById(`label${i}`);
-                if (i <= currentStep) {
+                if (!label) continue;
+                
+                // Skip do cônjuge se não deve mostrar
+                if (i === 3 && !shouldShowSpouseStep()) {
+                    label.classList.remove('active');
+                    continue;
+                }
+                
+                let shouldActivate = false;
+                
+                if (shouldShowSpouseStep()) {
+                    shouldActivate = currentStep >= i;
+                } else {
+                    if (i <= 2) {
+                        shouldActivate = currentStep >= i;
+                    } else if (i > 3) {
+                        shouldActivate = (currentStep - 1) >= (i - 1);
+                    }
+                }
+                
+                if (shouldActivate) {
                     label.classList.add('active');
                 } else {
                     label.classList.remove('active');
                 }
             }
 
-            // Atualizar indicadores
+            // Atualizar dots
             document.querySelectorAll('.step-dot').forEach((dot, index) => {
-                if (index < currentStep) {
+                const stepNumber = index + 1;
+                
+                if (stepNumber === 3 && !shouldShowSpouseStep()) {
+                    dot.classList.remove('active');
+                    return;
+                }
+                
+                let shouldActivate = false;
+                
+                if (shouldShowSpouseStep()) {
+                    shouldActivate = currentStep >= stepNumber;
+                } else {
+                    if (stepNumber <= 2) {
+                        shouldActivate = currentStep >= stepNumber;
+                    } else if (stepNumber > 3) {
+                        shouldActivate = (currentStep - 1) >= (stepNumber - 1);
+                    }
+                }
+                
+                if (shouldActivate) {
                     dot.classList.add('active');
                 } else {
                     dot.classList.remove('active');
@@ -1882,44 +2995,41 @@
             });
         }
 
-        // Enviar formulário para o webhook N8N
+        // Enviar formulário
         async function submitForm() {
             saveStepData();
             
-            // Mostrar loading
             const loadingSpinner = document.getElementById('loadingSpinner');
-            const errorMessage = document.getElementById('errorMessage');
             const btnNext = document.getElementById('btnNext');
             
             loadingSpinner.classList.add('show');
-            errorMessage.classList.remove('show');
             btnNext.disabled = true;
             
-            const sendDocsLater = document.getElementById('sendDocsLater').checked;
-            
-            // Preparar dados
             const submitData = {
                 ...formData,
                 dataEnvio: new Date().toISOString(),
-                documentosEnvioPosterior: sendDocsLater,
-                quantidadeDocumentos: uploadedFiles.length
+                timestamp: Date.now(),
+                // ✅ Dados dos documentos
+                documentos: uploadedFiles.map(f => ({
+                    name: f.name,
+                    size: f.size,
+                    type: f.type,
+                    category: f.category
+                })),
+                documentosEnvioPosterior: formData.sendDocsLater || false,
+                quantidadeDocumentos: uploadedFiles.length,
+                deviceInfo: {
+                    userAgent: navigator.userAgent,
+                    screenSize: `${screen.width}x${screen.height}`,
+                    windowSize: `${window.innerWidth}x${window.innerHeight}`,
+                    hasVisualViewport: !!window.visualViewport,
+                    isMobile: window.innerWidth <= 768
+                }
             };
             
-            // Se há arquivos, adicionar metadados (sem base64 por enquanto para evitar tamanho grande)
-            if (!sendDocsLater && uploadedFiles.length > 0) {
-                submitData.documentosInfo = uploadedFiles.map(f => ({
-                    name: f.name,
-                    category: f.category,
-                    size: f.size,
-                    type: f.type
-                }));
-            }
+            console.log('📤 Enviando dados:', submitData);
             
-            console.log('Enviando dados:', submitData);
-            
-            // Tentar enviar para o webhook
             try {
-                // Método 1: Fetch com modo cors
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: {
@@ -1928,48 +3038,15 @@
                     body: JSON.stringify(submitData)
                 });
                 
-                console.log('Resposta recebida:', response);
-                
-                // Sucesso
+                console.log('✅ Resposta recebida:', response);
                 mostrarSucesso(submitData);
                 
-            } catch (fetchError) {
-                console.log('Fetch falhou, tentando alternativas...', fetchError);
-                
-                // Método 2: XMLHttpRequest
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', WEBHOOK_URL, true);
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                
-                // Configurar timeout
-                xhr.timeout = 10000; // 10 segundos
-                
-                xhr.onload = function() {
-                    console.log('XHR Status:', xhr.status);
-                    mostrarSucesso(submitData);
-                };
-                
-                xhr.onerror = function() {
-                    console.log('XHR falhou também');
-                    // Mesmo com erro, considerar sucesso (webhook pode ter recebido)
-                    mostrarSucesso(submitData);
-                };
-                
-                xhr.ontimeout = function() {
-                    console.log('XHR timeout');
-                    mostrarSucesso(submitData);
-                };
-                
-                try {
-                    xhr.send(JSON.stringify(submitData));
-                } catch (xhrError) {
-                    console.log('Erro no XHR:', xhrError);
-                    // Prosseguir mesmo assim
-                    mostrarSucesso(submitData);
-                }
+            } catch (error) {
+                console.log('❌ Erro na requisição:', error);
+                mostrarSucesso(submitData); // Continuar mesmo com erro
             }
             
-            // Sempre salvar no localStorage como backup
+            // Salvar localmente como backup
             localStorage.setItem('ultimaProposta_' + Date.now(), JSON.stringify(submitData));
             
             loadingSpinner.classList.remove('show');
@@ -1978,36 +3055,12 @@
         
         // Mostrar mensagem de sucesso
         function mostrarSucesso(data) {
-            console.log('Proposta processada com sucesso!');
-            console.log('Dados salvos:', data);
-            
-            // Esconder formulário
             document.querySelector('.form-content').style.display = 'none';
             document.querySelector('.progress-container').style.display = 'none';
-            
-            // Mostrar mensagem de sucesso
             document.getElementById('successMessage').style.display = 'block';
             
-            // Opcional: Enviar dados para o console para debug
-            console.log('=== DADOS DA PROPOSTA ===');
-            console.log(JSON.stringify(data, null, 2));
-            console.log('========================');
-            
-            // Se quiser testar se o webhook está recebendo, 
-            // você pode abrir o N8N e verificar as execuções do webhook
-        }
-        
-        // Converter arquivo para base64 (mantido caso precise no futuro)
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    const base64 = reader.result.split(',')[1];
-                    resolve(base64);
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
+            console.log('🎉 Proposta enviada com sucesso!');
+            console.log('📊 Dados finais:', data);
         }
     </script>
 </body>
