@@ -19,10 +19,10 @@ up: ## Iniciar todos os serviços
 	docker-compose up -d
 	@echo ""
 	@echo "✅ Serviços iniciados:"
-	@echo "🌐 Aplicação Lotus: http://localhost:3000"
-	@echo "⚙️  N8N: http://localhost:5678 (admin/lotus2024)"
-	@echo "📁 File Browser: http://localhost:8081"
-	@echo "🔧 Traefik Dashboard: http://localhost:8080"
+	@echo "🌐 Aplicação Lotus: http://localhost:8090"
+	@echo "📁 File Browser: http://localhost:8096"
+	@echo "🔧 Traefik Dashboard: http://localhost:8095"
+	@echo "🗄️  Redis: localhost:8092"
 	@echo ""
 
 dev: ## Iniciar em modo desenvolvimento
@@ -30,10 +30,10 @@ dev: ## Iniciar em modo desenvolvimento
 	docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
 	@echo ""
 	@echo "✅ Desenvolvimento iniciado:"
-	@echo "🌐 Aplicação: http://localhost:3000"
-	@echo "🔧 Dev Server: http://localhost:3001"
-	@echo "⚙️  N8N: http://localhost:5678"
-	@echo "📊 PhpMyAdmin: http://localhost:8082"
+	@echo "🌐 Aplicação: http://localhost:8090"
+	@echo "🔧 Dev Server: http://localhost:8097"
+	@echo "📁 File Browser: http://localhost:8096"
+	@echo "🔧 Traefik: http://localhost:8095"
 
 down: ## Parar todos os serviços
 	@echo "⏹️  Parando serviços Lotus..."
@@ -94,8 +94,8 @@ install: ## Instalação inicial completa
 	@echo ""
 	@echo "🎉 Instalação concluída!"
 	@echo "📋 Próximos passos:"
-	@echo "   1. Acesse http://localhost:3000 para testar o formulário"
-	@echo "   2. Configure o N8N em http://localhost:5678"
+	@echo "   1. Acesse http://localhost:8090 para testar o formulário"
+	@echo "   2. Gerencie arquivos em http://localhost:8096"
 	@echo "   3. Importe os workflows da pasta n8n-workflows/"
 
 update: ## Atualizar projeto (pull + rebuild)
@@ -112,10 +112,10 @@ health: ## Verificar saúde dos serviços
 	@echo "🏥 Verificando saúde dos serviços:"
 	@echo ""
 	@echo "🌐 Lotus App:"
-	@curl -s -o /dev/null -w "  Status: %{http_code}\n  Tempo: %{time_total}s\n" http://localhost:3000 || echo "  ❌ Não disponível"
+	@curl -s -o /dev/null -w "  Status: %{http_code}\n  Tempo: %{time_total}s\n" http://localhost:8090 || echo "  ❌ Não disponível"
 	@echo ""
-	@echo "⚙️  N8N:"
-	@curl -s -o /dev/null -w "  Status: %{http_code}\n  Tempo: %{time_total}s\n" http://localhost:5678 || echo "  ❌ Não disponível"
+	@echo "📁 File Browser:"
+	@curl -s -o /dev/null -w "  Status: %{http_code}\n  Tempo: %{time_total}s\n" http://localhost:8096 || echo "  ❌ Não disponível"
 	@echo ""
 
 setup-prod: ## Configurar para produção

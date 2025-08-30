@@ -28,12 +28,11 @@ make backup
 
 | Serviço | Porta | Descrição | Acesso |
 |---------|-------|-----------|---------|
-| **Lotus App** | 3000 | Formulário principal | http://localhost:3000 |
-| **N8N** | 5678 | Automação e PDF | http://localhost:5678 |
-| **File Browser** | 8081 | Gerenciar arquivos | http://localhost:8081 |
-| **Traefik** | 8080 | Dashboard proxy | http://localhost:8080 |
+| **Lotus App** | 8090 | Formulário principal | http://localhost:8090 |
+| **File Browser** | 8096 | Gerenciar arquivos | http://localhost:8096 |
+| **Traefik** | 8095 | Dashboard proxy | http://localhost:8095 |
 | **PostgreSQL** | 5432 | Banco N8N | Interno |
-| **Redis** | 6379 | Cache | Interno |
+| **Redis** | 8092 | Cache | localhost:8092 |
 
 ## 🏗️ Estrutura de Arquivos
 
