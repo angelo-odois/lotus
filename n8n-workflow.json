@@ -1,0 +1,231 @@
+{
+  "name": "Lotus - Proposta PDF Generator com Storage",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bc635618-3f64-4db0-950e-feefaa899344",
+        "responseMode": "responseNode"
+      },
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "bc635618-3f64-4db0-950e-feefaa899344"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "template_data",
+              "name": "templateData",
+              "value": "={{ {\n  \"numeroProsposta\": \"LP\" + $now.format('YYYYMMDDHHMM'),\n  \"nome\": $json.nome,\n  \"cpfCnpj\": $json.cpfCnpj,\n  \"rgInsEst\": $json.rgInsEst,\n  \"orgaoExpedidor\": $json.orgaoExpedidor,\n  \"sexo\": $json.sexo,\n  \"naturalidade\": $json.naturalidade,\n  \"nacionalidade\": $json.nacionalidade,\n  \"telefoneCelular\": $json.telefoneCelular,\n  \"telefoneComercial\": $json.telefoneComercial,\n  \"profissao\": $json.profissao,\n  \"email\": $json.email,\n  \"rendaMensal\": $json.rendaMensal,\n  \"enderecoCompleto\": ($json.logradouro + \" \" + $json.numero + \" \" + ($json.complemento || \"\")).trim(),\n  \"bairro\": $json.bairro,\n  \"cidade\": $json.cidade,\n  \"uf\": $json.uf,\n  \"cep\": $json.cep,\n  \"estadoCivil\": $json.estadoCivil,\n  \"isMarried\": $json.estadoCivil === \"casado\" || $json.estadoCivil === \"uniao-estavel\",\n  \"nomeConjuge\": $json.nomeConjuge,\n  \"cpfConjuge\": $json.cpfConjuge,\n  \"rgConjuge\": $json.rgConjuge,\n  \"empreendimento\": $json.empreendimento === \"haya\" ? \"HAYA\" : $json.empreendimento === \"kasa\" ? \"KASA\" : $json.empreendimento === \"vert\" ? \"VERT\" : $json.empreendimento === \"alma\" ? \"ALMA\" : $json.empreendimento,\n  \"unidadeNumero\": $json.unidadeNumero,\n  \"valorImovel\": $json.valorImovel,\n  \"valorEntrada\": $json.valorEntrada,\n  \"valorFinanciar\": $json.valorFinanciar,\n  \"documentos\": $json.documentos || [],\n  \"quantidadeDocumentos\": ($json.documentos || []).length,\n  \"dataAtual\": $now.format('DD/MM/YYYY')\n} }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-f6g7-8901-bcde-f23456789012",
+      "name": "Preparar Dados",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://htmlcsstoimage.com/demo_run",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $('Carregar Template').first().json.template }}"
+            },
+            {
+              "name": "css",
+              "value": ""
+            },
+            {
+              "name": "google_fonts",
+              "value": "Inter"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-g7h8-9012-cdef-345678901234",
+      "name": "Gerar PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ \n  $json.templateData.documentos && $json.templateData.documentos.length > 0 ?\n  $json.template.replace(/{{(\\w+)}}/g, (match, key) => {\n    if (key === 'documentos') {\n      return $json.templateData.documentos.map(doc => {\n        const categoryLabels = {\n          'rg': 'RG',\n          'cpf': 'CPF', \n          'residencia': 'Comp. Residência',\n          'renda': 'Comp. Renda',\n          'casamento': 'Cert. Casamento',\n          'rg-conjuge': 'RG Cônjuge',\n          'cpf-conjuge': 'CPF Cônjuge',\n          'renda-conjuge': 'Renda Cônjuge',\n          'outros': 'Outros'\n        };\n        \n        let html = `<div class=\"document-page\">`;\n        html += `<div class=\"document-header\">`;\n        html += `<strong>${categoryLabels[doc.category] || 'Documento'} - ${doc.name}</strong>`;\n        html += `<div style=\"font-size: 10px; margin-top: 5px;\">`;\n        html += `${Math.round(doc.size / 1024)} KB • ${doc.type}`;\n        html += `</div></div>`;\n        \n        if (doc.base64 && doc.type.includes('image')) {\n          html += `<div class=\"document-image\">`;\n          html += `<img src=\"${doc.base64}\" alt=\"${doc.name}\">`;\n          html += `</div>`;\n        }\n        \n        html += `</div>`;\n        return html;\n      }).join('');\n    }\n    return $json.templateData[key] || '';\n  }) :\n  $json.template.replace(/{{(\\w+)}}/g, (match, key) => $json.templateData[key] || '')\n}}",
+        "options": {}
+      },
+      "id": "d4e5f6g7-h8i9-0123-defg-456789012345",
+      "name": "Processar Template",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/ahspimentel/lotus/main/template-n8n.html",
+        "options": {}
+      },
+      "id": "e5f6g7h8-i9j0-1234-efgh-567890123456",
+      "name": "Carregar Template",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [460, 180]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  \"success\": true,\n  \"message\": \"Proposta processada com sucesso\",\n  \"pdfUrl\": $json.url,\n  \"numeroProsposta\": $('Preparar Dados').first().json.templateData.numeroProsposta,\n  \"timestamp\": $now.toISOString()\n} }}"
+      },
+      "id": "f6g7h8i9-j0k1-2345-fghi-678901234567",
+      "name": "Resposta Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "bucketName": "lotus-propostas",
+        "fileName": "={{ $('Preparar Dados').first().json.templateData.numeroProsposta }}.pdf",
+        "binaryData": true,
+        "options": {
+          "makePublic": true
+        }
+      },
+      "id": "g7h8i9j0-k1l2-3456-ghij-789012345678",
+      "name": "Salvar no Storage",
+      "type": "n8n-nodes-base.googleCloudStorage",
+      "typeVersion": 1,
+      "position": [1120, 180]
+    },
+    {
+      "parameters": {
+        "operation": "sendEmail",
+        "email": "corretor@lotuscidade.com.br",
+        "subject": "Nova Proposta Lotus - {{ $('Preparar Dados').first().json.templateData.nome }}",
+        "emailType": "html",
+        "message": "=<h2>Nova Proposta Recebida</h2>\n\n<p><strong>Cliente:</strong> {{ $('Preparar Dados').first().json.templateData.nome }}</p>\n<p><strong>Empreendimento:</strong> {{ $('Preparar Dados').first().json.templateData.empreendimento }}</p>\n<p><strong>Unidade:</strong> {{ $('Preparar Dados').first().json.templateData.unidadeNumero }}</p>\n<p><strong>Valor:</strong> R$ {{ $('Preparar Dados').first().json.templateData.valorImovel }}</p>\n<p><strong>Email:</strong> {{ $('Preparar Dados').first().json.templateData.email }}</p>\n<p><strong>Telefone:</strong> {{ $('Preparar Dados').first().json.templateData.telefoneCelular }}</p>\n\n<p><strong>PDF da Proposta:</strong> <a href=\"{{ $json.url }}\">Baixar Proposta</a></p>\n\n<p>Data/Hora: {{ $now.format('DD/MM/YYYY HH:mm') }}</p>",
+        "options": {
+          "attachments": "={{ [{\n  \"name\": $('Preparar Dados').first().json.templateData.numeroProsposta + \".pdf\",\n  \"content\": $json.data\n}] }}"
+        }
+      },
+      "id": "h8i9j0k1-l2m3-4567-hijk-890123456789",
+      "name": "Enviar Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1340, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Preparar Dados",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Carregar Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Dados": {
+      "main": [
+        [
+          {
+            "node": "Processar Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar Template": {
+      "main": [
+        [
+          {
+            "node": "Gerar PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Carregar Template": {
+      "main": [
+        [
+          {
+            "node": "Processar Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar PDF": {
+      "main": [
+        [
+          {
+            "node": "Resposta Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Salvar no Storage",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enviar Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "id": "lotus",
+      "name": "lotus"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "versionId": "1"
+}

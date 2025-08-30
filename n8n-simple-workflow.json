@@ -1,0 +1,165 @@
+{
+  "meta": {
+    "instanceId": "lotus-pdf-generator"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bc635618-3f64-4db0-950e-feefaa899344",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-lotus",
+      "name": "Webhook - Receber Proposta",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Processar dados da proposta\nconst data = $input.first().json;\n\n// Gerar número da proposta\nconst now = new Date();\nconst numeroProsposta = `LP${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;\n\n// Mapear empreendimentos\nconst empreendimentoNames = {\n  'haya': 'HAYA',\n  'kasa': 'KASA',\n  'vert': 'VERT', \n  'alma': 'ALMA'\n};\n\n// Processar endereço\nconst enderecoCompleto = `${data.logradouro || ''} ${data.numero || ''} ${data.complemento || ''}`.trim();\n\n// Verificar se é casado\nconst isMarried = data.estadoCivil === 'casado' || data.estadoCivil === 'uniao-estavel';\n\n// Template HTML da proposta\nconst htmlTemplate = `\n<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Proposta de Compra - Lotus</title>\n    <style>\n        * { margin: 0; padding: 0; box-sizing: border-box; }\n        body { font-family: Arial, sans-serif; font-size: 12px; color: #1A1A1A; padding: 20px; }\n        .container { max-width: 800px; margin: 0 auto; }\n        .header { background: #FFC629; padding: 25px; text-align: center; border-radius: 8px; margin-bottom: 25px; }\n        .header h1 { font-size: 18px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }\n        .number { background: #1A1A1A; color: #FFC629; padding: 6px 12px; border-radius: 15px; font-weight: bold; display: inline-block; }\n        .section { margin-bottom: 25px; background: #FEFCF7; border-radius: 6px; padding: 18px; }\n        .section-title { background: #FFC629; font-weight: bold; font-size: 13px; padding: 10px 18px; border-radius: 20px; margin-bottom: 18px; text-align: center; text-transform: uppercase; }\n        .form-row { display: flex; margin-bottom: 12px; align-items: center; flex-wrap: wrap; gap: 12px; }\n        .form-group { display: flex; align-items: center; margin-bottom: 6px; min-width: 180px; }\n        .form-group.full { flex: 1; min-width: 280px; }\n        .form-label { font-weight: bold; margin-right: 8px; color: #5A5A5A; text-transform: uppercase; font-size: 9px; min-width: 70px; }\n        .form-value { border-bottom: 2px solid #FFC629; padding: 3px 6px; min-width: 100px; font-weight: 500; }\n        .values-section { background: #F0FDF4; border: 2px solid #10B981; border-radius: 6px; padding: 15px; margin: 15px 0; }\n        .value-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #E5E7EB; }\n        .value-item:last-child { border-bottom: none; font-weight: bold; }\n        .value-label { font-weight: bold; color: #374151; }\n        .value-amount { font-weight: bold; color: #10B981; font-size: 13px; }\n        .conditions { margin-top: 25px; background: #F8F8F8; border-radius: 6px; padding: 18px; }\n        .condition-item { margin-bottom: 12px; text-align: justify; line-height: 1.4; padding: 8px; background: #fff; border-radius: 4px; border-left: 3px solid #FFC629; }\n        .signatures { margin-top: 40px; display: flex; justify-content: space-between; gap: 30px; }\n        .signature-box { text-align: center; flex: 1; }\n        .signature-line { border-top: 2px solid #1A1A1A; height: 60px; margin-bottom: 8px; margin-top: 30px; }\n        .date-location { text-align: center; margin: 25px 0; font-weight: bold; font-size: 12px; }\n        .document-page { page-break-before: always; margin-top: 30px; }\n        .document-header { background: #FFC629; padding: 15px; border-radius: 6px; margin-bottom: 15px; text-align: center; }\n        .document-image { text-align: center; margin: 15px 0; }\n        .document-image img { max-width: 100%; max-height: 650px; border: 1px solid #E5E7EB; border-radius: 4px; }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"header\">\n            <div style=\"background: #1A1A1A; display: inline-block; padding: 12px 18px; border-radius: 10px; margin-bottom: 15px; color: #FFC629; font-weight: bold;\">LOTUS</div>\n            <h1>Proposta de Compra com Recibo de Sinal</h1>\n            <div class=\"number\">Nº ${numeroProsposta}</div>\n        </div>\n        \n        <div class=\"section\">\n            <div class=\"form-row\">\n                <div class=\"form-group full\">\n                    <span class=\"form-label\">NOME/1º PROPONENTE:</span>\n                    <span class=\"form-value\">${data.nome || ''}</span>\n                </div>\n            </div>\n            \n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">CPF/CNPJ:</span>\n                    <span class=\"form-value\">${data.cpfCnpj || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">RG:</span>\n                    <span class=\"form-value\">${data.rgInsEst || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">ÓRGÃO EXP.:</span>\n                    <span class=\"form-value\">${data.orgaoExpedidor || ''}</span>\n                </div>\n            </div>\n            \n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">SEXO:</span>\n                    <span class=\"form-value\">${data.sexo || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">NATURALIDADE:</span>\n                    <span class=\"form-value\">${data.naturalidade || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">NACIONALIDADE:</span>\n                    <span class=\"form-value\">${data.nacionalidade || ''}</span>\n                </div>\n            </div>\n            \n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">TELEFONE:</span>\n                    <span class=\"form-value\">${data.telefoneCelular || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">PROFISSÃO:</span>\n                    <span class=\"form-value\">${data.profissao || ''}</span>\n                </div>\n            </div>\n\n            <div class=\"form-row\">\n                <div class=\"form-group full\">\n                    <span class=\"form-label\">E-MAIL:</span>\n                    <span class=\"form-value\">${data.email || ''}</span>\n                </div>\n            </div>\n\n            <div class=\"form-row\">\n                <div class=\"form-group full\">\n                    <span class=\"form-label\">ENDEREÇO:</span>\n                    <span class=\"form-value\">${enderecoCompleto}</span>\n                </div>\n            </div>\n\n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">BAIRRO:</span>\n                    <span class=\"form-value\">${data.bairro || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">CIDADE:</span>\n                    <span class=\"form-value\">${data.cidade || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">CEP:</span>\n                    <span class=\"form-value\">${data.cep || ''}</span>\n                </div>\n            </div>\n\n            ${isMarried ? `\n            <div style=\"margin-top: 20px; padding-top: 15px; border-top: 1px solid #F5F5F5;\">\n                <div class=\"form-row\">\n                    <div class=\"form-group full\">\n                        <span class=\"form-label\">CÔNJUGE/2º PROPONENTE:</span>\n                        <span class=\"form-value\">${data.nomeConjuge || ''}</span>\n                    </div>\n                </div>\n                <div class=\"form-row\">\n                    <div class=\"form-group\">\n                        <span class=\"form-label\">CPF CÔNJUGE:</span>\n                        <span class=\"form-value\">${data.cpfConjuge || ''}</span>\n                    </div>\n                    <div class=\"form-group\">\n                        <span class=\"form-label\">RG CÔNJUGE:</span>\n                        <span class=\"form-value\">${data.rgConjuge || ''}</span>\n                    </div>\n                </div>\n            </div>\n            ` : ''}\n        </div>\n\n        <div class=\"section-title\">DADOS DO IMÓVEL OBJETO DESTA PROPOSTA</div>\n        <div class=\"section\">\n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">EMPREENDIMENTO:</span>\n                    <span class=\"form-value\">${empreendimentoNames[data.empreendimento] || data.empreendimento || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">INCORPORADORA:</span>\n                    <span class=\"form-value\">LOTUS CIDADE</span>\n                </div>\n            </div>\n\n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">UNIDADE Nº:</span>\n                    <span class=\"form-value\">${data.unidadeNumero || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">CIDADE:</span>\n                    <span class=\"form-value\">Brasília-DF</span>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"section-title\">VALORES DA PROPOSTA</div>\n        <div class=\"values-section\">\n            <div class=\"value-item\">\n                <span class=\"value-label\">(A) VALOR DA PROPOSTA:</span>\n                <span class=\"value-amount\">R$ ${data.valorImovel || '0,00'}</span>\n            </div>\n            <div class=\"value-item\">\n                <span class=\"value-label\">(B) VALOR DE ENTRADA:</span>\n                <span class=\"value-amount\">R$ ${data.valorEntrada || '0,00'}</span>\n            </div>\n            <div class=\"value-item\">\n                <span class=\"value-label\">(C) VALOR A FINANCIAR:</span>\n                <span class=\"value-amount\">R$ ${data.valorFinanciar || '0,00'}</span>\n            </div>\n        </div>\n\n        ${(data.documentos && data.documentos.length > 0) ? `\n        <div class=\"section-title\">DOCUMENTOS ANEXADOS</div>\n        <div class=\"section\">\n            <div style=\"background: #F0FDF4; border: 2px solid #10B981; border-radius: 6px; padding: 12px; margin-bottom: 15px;\">\n                <strong style=\"color: #10B981;\">Total de ${data.quantidadeDocumentos || data.documentos.length} documento(s) anexado(s)</strong>\n            </div>\n        </div>\n        \n        ${data.documentos.map(doc => {\n          const categoryLabels = {\n            'rg': 'RG',\n            'cpf': 'CPF',\n            'residencia': 'Comp. Residência',\n            'renda': 'Comp. Renda',\n            'casamento': 'Cert. Casamento',\n            'rg-conjuge': 'RG Cônjuge',\n            'cpf-conjuge': 'CPF Cônjuge',\n            'renda-conjuge': 'Renda Cônjuge',\n            'outros': 'Outros'\n          };\n          \n          return `\n            <div class=\"document-page\">\n                <div class=\"document-header\">\n                    <strong>${categoryLabels[doc.category] || 'Documento'} - ${doc.name}</strong>\n                    <div style=\"font-size: 10px; margin-top: 5px;\">\n                        ${Math.round(doc.size / 1024)} KB • ${doc.type}\n                    </div>\n                </div>\n                \n                ${doc.base64 && doc.type.includes('image') ? `\n                    <div class=\"document-image\">\n                        <img src=\"${doc.base64}\" alt=\"${doc.name}\">\n                    </div>\n                ` : ''}\n                \n                ${doc.pdfImages && doc.pdfImages.length > 0 ? `\n                    ${doc.pdfImages.map((pageImage, pageIndex) => `\n                        <div class=\"document-image\">\n                            <div style=\"font-weight: bold; margin-bottom: 8px; font-size: 10px;\">\n                                Página ${pageIndex + 1} de ${doc.pdfImages.length}\n                            </div>\n                            <img src=\"${pageImage}\" alt=\"${doc.name} - Página ${pageIndex + 1}\">\n                        </div>\n                    `).join('')}\n                ` : ''}\n            </div>\n          `;\n        }).join('')}\n        ` : ''}\n\n        <div class=\"conditions\">\n            <h3>Condições Gerais:</h3>\n            <div class=\"condition-item\">\n                <strong>1 -</strong> A presente proposta ficará sujeita a confirmação pela Incorporadora, facultado-lhe recusar expressamente esta proposta no prazo de até 48 (quarenta e oito) horas, contadas desta data.\n            </div>\n            <div class=\"condition-item\">\n                <strong>2 -</strong> Pelo presente instrumento o proponente retro qualificado promete comprar o(s) imóvel(is) objeto(s) deste pelo preço e prazos ali estabelecidos, obrigando-se a comparecer à sede da Construtora para assinar o instrumento particular de promessa de compra e venda da unidade no prazo de 72 (setenta e duas) horas contadas desta data.\n            </div>\n            <div class=\"condition-item\">\n                <strong>3 -</strong> No caso de financiamento junto a um agente financeiro, o proponente comprador obriga-se quando solicitado, a comprovar, no prazo de até 72 (setenta e duas) horas, a renda exigida pelo agente financeiro e a fornecer todos os documentos necessários exigidos.\n            </div>\n            <div class=\"condition-item\">\n                <strong>4 -</strong> Os valores descritos nos itens (A), (B) e (C) da presente Proposta de Compra compõem o preço total da Unidade conforme tabela de venda disponibilizada pela Incorporadora.\n            </div>\n        </div>\n\n        <div class=\"date-location\">\n            Brasília-DF, ${now.toLocaleDateString('pt-BR')}\n        </div>\n\n        <div class=\"signatures\">\n            <div class=\"signature-box\">\n                <div class=\"signature-line\"></div>\n                <div style=\"font-weight: bold; color: #5A5A5A; text-transform: uppercase; font-size: 9px;\">Proponente(s) Comprador(es)</div>\n            </div>\n            <div class=\"signature-box\">\n                <div class=\"signature-line\"></div>\n                <div style=\"font-weight: bold; color: #5A5A5A; text-transform: uppercase; font-size: 9px;\">CORRETOR</div>\n            </div>\n        </div>\n    </div>\n</body>\n</html>\n`;\n\nreturn {\n  json: {\n    htmlContent: htmlTemplate,\n    numeroProsposta: numeroProsposta,\n    nomeCliente: data.nome,\n    empreendimento: empreendimentoNames[data.empreendimento] || data.empreendimento,\n    originalData: data\n  }\n};"
+      },
+      "id": "code-processor",
+      "name": "Processar HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.html2pdf.app/v1/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-API-KEY",
+              "value": "YOUR_HTML2PDF_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $json.htmlContent }}"
+            },
+            {
+              "name": "options",
+              "value": "={{ {\n  \"format\": \"A4\",\n  \"margin\": {\n    \"top\": \"10mm\",\n    \"right\": \"10mm\", \n    \"bottom\": \"10mm\",\n    \"left\": \"10mm\"\n  },\n  \"printBackground\": true,\n  \"displayHeaderFooter\": false\n} }}"
+            }
+          ]
+        }
+      },
+      "id": "pdf-generator",
+      "name": "Gerar PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "id": "save-pdf",
+      "name": "Salvar PDF",
+      "type": "n8n-nodes-base.moveDate",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  \"success\": true,\n  \"message\": \"Proposta processada com sucesso\",\n  \"pdfUrl\": \"https://storage.googleapis.com/lotus-propostas/\" + $('Processar HTML').first().json.numeroProsposta + \".pdf\",\n  \"numeroProsposta\": $('Processar HTML').first().json.numeroProsposta,\n  \"nomeCliente\": $('Processar HTML').first().json.nomeCliente,\n  \"timestamp\": $now.toISOString()\n} }}"
+      },
+      "id": "webhook-response",
+      "name": "Resposta para Cliente",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "operation": "sendEmail",
+        "email": "corretor@lotuscidade.com.br",
+        "subject": "=Nova Proposta Lotus - {{ $('Processar HTML').first().json.nomeCliente }}",
+        "emailType": "html",
+        "message": "=<h2>🏠 Nova Proposta Recebida - Lotus</h2>\n\n<div style=\"background: #FFC629; padding: 20px; border-radius: 8px; margin: 20px 0;\">\n  <h3 style=\"margin: 0; color: #1A1A1A;\">{{ $('Processar HTML').first().json.nomeCliente }}</h3>\n  <p style=\"margin: 5px 0 0 0; color: #1A1A1A;\"><strong>Proposta Nº:</strong> {{ $('Processar HTML').first().json.numeroProsposta }}</p>\n</div>\n\n<h3>📋 Dados da Proposta:</h3>\n<ul>\n  <li><strong>Empreendimento:</strong> {{ $('Processar HTML').first().json.empreendimento }}</li>\n  <li><strong>Unidade:</strong> {{ $('Processar HTML').first().json.originalData.unidadeNumero }}</li>\n  <li><strong>Valor:</strong> R$ {{ $('Processar HTML').first().json.originalData.valorImovel }}</li>\n  <li><strong>Entrada:</strong> R$ {{ $('Processar HTML').first().json.originalData.valorEntrada }}</li>\n</ul>\n\n<h3>👤 Dados do Cliente:</h3>\n<ul>\n  <li><strong>Email:</strong> {{ $('Processar HTML').first().json.originalData.email }}</li>\n  <li><strong>Telefone:</strong> {{ $('Processar HTML').first().json.originalData.telefoneCelular }}</li>\n  <li><strong>CPF:</strong> {{ $('Processar HTML').first().json.originalData.cpfCnpj }}</li>\n</ul>\n\n<h3>📄 Documentos:</h3>\n<p><strong>{{ $('Processar HTML').first().json.originalData.quantidadeDocumentos || 0 }}</strong> documento(s) anexado(s)</p>\n\n<p style=\"margin-top: 20px;\">📎 <strong>PDF da Proposta em anexo</strong></p>\n\n<hr style=\"margin: 20px 0;\">\n<p style=\"font-size: 12px; color: #666;\">Enviado em {{ $now.format('DD/MM/YYYY HH:mm') }} via formulário online Lotus</p>",
+        "options": {
+          "attachments": "={{ [\n  {\n    \"name\": $('Processar HTML').first().json.numeroProsposta + \".pdf\",\n    \"content\": $binary.data,\n    \"type\": \"application/pdf\"\n  }\n] }}"
+        }
+      },
+      "id": "email-corretor",
+      "name": "Email para Corretor",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1120, 480]
+    }
+  ],
+  "connections": {
+    "Webhook - Receber Proposta": {
+      "main": [
+        [
+          {
+            "node": "Processar HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar HTML": {
+      "main": [
+        [
+          {
+            "node": "Gerar PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar PDF": {
+      "main": [
+        [
+          {
+            "node": "Salvar PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salvar PDF": {
+      "main": [
+        [
+          {
+            "node": "Resposta para Cliente",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email para Corretor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "versionId": "1"
+}

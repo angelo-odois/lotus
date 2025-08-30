@@ -1,0 +1,321 @@
+{
+  "name": "Lotus - Storage Local no Servidor",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bc635618-3f64-4db0-950e-feefaa899344",
+        "responseMode": "responseNode"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [240, 300],
+      "id": "webhook-node"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ \nconst data = $json;\nconst now = new Date();\nconst numeroProsposta = `LP${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;\n\n// Estrutura de pastas no servidor do projeto\nconst basePath = '/Users/ahspimentel/www/lotus';\nconst pastaPropostas = `${basePath}/propostas`;\nconst pastaProsposta = `${pastaPropostas}/${numeroProsposta}-${(data.nome || 'cliente').replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;\nconst pastaDocumentos = `${pastaProsposta}/documentos`;\n\n// Mapear empreendimentos\nconst empreendimentoNames = {\n  'haya': 'HAYA',\n  'kasa': 'KASA',\n  'vert': 'VERT',\n  'alma': 'ALMA'\n};\n\nreturn {\n  numeroProsposta,\n  basePath,\n  pastaPropostas,\n  pastaProsposta,\n  pastaDocumentos,\n  nomeCliente: data.nome,\n  empreendimento: empreendimentoNames[data.empreendimento] || data.empreendimento,\n  enderecoCompleto: `${data.logradouro || ''} ${data.numero || ''} ${data.complemento || ''}`.trim(),\n  isMarried: data.estadoCivil === 'casado' || data.estadoCivil === 'uniao-estavel',\n  dataAtual: now.toLocaleDateString('pt-BR'),\n  horaAtual: now.toLocaleTimeString('pt-BR'),\n  documentos: data.documentos || [],\n  quantidadeDocumentos: (data.documentos || []).length,\n  dadosOriginais: data\n};\n}}"
+      },
+      "name": "Processar Estrutura",
+      "type": "n8n-nodes-base.code",
+      "position": [460, 300],
+      "id": "process-structure"
+    },
+    {
+      "parameters": {
+        "command": "mkdir -p \"{{ $json.pastaDocumentos }}\""
+      },
+      "name": "Criar Estrutura de Pastas",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [680, 200],
+      "id": "create-folders"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-documents",
+              "leftValue": "={{ $json.quantidadeDocumentos }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Verificar Documentos",
+      "type": "n8n-nodes-base.if",
+      "position": [680, 400],
+      "id": "check-documents"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "documentos",
+        "options": {}
+      },
+      "name": "Separar Documentos",
+      "type": "n8n-nodes-base.itemLists",
+      "position": [900, 400],
+      "id": "split-documents"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ \nconst estrutura = $('Processar Estrutura').first().json;\nconst doc = $json;\n\n// Nome seguro do arquivo\nconst nomeSeguro = doc.name.replace(/[^a-zA-Z0-9.-]/g, '_');\nconst caminhoCompleto = `${estrutura.pastaDocumentos}/${nomeSeguro}`;\n\n// Categoria do documento\nconst categoryLabels = {\n  'rg': 'RG',\n  'cpf': 'CPF',\n  'residencia': 'Comp_Residencia',\n  'renda': 'Comp_Renda',\n  'casamento': 'Cert_Casamento',\n  'rg-conjuge': 'RG_Conjuge',\n  'cpf-conjuge': 'CPF_Conjuge',\n  'renda-conjuge': 'Renda_Conjuge',\n  'outros': 'Outros'\n};\n\nconst categoriaFormatada = categoryLabels[doc.category] || 'Documento';\nconst nomeComCategoria = `${categoriaFormatada}_${nomeSeguro}`;\nconst caminhoFinal = `${estrutura.pastaDocumentos}/${nomeComCategoria}`;\n\n// Extrair dados base64\nconst base64Data = doc.base64.split(',')[1];\n\nreturn {\n  nomeOriginal: doc.name,\n  nomeSeguro: nomeComCategoria,\n  caminhoArquivo: caminhoFinal,\n  categoria: doc.category,\n  categoriaLabel: categoriaFormatada,\n  tamanho: doc.size,\n  tipo: doc.type,\n  base64Data: base64Data,\n  numeroProsposta: estrutura.numeroProsposta\n};\n}}"
+      },
+      "name": "Processar Arquivo Individual",
+      "type": "n8n-nodes-base.code",
+      "position": [1120, 400],
+      "id": "process-file"
+    },
+    {
+      "parameters": {
+        "command": "echo \"{{ $json.base64Data }}\" | base64 -d > \"{{ $json.caminhoArquivo }}\""
+      },
+      "name": "Salvar Arquivo no Servidor",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [1340, 400],
+      "id": "save-file"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ \nconst estrutura = $('Processar Estrutura').first().json;\nconst dadosOriginais = estrutura.dadosOriginais;\n\n// Gerar HTML da proposta\nconst htmlTemplate = `\n<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Proposta ${estrutura.numeroProsposta} - ${estrutura.nomeCliente}</title>\n    <style>\n        * { margin: 0; padding: 0; box-sizing: border-box; }\n        body { font-family: Arial, sans-serif; font-size: 12px; color: #1A1A1A; padding: 15mm; background: #fff; }\n        .container { max-width: none; margin: 0 auto; }\n        .header { background: linear-gradient(135deg, #FFC629 0%, #FFD93D 100%); padding: 25px; text-align: center; border-radius: 8px; margin-bottom: 25px; }\n        .logo-container { display: inline-block; background: #1A1A1A; padding: 12px 18px; border-radius: 10px; margin-bottom: 15px; color: #FFC629; font-weight: bold; font-size: 16px; }\n        .header h1 { font-size: 18px; font-weight: bold; text-transform: uppercase; color: #1A1A1A; margin-bottom: 10px; letter-spacing: -0.5px; }\n        .number { background: #1A1A1A; color: #FFC629; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 12px; display: inline-block; }\n        .section { margin-bottom: 25px; background: #FEFCF7; border: 1px solid #F5F5F5; border-radius: 8px; padding: 20px; page-break-inside: avoid; }\n        .section-title { background: linear-gradient(135deg, #FFC629 0%, #FFD93D 100%); font-weight: bold; font-size: 14px; padding: 12px 20px; border-radius: 25px; margin-bottom: 20px; text-align: center; text-transform: uppercase; color: #1A1A1A; }\n        .form-row { display: flex; margin-bottom: 15px; align-items: center; flex-wrap: wrap; gap: 15px; }\n        .form-group { display: flex; align-items: center; margin-bottom: 8px; min-width: 200px; }\n        .form-group.full { flex: 1; min-width: 300px; }\n        .form-label { font-weight: bold; margin-right: 10px; color: #5A5A5A; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; min-width: 80px; }\n        .form-value { border-bottom: 2px solid #FFC629; padding: 4px 8px; min-width: 120px; background: #fff; color: #1A1A1A; font-weight: 500; }\n        .values-section { background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%); border: 2px solid #10B981; border-radius: 8px; padding: 20px; margin: 20px 0; }\n        .value-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #E5E7EB; }\n        .value-item:last-child { border-bottom: none; font-weight: bold; font-size: 13px; }\n        .value-label { font-weight: bold; color: #374151; }\n        .value-amount { font-weight: bold; color: #10B981; font-size: 14px; }\n        .conditions { margin-top: 30px; background: #F8F8F8; border-radius: 8px; padding: 20px; }\n        .conditions h3 { font-weight: bold; margin-bottom: 15px; color: #1A1A1A; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; }\n        .condition-item { margin-bottom: 15px; text-align: justify; line-height: 1.5; padding: 10px; background: #fff; border-radius: 6px; border-left: 4px solid #FFC629; }\n        .signatures { margin-top: 50px; display: flex; justify-content: space-between; gap: 40px; }\n        .signature-box { text-align: center; flex: 1; }\n        .signature-line { border-top: 2px solid #1A1A1A; height: 80px; margin-bottom: 10px; margin-top: 40px; }\n        .signature-label { font-weight: bold; color: #5A5A5A; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }\n        .date-location { text-align: center; margin: 30px 0; font-weight: bold; font-size: 13px; color: #1A1A1A; }\n        .storage-info { background: #E0F2FE; border: 2px solid #3B82F6; border-radius: 8px; padding: 15px; margin: 20px 0; font-size: 10px; }\n        .document-summary { background: #F0FDF4; border: 2px solid #10B981; border-radius: 8px; padding: 15px; margin: 20px 0; }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"header\">\n            <div class=\"logo-container\">LOTUS</div>\n            <h1>Proposta de Compra com Recibo de Sinal</h1>\n            <div class=\"number\">Nº ${estrutura.numeroProsposta}</div>\n        </div>\n        \n        <div class=\"section\">\n            <div class=\"form-row\">\n                <div class=\"form-group full\">\n                    <span class=\"form-label\">NOME/1º PROPONENTE:</span>\n                    <span class=\"form-value\">${dadosOriginais.nome || ''}</span>\n                </div>\n            </div>\n            \n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">CPF/CNPJ:</span>\n                    <span class=\"form-value\">${dadosOriginais.cpfCnpj || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">RG:</span>\n                    <span class=\"form-value\">${dadosOriginais.rgInsEst || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">ÓRGÃO EXP.:</span>\n                    <span class=\"form-value\">${dadosOriginais.orgaoExpedidor || ''}</span>\n                </div>\n            </div>\n            \n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">SEXO:</span>\n                    <span class=\"form-value\">${dadosOriginais.sexo || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">NATURALIDADE:</span>\n                    <span class=\"form-value\">${dadosOriginais.naturalidade || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">NACIONALIDADE:</span>\n                    <span class=\"form-value\">${dadosOriginais.nacionalidade || ''}</span>\n                </div>\n            </div>\n            \n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">TELEFONE:</span>\n                    <span class=\"form-value\">${dadosOriginais.telefoneCelular || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">PROFISSÃO:</span>\n                    <span class=\"form-value\">${dadosOriginais.profissao || ''}</span>\n                </div>\n            </div>\n\n            <div class=\"form-row\">\n                <div class=\"form-group full\">\n                    <span class=\"form-label\">E-MAIL:</span>\n                    <span class=\"form-value\">${dadosOriginais.email || ''}</span>\n                </div>\n            </div>\n\n            <div class=\"form-row\">\n                <div class=\"form-group full\">\n                    <span class=\"form-label\">ENDEREÇO:</span>\n                    <span class=\"form-value\">${estrutura.enderecoCompleto}</span>\n                </div>\n            </div>\n\n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">BAIRRO:</span>\n                    <span class=\"form-value\">${dadosOriginais.bairro || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">CIDADE:</span>\n                    <span class=\"form-value\">${dadosOriginais.cidade || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">CEP:</span>\n                    <span class=\"form-value\">${dadosOriginais.cep || ''}</span>\n                </div>\n            </div>\n\n            ${estrutura.isMarried ? `\n            <div style=\"margin-top: 25px; padding-top: 20px; border-top: 1px solid #F5F5F5;\">\n                <div class=\"form-row\">\n                    <div class=\"form-group full\">\n                        <span class=\"form-label\">CÔNJUGE/2º PROPONENTE:</span>\n                        <span class=\"form-value\">${dadosOriginais.nomeConjuge || ''}</span>\n                    </div>\n                </div>\n                <div class=\"form-row\">\n                    <div class=\"form-group\">\n                        <span class=\"form-label\">CPF CÔNJUGE:</span>\n                        <span class=\"form-value\">${dadosOriginais.cpfConjuge || ''}</span>\n                    </div>\n                    <div class=\"form-group\">\n                        <span class=\"form-label\">RG CÔNJUGE:</span>\n                        <span class=\"form-value\">${dadosOriginais.rgConjuge || ''}</span>\n                    </div>\n                </div>\n            </div>\n            ` : ''}\n        </div>\n\n        <div class=\"section-title\">DADOS DO IMÓVEL OBJETO DESTA PROPOSTA</div>\n        <div class=\"section\">\n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">EMPREENDIMENTO:</span>\n                    <span class=\"form-value\">${estrutura.empreendimento}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">INCORPORADORA:</span>\n                    <span class=\"form-value\">LOTUS CIDADE</span>\n                </div>\n            </div>\n\n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">UNIDADE Nº:</span>\n                    <span class=\"form-value\">${dadosOriginais.unidadeNumero || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">CIDADE:</span>\n                    <span class=\"form-value\">Brasília-DF</span>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"section-title\">VALORES DA PROPOSTA</div>\n        <div class=\"values-section\">\n            <div class=\"value-item\">\n                <span class=\"value-label\">(A) VALOR DA PROPOSTA:</span>\n                <span class=\"value-amount\">R$ ${dadosOriginais.valorImovel || '0,00'}</span>\n            </div>\n            <div class=\"value-item\">\n                <span class=\"value-label\">(B) VALOR DE ENTRADA:</span>\n                <span class=\"value-amount\">R$ ${dadosOriginais.valorEntrada || '0,00'}</span>\n            </div>\n            <div class=\"value-item\">\n                <span class=\"value-label\">(C) VALOR A FINANCIAR:</span>\n                <span class=\"value-amount\">R$ ${dadosOriginais.valorFinanciar || '0,00'}</span>\n            </div>\n        </div>\n\n        ${estrutura.quantidadeDocumentos > 0 ? `\n        <div class=\"section-title\">DOCUMENTOS ANEXADOS</div>\n        <div class=\"document-summary\">\n            <div style=\"text-align: center; margin-bottom: 15px;\">\n                <strong style=\"color: #10B981; font-size: 14px;\">📄 ${estrutura.quantidadeDocumentos} Documento(s) Anexado(s)</strong>\n            </div>\n            <div class=\"storage-info\">\n                <strong>📁 Localização dos Arquivos:</strong><br>\n                <code>${estrutura.pastaDocumentos}/</code>\n            </div>\n        </div>\n        ` : ''}\n\n        <div class=\"conditions\">\n            <h3>Condições Gerais:</h3>\n            <div class=\"condition-item\">\n                <strong>1 -</strong> A presente proposta ficará sujeita a confirmação pela Incorporadora, facultado-lhe recusar expressamente esta proposta no prazo de até 48 (quarenta e oito) horas, contadas desta data.\n            </div>\n            <div class=\"condition-item\">\n                <strong>2 -</strong> Pelo presente instrumento o proponente retro qualificado promete comprar o(s) imóvel(is) objeto(s) deste pelo preço e prazos ali estabelecidos, obrigando-se a comparecer à sede da Construtora para assinar o instrumento particular de promessa de compra e venda da unidade no prazo de 72 (setenta e duas) horas contadas desta data.\n            </div>\n            <div class=\"condition-item\">\n                <strong>3 -</strong> No caso de financiamento junto a um agente financeiro, o proponente comprador obriga-se quando solicitado, a comprovar, no prazo de até 72 (setenta e duas) horas, a renda exigida pelo agente financeiro e a fornecer todos os documentos necessários exigidos.\n            </div>\n            <div class=\"condition-item\">\n                <strong>4 -</strong> Os valores descritos nos itens (A), (B) e (C) da presente Proposta de Compra compõem o preço total da Unidade conforme tabela de venda disponibilizada pela Incorporadora.\n            </div>\n        </div>\n\n        <div class=\"date-location\">\n            Brasília-DF, ${estrutura.dataAtual} às ${estrutura.horaAtual}\n        </div>\n\n        <div class=\"signatures\">\n            <div class=\"signature-box\">\n                <div class=\"signature-line\"></div>\n                <div class=\"signature-label\">Proponente(s) Comprador(es)</div>\n            </div>\n            <div class=\"signature-box\">\n                <div class=\"signature-line\"></div>\n                <div class=\"signature-label\">CORRETOR</div>\n            </div>\n        </div>\n        \n        <div class=\"storage-info\" style=\"margin-top: 30px;\">\n            <strong>📁 Sistema de Arquivos:</strong><br>\n            • Proposta PDF: ${estrutura.pastaProsposta}/proposta-${estrutura.numeroProsposta}.pdf<br>\n            • Dados JSON: ${estrutura.pastaProsposta}/dados-proposta.json<br>\n            • Documentos: ${estrutura.pastaDocumentos}/\n        </div>\n    </div>\n</body>\n</html>`;\n\nreturn { htmlContent: htmlTemplate };\n}}"
+      },
+      "name": "Gerar HTML da Proposta",
+      "type": "n8n-nodes-base.code",
+      "position": [900, 300],
+      "id": "generate-html"
+    },
+    {
+      "parameters": {
+        "url": "https://htmlcsstoimage.com/demo_run",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $json.htmlContent }}"
+            },
+            {
+              "name": "device_scale",
+              "value": "2"
+            },
+            {
+              "name": "format",
+              "value": "pdf"
+            },
+            {
+              "name": "pdf_format",
+              "value": "A4"
+            }
+          ]
+        }
+      },
+      "name": "Converter para PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1120, 300],
+      "id": "convert-to-pdf"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "name": "Baixar PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1340, 300],
+      "id": "download-pdf"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $('Processar Estrutura').first().json.pastaProsposta + '/proposta-' + $('Processar Estrutura').first().json.numeroProsposta + '.pdf' }}",
+        "dataPropertyName": "data"
+      },
+      "name": "Salvar PDF",
+      "type": "n8n-nodes-base.fs",
+      "position": [1560, 300],
+      "id": "save-pdf"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $('Processar Estrutura').first().json.pastaProsposta + '/dados-proposta.json' }}",
+        "dataPropertyName": "dadosOriginais"
+      },
+      "name": "Salvar Dados JSON",
+      "type": "n8n-nodes-base.fs",
+      "position": [1560, 180],
+      "id": "save-json-data"
+    },
+    {
+      "parameters": {
+        "command": "ls -la \"{{ $('Processar Estrutura').first().json.pastaProsposta }}\""
+      },
+      "name": "Verificar Arquivos Salvos",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [1780, 300],
+      "id": "verify-files"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ \nconst estrutura = $('Processar Estrutura').first().json;\n\n{\n  \"success\": true,\n  \"message\": \"Proposta processada e arquivos salvos com sucesso\",\n  \"pdfUrl\": `file://${estrutura.pastaProsposta}/proposta-${estrutura.numeroProsposta}.pdf`,\n  \"numeroProsposta\": estrutura.numeroProsposta,\n  \"nomeCliente\": estrutura.nomeCliente,\n  \"empreendimento\": estrutura.empreendimento,\n  \"storage\": {\n    \"pastaProsposta\": estrutura.pastaProsposta,\n    \"pastaDocumentos\": estrutura.pastaDocumentos,\n    \"arquivoPDF\": `${estrutura.pastaProsposta}/proposta-${estrutura.numeroProsposta}.pdf`,\n    \"arquivoJSON\": `${estrutura.pastaProsposta}/dados-proposta.json`,\n    \"totalDocumentos\": estrutura.quantidadeDocumentos\n  },\n  \"verificacao\": $json.stdout,\n  \"timestamp\": $now.toISOString()\n}\n}}"
+      },
+      "name": "Resposta com Storage Info",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [2000, 300],
+      "id": "storage-response"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Processar Estrutura",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar Estrutura": {
+      "main": [
+        [
+          {
+            "node": "Criar Estrutura de Pastas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Verificar Documentos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gerar HTML da Proposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Documentos": {
+      "main": [
+        [
+          {
+            "node": "Separar Documentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separar Documentos": {
+      "main": [
+        [
+          {
+            "node": "Processar Arquivo Individual",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar Arquivo Individual": {
+      "main": [
+        [
+          {
+            "node": "Salvar Arquivo no Servidor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar HTML da Proposta": {
+      "main": [
+        [
+          {
+            "node": "Converter para PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Converter para PDF": {
+      "main": [
+        [
+          {
+            "node": "Baixar PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar PDF": {
+      "main": [
+        [
+          {
+            "node": "Salvar PDF",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Salvar Dados JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salvar PDF": {
+      "main": [
+        [
+          {
+            "node": "Verificar Arquivos Salvos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Arquivos Salvos": {
+      "main": [
+        [
+          {
+            "node": "Resposta com Storage Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

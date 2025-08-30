@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste PDF Generator</title>
+</head>
+<body>
+    <h1>Teste do Gerador de PDF</h1>
+    <button onclick="testPDFGeneration()">Gerar PDF de Teste</button>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="pdf-generator.js"></script>
+    
+    <script>
+        async function testPDFGeneration() {
+            const testData = {
+                nome: "João Silva Santos",
+                cpfCnpj: "123.456.789-00",
+                rg: "1234567",
+                orgaoExpedidor: "SSP/DF",
+                dataNascimento: "15/08/1985",
+                naturalidade: "Brasília",
+                nacionalidade: "Brasileira",
+                telefoneCelular: "(61) 99999-9999",
+                telefoneComercial: "(61) 3333-4444",
+                profissao: "Engenheiro",
+                email: "joao@email.com",
+                rendaMensal: "R$ 15.000,00",
+                logradouro: "QS 01 Rua 100",
+                numero: "123",
+                complemento: "Apt 101",
+                bairro: "Águas Claras",
+                cidade: "Brasília",
+                uf: "DF",
+                cep: "71900-000",
+                estadoCivil: "casado",
+                nomeConjuge: "Maria Silva Santos",
+                cpfConjuge: "987.654.321-00",
+                empreendimento: "haya",
+                unidadeNumero: "1502",
+                valorImovel: "450.000,00",
+                valorEntrada: "45.000,00",
+                formaPagamento: "Transferência Bancária"
+            };
+            
+            try {
+                const generator = new PropostaPDFGenerator();
+                await loadHTML2PDF();
+                await generator.generatePDF(testData);
+                console.log('PDF de teste gerado com sucesso!');
+            } catch (error) {
+                console.error('Erro no teste:', error);
+            }
+        }
+    </script>
+</body>
+</html>

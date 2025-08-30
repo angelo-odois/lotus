@@ -1,0 +1,382 @@
+{
+  "name": "Lotus - Proposta com Storage Organizado",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bc635618-3f64-4db0-950e-feefaa899344",
+        "responseMode": "responseNode"
+      },
+      "name": "Webhook - Receber Proposta",
+      "type": "n8n-nodes-base.webhook",
+      "position": [240, 300],
+      "id": "webhook-receive"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ \nconst data = $json;\nconst now = new Date();\nconst numeroProsposta = `LP${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;\n\n// Criar estrutura de pastas\nconst pastaProsposta = `propostas/${numeroProsposta}-${(data.nome || 'cliente').replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;\n\n// Mapear empreendimentos\nconst empreendimentoNames = {\n  'haya': 'HAYA',\n  'kasa': 'KASA',\n  'vert': 'VERT',\n  'alma': 'ALMA'\n};\n\nreturn {\n  numeroProsposta,\n  pastaProsposta,\n  nomeCliente: data.nome,\n  empreendimento: empreendimentoNames[data.empreendimento] || data.empreendimento,\n  enderecoCompleto: `${data.logradouro || ''} ${data.numero || ''} ${data.complemento || ''}`.trim(),\n  isMarried: data.estadoCivil === 'casado' || data.estadoCivil === 'uniao-estavel',\n  dataAtual: now.toLocaleDateString('pt-BR'),\n  documentos: data.documentos || [],\n  quantidadeDocumentos: (data.documentos || []).length,\n  dadosOriginais: data\n};\n}}"
+      },
+      "name": "Processar Dados Iniciais",
+      "type": "n8n-nodes-base.code",
+      "position": [460, 300],
+      "id": "process-initial"
+    },
+    {
+      "parameters": {
+        "operation": "createDirectory",
+        "path": "={{ '/var/www/storage/' + $json.pastaProsposta }}"
+      },
+      "name": "Criar Pasta da Proposta",
+      "type": "n8n-nodes-base.fs",
+      "position": [680, 200],
+      "id": "create-folder"
+    },
+    {
+      "parameters": {
+        "operation": "createDirectory", 
+        "path": "={{ '/var/www/storage/' + $json.pastaProsposta + '/documentos' }}"
+      },
+      "name": "Criar Pasta Documentos",
+      "type": "n8n-nodes-base.fs",
+      "position": [680, 280],
+      "id": "create-docs-folder"
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "name": "Loop Documentos",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [900, 400],
+      "id": "loop-docs"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-documents",
+              "leftValue": "={{ $('Processar Dados Iniciais').first().json.quantidadeDocumentos }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Tem Documentos?",
+      "type": "n8n-nodes-base.if",
+      "position": [680, 400],
+      "id": "check-docs"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ \nconst doc = $('Processar Dados Iniciais').first().json.documentos[$('Loop Documentos').first().json.index];\nconst pastaProsposta = $('Processar Dados Iniciais').first().json.pastaProsposta;\n\n// Gerar nome seguro do arquivo\nconst nomeSeguro = doc.name.replace(/[^a-zA-Z0-9.-]/g, '_');\nconst caminhoArquivo = `/var/www/storage/${pastaProsposta}/documentos/${nomeSeguro}`;\n\n// Converter base64 para buffer\nconst base64Data = doc.base64.split(',')[1];\nconst buffer = Buffer.from(base64Data, 'base64');\n\nreturn {\n  caminhoArquivo,\n  nomeArquivo: nomeSeguro,\n  dadosArquivo: buffer,\n  categoria: doc.category,\n  tamanho: doc.size,\n  tipo: doc.type\n};\n}}"
+      },
+      "name": "Processar Documento",
+      "type": "n8n-nodes-base.code",
+      "position": [1120, 400],
+      "id": "process-document"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $json.caminhoArquivo }}",
+        "dataPropertyName": "dadosArquivo"
+      },
+      "name": "Salvar Documento",
+      "type": "n8n-nodes-base.fs",
+      "position": [1340, 400],
+      "id": "save-document"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ \nconst data = $('Processar Dados Iniciais').first().json;\nconst dadosOriginais = data.dadosOriginais;\n\n// Template HTML completo\nconst htmlTemplate = `\n<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Proposta de Compra - Lotus - ${data.nomeCliente}</title>\n    <style>\n        * { margin: 0; padding: 0; box-sizing: border-box; }\n        body { font-family: Arial, sans-serif; font-size: 12px; color: #1A1A1A; padding: 20px; margin: 0; background: #fff; }\n        .container { max-width: 800px; margin: 0 auto; }\n        .header { background: linear-gradient(135deg, #FFC629 0%, #FFD93D 100%); padding: 25px; text-align: center; border-radius: 8px; margin-bottom: 25px; }\n        .logo-container { display: inline-block; background: #1A1A1A; padding: 12px 18px; border-radius: 10px; margin-bottom: 15px; color: #FFC629; font-weight: bold; font-size: 16px; }\n        .header h1 { font-size: 18px; font-weight: bold; text-transform: uppercase; color: #1A1A1A; margin-bottom: 10px; }\n        .number { background: #1A1A1A; color: #FFC629; padding: 6px 12px; border-radius: 15px; font-weight: bold; font-size: 11px; display: inline-block; }\n        .section { margin-bottom: 25px; background: #FEFCF7; border: 1px solid #F5F5F5; border-radius: 6px; padding: 18px; }\n        .section-title { background: linear-gradient(135deg, #FFC629 0%, #FFD93D 100%); font-weight: bold; font-size: 13px; padding: 10px 18px; border-radius: 20px; margin-bottom: 18px; text-align: center; text-transform: uppercase; color: #1A1A1A; }\n        .form-row { display: flex; margin-bottom: 12px; align-items: center; flex-wrap: wrap; gap: 12px; }\n        .form-group { display: flex; align-items: center; margin-bottom: 6px; min-width: 180px; }\n        .form-group.full { flex: 1; min-width: 280px; }\n        .form-label { font-weight: bold; margin-right: 8px; color: #5A5A5A; text-transform: uppercase; font-size: 9px; min-width: 70px; }\n        .form-value { border-bottom: 2px solid #FFC629; padding: 3px 6px; min-width: 100px; background: #fff; color: #1A1A1A; font-weight: 500; }\n        .values-section { background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%); border: 2px solid #10B981; border-radius: 6px; padding: 15px; margin: 15px 0; }\n        .value-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #E5E7EB; }\n        .value-item:last-child { border-bottom: none; font-weight: bold; }\n        .value-label { font-weight: bold; color: #374151; }\n        .value-amount { font-weight: bold; color: #10B981; font-size: 13px; }\n        .conditions { margin-top: 25px; background: #F8F8F8; border-radius: 6px; padding: 18px; }\n        .conditions h3 { font-weight: bold; margin-bottom: 12px; color: #1A1A1A; text-transform: uppercase; font-size: 12px; }\n        .condition-item { margin-bottom: 12px; text-align: justify; line-height: 1.4; padding: 8px; background: #fff; border-radius: 4px; border-left: 3px solid #FFC629; }\n        .signatures { margin-top: 40px; display: flex; justify-content: space-between; gap: 30px; }\n        .signature-box { text-align: center; flex: 1; }\n        .signature-line { border-top: 2px solid #1A1A1A; height: 60px; margin-bottom: 8px; margin-top: 30px; }\n        .signature-label { font-weight: bold; color: #5A5A5A; text-transform: uppercase; font-size: 9px; }\n        .date-location { text-align: center; margin: 25px 0; font-weight: bold; font-size: 12px; color: #1A1A1A; }\n        .document-page { page-break-before: always; margin-top: 30px; }\n        .document-header { background: #FFC629; padding: 15px; border-radius: 6px; margin-bottom: 15px; text-align: center; }\n        .document-image { text-align: center; margin: 15px 0; }\n        .document-image img { max-width: 100%; max-height: 650px; border: 1px solid #E5E7EB; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }\n        @media print { body { margin: 0; padding: 8mm; font-size: 10px; } .container { max-width: none; width: 100%; } }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"header\">\n            <div class=\"logo-container\">LOTUS</div>\n            <h1>Proposta de Compra com Recibo de Sinal</h1>\n            <div class=\"number\">Nº ${data.numeroProsposta}</div>\n        </div>\n        \n        <div class=\"section\">\n            <div class=\"form-row\">\n                <div class=\"form-group full\">\n                    <span class=\"form-label\">NOME/1º PROPONENTE:</span>\n                    <span class=\"form-value\">${dadosOriginais.nome || ''}</span>\n                </div>\n            </div>\n            \n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">CPF/CNPJ:</span>\n                    <span class=\"form-value\">${dadosOriginais.cpfCnpj || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">RG:</span>\n                    <span class=\"form-value\">${dadosOriginais.rgInsEst || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">ÓRGÃO EXP.:</span>\n                    <span class=\"form-value\">${dadosOriginais.orgaoExpedidor || ''}</span>\n                </div>\n            </div>\n            \n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">SEXO:</span>\n                    <span class=\"form-value\">${dadosOriginais.sexo || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">NATURALIDADE:</span>\n                    <span class=\"form-value\">${dadosOriginais.naturalidade || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">NACIONALIDADE:</span>\n                    <span class=\"form-value\">${dadosOriginais.nacionalidade || ''}</span>\n                </div>\n            </div>\n            \n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">TELEFONE:</span>\n                    <span class=\"form-value\">${dadosOriginais.telefoneCelular || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">PROFISSÃO:</span>\n                    <span class=\"form-value\">${dadosOriginais.profissao || ''}</span>\n                </div>\n            </div>\n\n            <div class=\"form-row\">\n                <div class=\"form-group full\">\n                    <span class=\"form-label\">E-MAIL:</span>\n                    <span class=\"form-value\">${dadosOriginais.email || ''}</span>\n                </div>\n            </div>\n\n            <div class=\"form-row\">\n                <div class=\"form-group full\">\n                    <span class=\"form-label\">ENDEREÇO:</span>\n                    <span class=\"form-value\">${data.enderecoCompleto}</span>\n                </div>\n            </div>\n\n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">BAIRRO:</span>\n                    <span class=\"form-value\">${dadosOriginais.bairro || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">CIDADE:</span>\n                    <span class=\"form-value\">${dadosOriginais.cidade || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">CEP:</span>\n                    <span class=\"form-value\">${dadosOriginais.cep || ''}</span>\n                </div>\n            </div>\n\n            ${data.isMarried ? `\n            <div style=\"margin-top: 20px; padding-top: 15px; border-top: 1px solid #F5F5F5;\">\n                <div class=\"form-row\">\n                    <div class=\"form-group full\">\n                        <span class=\"form-label\">CÔNJUGE/2º PROPONENTE:</span>\n                        <span class=\"form-value\">${dadosOriginais.nomeConjuge || ''}</span>\n                    </div>\n                </div>\n                <div class=\"form-row\">\n                    <div class=\"form-group\">\n                        <span class=\"form-label\">CPF CÔNJUGE:</span>\n                        <span class=\"form-value\">${dadosOriginais.cpfConjuge || ''}</span>\n                    </div>\n                    <div class=\"form-group\">\n                        <span class=\"form-label\">RG CÔNJUGE:</span>\n                        <span class=\"form-value\">${dadosOriginais.rgConjuge || ''}</span>\n                    </div>\n                </div>\n            </div>\n            ` : ''}\n        </div>\n\n        <div class=\"section-title\">DADOS DO IMÓVEL OBJETO DESTA PROPOSTA</div>\n        <div class=\"section\">\n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">EMPREENDIMENTO:</span>\n                    <span class=\"form-value\">${data.empreendimento}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">INCORPORADORA:</span>\n                    <span class=\"form-value\">LOTUS CIDADE</span>\n                </div>\n            </div>\n\n            <div class=\"form-row\">\n                <div class=\"form-group\">\n                    <span class=\"form-label\">UNIDADE Nº:</span>\n                    <span class=\"form-value\">${dadosOriginais.unidadeNumero || ''}</span>\n                </div>\n                <div class=\"form-group\">\n                    <span class=\"form-label\">CIDADE:</span>\n                    <span class=\"form-value\">Brasília-DF</span>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"section-title\">VALORES DA PROPOSTA</div>\n        <div class=\"values-section\">\n            <div class=\"value-item\">\n                <span class=\"value-label\">(A) VALOR DA PROPOSTA:</span>\n                <span class=\"value-amount\">R$ ${dadosOriginais.valorImovel || '0,00'}</span>\n            </div>\n            <div class=\"value-item\">\n                <span class=\"value-label\">(B) VALOR DE ENTRADA:</span>\n                <span class=\"value-amount\">R$ ${dadosOriginais.valorEntrada || '0,00'}</span>\n            </div>\n            <div class=\"value-item\">\n                <span class=\"value-label\">(C) VALOR A FINANCIAR:</span>\n                <span class=\"value-amount\">R$ ${dadosOriginais.valorFinanciar || '0,00'}</span>\n            </div>\n        </div>\n\n        ${data.quantidadeDocumentos > 0 ? `\n        <div class=\"section-title\">DOCUMENTOS ANEXADOS</div>\n        <div class=\"section\">\n            <div style=\"background: #F0FDF4; border: 2px solid #10B981; border-radius: 6px; padding: 12px; margin-bottom: 15px;\">\n                <strong style=\"color: #10B981;\">Total de ${data.quantidadeDocumentos} documento(s) anexado(s)</strong>\n            </div>\n            <div style=\"font-size: 11px; color: #5A5A5A;\">\n                <strong>Documentos salvos em:</strong> /storage/${data.pastaProsposta}/documentos/\n            </div>\n        </div>\n        \n        ${data.documentos.map(doc => {\n          const categoryLabels = {\n            'rg': 'RG',\n            'cpf': 'CPF',\n            'residencia': 'Comp. Residência',\n            'renda': 'Comp. Renda',\n            'casamento': 'Cert. Casamento',\n            'rg-conjuge': 'RG Cônjuge',\n            'cpf-conjuge': 'CPF Cônjuge',\n            'renda-conjuge': 'Renda Cônjuge',\n            'outros': 'Outros'\n          };\n          \n          return `\n            <div style=\"page-break-before: always; margin-top: 30px;\">\n                <div style=\"background: #FFC629; padding: 15px; border-radius: 6px; margin-bottom: 15px; text-align: center;\">\n                    <strong>${categoryLabels[doc.category] || 'Documento'} - ${doc.name}</strong>\n                    <div style=\"font-size: 10px; margin-top: 5px;\">\n                        ${Math.round(doc.size / 1024)} KB • ${doc.type}\n                    </div>\n                    <div style=\"font-size: 9px; margin-top: 3px; color: #1A1A1A;\">\n                        Arquivo: /storage/${data.pastaProsposta}/documentos/${doc.name.replace(/[^a-zA-Z0-9.-]/g, '_')}\n                    </div>\n                </div>\n                \n                ${doc.base64 && doc.type.includes('image') ? `\n                    <div style=\"text-align: center; margin: 15px 0;\">\n                        <img src=\"${doc.base64}\" alt=\"${doc.name}\" style=\"max-width: 100%; max-height: 650px; border: 1px solid #E5E7EB; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);\">\n                    </div>\n                ` : ''}\n                \n                ${doc.type.includes('pdf') ? `\n                    <div style=\"text-align: center; padding: 40px; background: #F8F8F8; border-radius: 6px; margin: 20px 0;\">\n                        <div style=\"font-size: 48px; margin-bottom: 15px;\">📄</div>\n                        <div style=\"font-weight: bold; color: #1A1A1A;\">Documento PDF</div>\n                        <div style=\"font-size: 11px; color: #5A5A5A; margin-top: 5px;\">\n                            ${doc.name}<br>\n                            Documento anexado ao formulário\n                        </div>\n                    </div>\n                ` : ''}\n            </div>\n          `;\n        }).join('')}\n        ` : ''}\n\n        <div class=\"conditions\">\n            <h3>Condições Gerais:</h3>\n            <div class=\"condition-item\">\n                <strong>1 -</strong> A presente proposta ficará sujeita a confirmação pela Incorporadora, facultado-lhe recusar expressamente esta proposta no prazo de até 48 (quarenta e oito) horas, contadas desta data.\n            </div>\n            <div class=\"condition-item\">\n                <strong>2 -</strong> Pelo presente instrumento o proponente retro qualificado promete comprar o(s) imóvel(is) objeto(s) deste pelo preço e prazos ali estabelecidos, obrigando-se a comparecer à sede da Construtora para assinar o instrumento particular de promessa de compra e venda da unidade no prazo de 72 (setenta e duas) horas contadas desta data.\n            </div>\n            <div class=\"condition-item\">\n                <strong>3 -</strong> No caso de financiamento junto a um agente financeiro, o proponente comprador obriga-se quando solicitado, a comprovar, no prazo de até 72 (setenta e duas) horas, a renda exigida pelo agente financeiro e a fornecer todos os documentos necessários exigidos.\n            </div>\n            <div class=\"condition-item\">\n                <strong>4 -</strong> Os valores descritos nos itens (A), (B) e (C) da presente Proposta de Compra compõem o preço total da Unidade conforme tabela de venda disponibilizada pela Incorporadora.\n            </div>\n        </div>\n\n        <div class=\"date-location\">\n            Brasília-DF, ${data.dataAtual}\n        </div>\n\n        <div class=\"signatures\">\n            <div class=\"signature-box\">\n                <div class=\"signature-line\"></div>\n                <div class=\"signature-label\">Proponente(s) Comprador(es)</div>\n            </div>\n            <div class=\"signature-box\">\n                <div class=\"signature-line\"></div>\n                <div class=\"signature-label\">CORRETOR</div>\n            </div>\n        </div>\n    </div>\n</body>\n</html>`\n};\n\nreturn { htmlContent: htmlTemplate };\n}}"
+      },
+      "name": "Gerar HTML Template",
+      "type": "n8n-nodes-base.code",
+      "position": [900, 300],
+      "id": "generate-html"
+    },
+    {
+      "parameters": {
+        "url": "https://htmlcsstoimage.com/demo_run",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_HTMLCSSTOIMAGE_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $json.htmlContent }}"
+            },
+            {
+              "name": "device_scale",
+              "value": "2"
+            },
+            {
+              "name": "format",
+              "value": "pdf"
+            },
+            {
+              "name": "pdf_format",
+              "value": "A4"
+            }
+          ]
+        }
+      },
+      "name": "Converter HTML para PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1120, 300],
+      "id": "convert-pdf"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "name": "Baixar PDF Gerado",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1340, 300],
+      "id": "download-pdf"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ '/var/www/storage/' + $('Processar Dados Iniciais').first().json.pastaProsposta + '/proposta-' + $('Processar Dados Iniciais').first().json.numeroProsposta + '.pdf' }}",
+        "dataPropertyName": "data"
+      },
+      "name": "Salvar PDF no Servidor",
+      "type": "n8n-nodes-base.fs",
+      "position": [1560, 300],
+      "id": "save-pdf-server"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ \nconst dadosIniciais = $('Processar Dados Iniciais').first().json;\nconst arquivosSalvos = [];\n\n// Listar arquivos salvos\nif (dadosIniciais.quantidadeDocumentos > 0) {\n  dadosIniciais.documentos.forEach(doc => {\n    arquivosSalvos.push({\n      nome: doc.name,\n      categoria: doc.category,\n      caminho: `/storage/${dadosIniciais.pastaProsposta}/documentos/${doc.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`,\n      tamanho: doc.size,\n      tipo: doc.type\n    });\n  });\n}\n\nreturn {\n  numeroProsposta: dadosIniciais.numeroProsposta,\n  nomeCliente: dadosIniciais.nomeCliente,\n  empreendimento: dadosIniciais.empreendimento,\n  pastaProsposta: dadosIniciais.pastaProsposta,\n  caminhoPropostaPDF: `/storage/${dadosIniciais.pastaProsposta}/proposta-${dadosIniciais.numeroProsposta}.pdf`,\n  urlPropostaPDF: `https://seu-servidor.com/storage/${dadosIniciais.pastaProsposta}/proposta-${dadosIniciais.numeroProsposta}.pdf`,\n  arquivosSalvos: arquivosSalvos,\n  totalArquivos: arquivosSalvos.length,\n  dadosCompletos: dadosIniciais.dadosOriginais\n};\n}}"
+      },
+      "name": "Finalizar Storage",
+      "type": "n8n-nodes-base.code",
+      "position": [1780, 300],
+      "id": "finalize-storage"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ \n{\n  \"success\": true,\n  \"message\": \"Proposta processada e arquivos organizados com sucesso\",\n  \"pdfUrl\": $json.urlPropostaPDF,\n  \"numeroProsposta\": $json.numeroProsposta,\n  \"nomeCliente\": $json.nomeCliente,\n  \"empreendimento\": $json.empreendimento,\n  \"storage\": {\n    \"pastaProsposta\": $json.pastaProsposta,\n    \"caminhoPropostaPDF\": $json.caminhoPropostaPDF,\n    \"arquivosDocumentos\": $json.arquivosSalvos,\n    \"totalArquivos\": $json.totalArquivos\n  },\n  \"timestamp\": $now.toISOString()\n}\n}}"
+      },
+      "name": "Resposta Final",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [2000, 300],
+      "id": "final-response"
+    },
+    {
+      "parameters": {
+        "operation": "sendEmail",
+        "email": "corretor@lotuscidade.com.br",
+        "subject": "=🏠 Nova Proposta Lotus - {{ $json.nomeCliente }} - {{ $json.numeroProsposta }}",
+        "emailType": "html",
+        "message": "=<div style=\"font-family: Arial, sans-serif;\">\n\n<div style=\"background: linear-gradient(135deg, #FFC629 0%, #FFD93D 100%); padding: 25px; border-radius: 8px; margin: 20px 0; text-align: center;\">\n  <div style=\"background: #1A1A1A; display: inline-block; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; color: #FFC629; font-weight: bold;\">LOTUS</div>\n  <h2 style=\"margin: 0; color: #1A1A1A;\">Nova Proposta Recebida</h2>\n  <div style=\"background: #1A1A1A; color: #FFC629; padding: 6px 12px; border-radius: 15px; font-weight: bold; display: inline-block; margin-top: 10px;\">{{ $json.numeroProsposta }}</div>\n</div>\n\n<h3 style=\"color: #1A1A1A; margin: 20px 0 10px 0;\">👤 Dados do Cliente:</h3>\n<div style=\"background: #FEFCF7; border-radius: 6px; padding: 15px; margin-bottom: 20px;\">\n  <p><strong>Nome:</strong> {{ $json.nomeCliente }}</p>\n  <p><strong>Email:</strong> {{ $json.dadosCompletos.email }}</p>\n  <p><strong>Telefone:</strong> {{ $json.dadosCompletos.telefoneCelular }}</p>\n  <p><strong>CPF:</strong> {{ $json.dadosCompletos.cpfCnpj }}</p>\n</div>\n\n<h3 style=\"color: #1A1A1A; margin: 20px 0 10px 0;\">🏠 Dados da Proposta:</h3>\n<div style=\"background: #F0FDF4; border: 2px solid #10B981; border-radius: 6px; padding: 15px; margin-bottom: 20px;\">\n  <p><strong>Empreendimento:</strong> {{ $json.empreendimento }}</p>\n  <p><strong>Unidade:</strong> {{ $json.dadosCompletos.unidadeNumero }}</p>\n  <p><strong>Valor da Proposta:</strong> <span style=\"color: #10B981; font-weight: bold;\">R$ {{ $json.dadosCompletos.valorImovel }}</span></p>\n  <p><strong>Valor de Entrada:</strong> <span style=\"color: #10B981; font-weight: bold;\">R$ {{ $json.dadosCompletos.valorEntrada }}</span></p>\n</div>\n\n<h3 style=\"color: #1A1A1A; margin: 20px 0 10px 0;\">📁 Arquivos Organizados:</h3>\n<div style=\"background: #FEF3C7; border: 2px solid #FCD34D; border-radius: 6px; padding: 15px; margin-bottom: 20px;\">\n  <p><strong>📄 Proposta PDF:</strong> {{ $json.caminhoPropostaPDF }}</p>\n  <p><strong>📂 Pasta da Proposta:</strong> /storage/{{ $json.pastaProsposta }}/</p>\n  <p><strong>📎 Total de Documentos:</strong> {{ $json.totalArquivos }}</p>\n  \n  {{#if $json.arquivosSalvos}}\n  <h4 style=\"margin: 15px 0 5px 0;\">Documentos Anexados:</h4>\n  <ul style=\"margin: 0; padding-left: 20px;\">\n    {{#each $json.arquivosSalvos}}\n    <li style=\"margin: 5px 0;\">📄 <strong>{{this.categoria}}</strong>: {{this.nome}} ({{Math.round(this.tamanho/1024)}} KB)</li>\n    {{/each}}\n  </ul>\n  {{/if}}\n</div>\n\n<div style=\"background: #E0F2FE; border: 2px solid #3B82F6; border-radius: 6px; padding: 15px; margin: 20px 0;\">\n  <p><strong>🔗 Link da Proposta:</strong> <a href=\"{{ $json.urlPropostaPDF }}\" style=\"color: #3B82F6; text-decoration: none;\">{{ $json.urlPropostaPDF }}</a></p>\n</div>\n\n<hr style=\"margin: 20px 0; border: 1px solid #F5F5F5;\">\n<p style=\"font-size: 11px; color: #8A8A8A; text-align: center;\">Proposta gerada automaticamente em {{ $now.format('DD/MM/YYYY HH:mm') }} via sistema Lotus</p>\n\n</div>",
+        "options": {
+          "attachments": "={{ [\n  {\n    \"name\": $json.numeroProsposta + \".pdf\",\n    \"content\": $('Baixar PDF Gerado').first().binary.data,\n    \"type\": \"application/pdf\"\n  }\n] }}"
+        }
+      },
+      "name": "Email para Corretor",
+      "type": "n8n-nodes-base.emailSend",
+      "position": [2000, 480],
+      "id": "email-corretor"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ '/var/www/storage/' + $('Processar Dados Iniciais').first().json.pastaProsposta + '/dados-proposta.json' }}",
+        "dataPropertyName": "dadosCompletos"
+      },
+      "name": "Salvar Dados JSON",
+      "type": "n8n-nodes-base.fs", 
+      "position": [1780, 180],
+      "id": "save-json"
+    }
+  ],
+  "connections": {
+    "Webhook - Receber Proposta": {
+      "main": [
+        [
+          {
+            "node": "Processar Dados Iniciais",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar Dados Iniciais": {
+      "main": [
+        [
+          {
+            "node": "Criar Pasta da Proposta",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Criar Pasta Documentos", 
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Tem Documentos?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gerar HTML Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem Documentos?": {
+      "main": [
+        [
+          {
+            "node": "Loop Documentos",
+            "type": "main", 
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gerar HTML Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Documentos": {
+      "main": [
+        [
+          {
+            "node": "Processar Documento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar Documento": {
+      "main": [
+        [
+          {
+            "node": "Salvar Documento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar HTML Template": {
+      "main": [
+        [
+          {
+            "node": "Converter HTML para PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Converter HTML para PDF": {
+      "main": [
+        [
+          {
+            "node": "Baixar PDF Gerado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar PDF Gerado": {
+      "main": [
+        [
+          {
+            "node": "Salvar PDF no Servidor",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Salvar Dados JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salvar PDF no Servidor": {
+      "main": [
+        [
+          {
+            "node": "Finalizar Storage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finalizar Storage": {
+      "main": [
+        [
+          {
+            "node": "Resposta Final",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email para Corretor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "lotus",
+      "id": "lotus-tag"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2024-08-29T00:00:00.000Z",
+  "versionId": "1"
+}
