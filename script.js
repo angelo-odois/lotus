@@ -11,6 +11,7 @@ const formData = {};
 const uploadedFiles = [];
 const fileCategories = {};
 
+
 // 📱 Sistema de detecção e compensação de teclado mobile
 class MobileKeyboardHandler {
     constructor() {
@@ -968,8 +969,6 @@ async function submitForm() {
         })),
         documentosEnvioPosterior: false,
         quantidadeDocumentos: uploadedFiles.length,
-        // ✅ Informações do webhook
-        webhookUrl: WEBHOOK_URL,
         deviceInfo: {
             userAgent: navigator.userAgent,
             screenSize: `${screen.width}x${screen.height}`,
@@ -999,7 +998,7 @@ async function submitForm() {
         }
         
         // Enviar proposta via WhatsApp usando WAHA
-        sendWhatsAppMessage(submitData, pdfUrl);
+        sendWhatsAppMessage(submitData);
         
         // Mostrar sucesso com PDF local
         mostrarSucesso(submitData, pdfUrl);
@@ -1065,8 +1064,11 @@ async function generatePropostaPDFBlob(formData) {
         if (!propostaHTML || propostaHTML.length < 100) {
             console.error('❌ HTML gerado está vazio ou muito pequeno');
             console.log('📄 HTML gerado:', propostaHTML.substring(0, 500));
+            console.log('📄 Dados da proposta:', formData);
             throw new Error('HTML da proposta está vazio');
         }
+        
+        console.log('📄 HTML válido gerado, primeiros 200 chars:', propostaHTML.substring(0, 200));
         
         // Criar elemento temporário para gerar PDF
         const element = document.createElement('div');
@@ -1142,7 +1144,7 @@ async function generatePropostaPDFBlob(formData) {
             console.warn('⚠️ PDF muito pequeno:', pdfBlob.size, 'bytes');
         }
         
-        console.log('✅ PDF blob válido gerado para webhook');
+        console.log('✅ PDF blob válido gerado');
         return pdfBlob;
         
     } catch (error) {
@@ -1996,24 +1998,34 @@ async function generateAndDownloadPDF(data) {
 }
 
 // 📱 Função para enviar mensagem via WhatsApp usando WAHA
-async function sendWhatsAppMessage(submitData, pdfUrl) {
+async function sendWhatsAppMessage(submitData) {
     try {
         console.log('📱 Enviando proposta via WhatsApp...');
         
         // Formatar dados da proposta para mensagem
-        const cliente = submitData.clienteNome || 'Cliente';
-        const projeto = submitData.tipoProjeto || 'Projeto';
-        const valor = submitData.valorTotal || 'N/A';
-        const dataEntrega = submitData.prazoEntrega || 'A definir';
+        const cliente = submitData.nome || 'Cliente';
+        const cpfCnpj = submitData.cpfCnpj || 'N/A';
+        const empreendimento = submitData.empreendimento ? submitData.empreendimento.toUpperCase() : 'N/A';
+        const unidade = submitData.unidadeNumero || 'N/A';
+        const valorImovel = submitData.valorImovel || 'N/A';
+        const valorEntrada = submitData.valorEntrada || 'N/A';
+        const telefone = submitData.telefoneCelular || 'N/A';
+        const email = submitData.email || 'N/A';
+        const quantidadeDocs = submitData.quantidadeDocumentos || 0;
         
-        const mensagem = `🌟 *NOVA PROPOSTA GERADA - LOTUS*\n\n` +
+        const mensagem = `🌟 *NOVA PROPOSTA LOTUS* 🌟\n\n` +
             `👤 *Cliente:* ${cliente}\n` +
-            `🏗️ *Projeto:* ${projeto}\n` +
-            `💰 *Valor:* R$ ${valor}\n` +
-            `📅 *Prazo:* ${dataEntrega}\n\n` +
-            `📄 *PDF da proposta foi gerado com sucesso!*\n` +
-            `🔗 Link: ${window.location.origin}\n\n` +
-            `✅ *Status:* Aguardando análise do cliente`;
+            `📱 *Telefone:* ${telefone}\n` +
+            `📧 *Email:* ${email}\n` +
+            `🆔 *CPF/CNPJ:* ${cpfCnpj}\n\n` +
+            `🏢 *Empreendimento:* ${empreendimento}\n` +
+            `🏠 *Unidade:* ${unidade}\n` +
+            `💰 *Valor do Imóvel:* R$ ${valorImovel}\n` +
+            `💵 *Valor de Entrada:* R$ ${valorEntrada}\n\n` +
+            `📄 *Documentos anexados:* ${quantidadeDocs} arquivo(s)\n` +
+            `⏰ *Gerada em:* ${new Date().toLocaleString('pt-BR')}\n\n` +
+            `✅ *Status:* Proposta gerada e salva no sistema\n` +
+            `🔄 *Próximos passos:* Análise da documentação e aprovação`;
 
         // Enviar mensagem via WAHA API
         const response = await fetch(`${WAHA_URL}/api/sendText`, {
