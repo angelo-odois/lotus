@@ -13,7 +13,8 @@ services:
       - lotus-storage:/var/www/storage
     environment:
       - NODE_ENV=production
-      - WEBHOOK_URL=https://n8n.nexuso2.com/webhook-test/bc635618-3f64-4db0-950e-feefaa899344
+      - WAHA_URL=https://waha.nexuso2.com
+      - WHATSAPP_PHONE=+5511999999999
     restart: unless-stopped
     networks:
       - lotus-network
@@ -22,19 +23,6 @@ services:
       - "traefik.http.routers.lotus.rule=Host(`lotus.localhost`)"
       - "traefik.http.services.lotus.loadbalancer.server.port=80"
 
-  # Banco de dados para N8N
-  postgres:
-    image: postgres:15-alpine
-    container_name: lotus-postgres
-    environment:
-      - POSTGRES_USER=n8n
-      - POSTGRES_PASSWORD=n8n_password
-      - POSTGRES_DB=n8n
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    restart: unless-stopped
-    networks:
-      - lotus-network
 
   # Redis para cache (opcional)
   redis:
@@ -115,10 +103,6 @@ services:
 
 # Volumes persistentes
 volumes:
-  n8n-data:
-    driver: local
-  postgres-data:
-    driver: local
   redis-data:
     driver: local
   lotus-storage:

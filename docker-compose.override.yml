@@ -17,26 +17,4 @@ services:
       - "3000:80"
       - "3001:8080"  # Porta de desenvolvimento
 
-  n8n:
-    environment:
-      - N8N_LOG_LEVEL=debug
-      - EXECUTIONS_DATA_PRUNE=false
-    volumes:
-      - .:/opt/lotus-project:ro
-      - ./n8n-workflows:/opt/workflows
-      - ./propostas:/var/www/lotus/propostas
 
-  # Adicionar PhpMyAdmin para visualizar dados (desenvolvimento)
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
-    container_name: lotus-phpmyadmin
-    environment:
-      - PMA_HOST=postgres
-      - PMA_USER=n8n
-      - PMA_PASSWORD=n8n_password
-    ports:
-      - "8082:80"
-    depends_on:
-      - postgres
-    networks:
-      - lotus-network

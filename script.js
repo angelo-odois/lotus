@@ -1,6 +1,8 @@
 // 📱 Configuração avançada de viewport para mobile
-// Webhook URL - altere aqui quando for para produção
-const WEBHOOK_URL = 'https://n8n.nexuso2.com/webhook-test/bc635618-3f64-4db0-950e-feefaa899344';
+// Configuração WAHA para WhatsApp
+const WAHA_URL = 'https://waha.nexuso2.com';
+const WAHA_API_KEY = '083D38CBCA7707EAAC23CFC1A6A9A26BA9F854FC81D66AA01C0A6BC0298182299BF6A16004384F4891454A69BB15641ECE3919597CA103B82BCFEF3BD24A7EAF';
+const WHATSAPP_PHONE = '+5561999911676';
 
 // Variáveis globais
 let currentStep = 1;
@@ -981,36 +983,29 @@ async function submitForm() {
     console.log(`🔗 Webhook URL: ${WEBHOOK_URL}`);
     
     try {
-        // Enviar dados estruturados para N8N gerar o PDF
-        const response = await fetch(WEBHOOK_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(submitData)
-        });
+        // Gerar PDF localmente para download imediato
+        console.log('📄 Gerando PDF para download...');
+        const pdfBlob = await generatePropostaPDFBlob(submitData);
         
-        if (response.ok) {
-            const result = await response.json();
-            console.log('✅ Webhook resposta recebida:', result);
-            
-            // Verificar se N8N retornou URL do PDF gerado
-            const pdfUrl = result.pdfUrl || result.pdf_url || result.documentUrl || result.document_url;
-            
-            if (pdfUrl) {
-                console.log('📄 PDF gerado pelo N8N:', pdfUrl);
-                mostrarSucesso(submitData, pdfUrl);
-            } else {
-                console.log('⚠️ N8N não retornou URL do PDF');
-                mostrarSucesso(submitData, null);
-            }
-        } else {
-            console.log('⚠️ Webhook resposta não OK:', response.status);
-            mostrarSucesso(submitData, null);
+        let pdfUrl = null;
+        if (pdfBlob) {
+            pdfUrl = URL.createObjectURL(pdfBlob);
+            console.log('✅ PDF gerado localmente:', pdfUrl);
         }
         
+        // Salvar PDF no servidor e enviar via WhatsApp
+        if (pdfBlob) {
+            await savePDFToServer(pdfBlob, `proposta-lotus-${submitData.nome ? submitData.nome.replace(/\s+/g, '-').toLowerCase() : 'cliente'}-${Date.now()}.pdf`, submitData);
+        }
+        
+        // Enviar proposta via WhatsApp usando WAHA
+        sendWhatsAppMessage(submitData, pdfUrl);
+        
+        // Mostrar sucesso com PDF local
+        mostrarSucesso(submitData, pdfUrl);
+        
     } catch (error) {
-        console.log('❌ Erro no webhook:', error);
+        console.log('❌ Erro no processo:', error);
         mostrarSucesso(submitData, null);
     }
     
@@ -1056,7 +1051,7 @@ async function generatePropostaPDF(formData) {
 async function generatePropostaPDFBlob(formData) {
     try {
         console.log('📄 Gerando PDF blob para webhook...');
-        console.log('📄 Dados recebidos:', formData);
+        console.log('📄 Dados recebidos:', JSON.stringify(formData, null, 2));
         
         // Carregar biblioteca html2pdf
         await loadHTML2PDF();
@@ -1066,36 +1061,58 @@ async function generatePropostaPDFBlob(formData) {
         const propostaHTML = generatePropostaHTML(formData);
         console.log('📄 HTML gerado, tamanho:', propostaHTML.length, 'caracteres');
         
+        // Debug: Verificar se o HTML não está vazio
+        if (!propostaHTML || propostaHTML.length < 100) {
+            console.error('❌ HTML gerado está vazio ou muito pequeno');
+            console.log('📄 HTML gerado:', propostaHTML.substring(0, 500));
+            throw new Error('HTML da proposta está vazio');
+        }
+        
         // Criar elemento temporário para gerar PDF
         const element = document.createElement('div');
         element.innerHTML = propostaHTML;
-        element.style.position = 'absolute';
-        element.style.left = '-9999px';
-        element.style.top = '0';
-        element.style.width = '210mm'; // A4 width
+        element.style.cssText = `
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            width: 800px;
+            background: white;
+            font-family: Arial, sans-serif;
+            visibility: hidden;
+        `;
         document.body.appendChild(element);
         
         console.log('📄 Elemento criado e anexado ao DOM');
+        console.log('📄 Elemento scroll height:', element.scrollHeight);
+        console.log('📄 Elemento scroll width:', element.scrollWidth);
         
-        // Aguardar um pouco para o DOM se estabilizar
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Aguardar mais tempo para o DOM se estabilizar
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Configurações do PDF otimizadas
+        // Verificar se o elemento tem conteúdo
+        if (element.scrollHeight === 0 || element.scrollWidth === 0) {
+            console.error('❌ Elemento não tem dimensões válidas');
+            console.log('📄 Inner HTML length:', element.innerHTML.length);
+            document.body.removeChild(element);
+            throw new Error('Elemento HTML não renderizou corretamente');
+        }
+        
+        // Configurações do PDF mais robustas
         const opt = {
-            margin: [5, 5, 5, 5],
+            margin: [10, 10, 10, 10],
             filename: `proposta-lotus-${formData.nome ? formData.nome.replace(/\s+/g, '-').toLowerCase() : 'cliente'}-${Date.now()}.pdf`,
             image: { 
                 type: 'jpeg', 
-                quality: 0.9 
+                quality: 0.98
             },
             html2canvas: { 
-                scale: 1.5,
+                scale: 2,
                 useCORS: true,
                 allowTaint: true,
-                letterRendering: true,
-                logging: true,
-                height: element.scrollHeight,
-                width: element.scrollWidth
+                backgroundColor: '#ffffff',
+                logging: false,
+                width: element.scrollWidth,
+                height: element.scrollHeight
             },
             jsPDF: { 
                 unit: 'mm', 
@@ -1104,19 +1121,25 @@ async function generatePropostaPDFBlob(formData) {
             }
         };
         
+        console.log('📄 Configurações do PDF:', JSON.stringify(opt, null, 2));
         console.log('📄 Iniciando geração do PDF...');
         
         // Gerar PDF como blob
         const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
         
-        console.log('📄 PDF blob criado, tamanho:', pdfBlob.size, 'bytes');
+        console.log('📄 PDF blob criado, tamanho:', pdfBlob?.size, 'bytes');
         
         // Limpar elemento temporário
         document.body.removeChild(element);
         
         // Validar se o blob foi criado corretamente
         if (!pdfBlob || pdfBlob.size === 0) {
-            throw new Error('PDF blob está vazio');
+            throw new Error('PDF blob está vazio ou não foi criado');
+        }
+        
+        // Verificar se o tamanho é razoável (pelo menos 1KB)
+        if (pdfBlob.size < 1024) {
+            console.warn('⚠️ PDF muito pequeno:', pdfBlob.size, 'bytes');
         }
         
         console.log('✅ PDF blob válido gerado para webhook');
@@ -1125,6 +1148,18 @@ async function generatePropostaPDFBlob(formData) {
     } catch (error) {
         console.error('❌ Erro ao gerar PDF blob:', error);
         console.error('❌ Detalhes:', error.message);
+        console.error('❌ Stack:', error.stack);
+        
+        // Tentar limpar elemento se ainda estiver no DOM
+        const leftoverElements = document.querySelectorAll('[style*="-9999px"]');
+        leftoverElements.forEach(el => {
+            try {
+                document.body.removeChild(el);
+            } catch (e) {
+                console.warn('⚠️ Não foi possível limpar elemento:', e);
+            }
+        });
+        
         return null;
     }
 }
@@ -1851,20 +1886,263 @@ function mostrarSucesso(data, pdfUrl = null) {
     document.querySelector('.progress-container').style.display = 'none';
     document.getElementById('successMessage').style.display = 'block';
     
-    // Configurar download se N8N retornou URL do PDF
-    if (pdfUrl) {
-        const downloadSection = document.getElementById('downloadSection');
-        const downloadLink = document.getElementById('downloadLink');
+    // Sempre mostrar seção de download
+    const downloadSection = document.getElementById('downloadSection');
+    const downloadLink = document.getElementById('downloadLink');
+    
+    if (downloadSection) {
+        downloadSection.style.display = 'block';
+        console.log('📄 Seção de download mostrada');
         
-        if (downloadSection && downloadLink) {
-            downloadSection.style.display = 'block';
-            downloadLink.href = pdfUrl;
-            downloadLink.download = `proposta-lotus-${data.nome ? data.nome.replace(/\s+/g, '-').toLowerCase() : 'cliente'}-${Date.now()}.pdf`;
-            console.log('📄 Download configurado:', pdfUrl);
+        if (downloadLink) {
+            if (pdfUrl) {
+                downloadLink.href = pdfUrl;
+                downloadLink.download = `proposta-lotus-${data.nome ? data.nome.replace(/\s+/g, '-').toLowerCase() : 'cliente'}-${Date.now()}.pdf`;
+                downloadLink.style.opacity = '1';
+                downloadLink.style.pointerEvents = 'auto';
+                downloadLink.onclick = null;
+                console.log('📄 Download PDF configurado:', pdfUrl);
+            } else {
+                // Se não há PDF, gerar na hora
+                downloadLink.href = '#';
+                downloadLink.onclick = (e) => {
+                    e.preventDefault();
+                    generateAndDownloadPDF(data);
+                };
+                downloadLink.style.opacity = '1';
+                downloadLink.style.pointerEvents = 'auto';
+                console.log('📄 Download configurado para gerar na hora');
+            }
         }
-    } else {
-        console.log('⚠️ Nenhum PDF disponível para download');
     }
     
     console.log('✅ Tela de sucesso configurada');
+}
+
+// Gerar e fazer download do PDF na hora
+async function generateAndDownloadPDF(data) {
+    try {
+        console.log('📄 Gerando PDF na hora...');
+        const downloadLink = document.getElementById('downloadLink');
+        
+        // Mostrar loading no botão
+        if (downloadLink) {
+            downloadLink.innerHTML = `
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z">
+                        <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
+                    </path>
+                </svg>
+                Gerando PDF...
+            `;
+            downloadLink.style.pointerEvents = 'none';
+        }
+        
+        const pdfBlob = await generatePropostaPDFBlob(data);
+        
+        if (pdfBlob) {
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            const filename = `proposta-lotus-${data.nome ? data.nome.replace(/\s+/g, '-').toLowerCase() : 'cliente'}-${Date.now()}.pdf`;
+            
+            // Criar link temporário para download
+            const tempLink = document.createElement('a');
+            tempLink.href = pdfUrl;
+            tempLink.download = filename;
+            tempLink.style.display = 'none';
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            document.body.removeChild(tempLink);
+            
+            // Atualizar botão de download
+            if (downloadLink) {
+                downloadLink.href = pdfUrl;
+                downloadLink.download = filename;
+                downloadLink.innerHTML = `
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                    </svg>
+                    Baixar Novamente
+                `;
+                downloadLink.style.pointerEvents = 'auto';
+            }
+            
+            console.log('✅ PDF gerado e baixado:', filename);
+        } else {
+            console.log('❌ Erro ao gerar PDF');
+            if (downloadLink) {
+                downloadLink.innerHTML = `
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                    </svg>
+                    Tentar Novamente
+                `;
+                downloadLink.style.pointerEvents = 'auto';
+            }
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao gerar PDF na hora:', error);
+        
+        if (downloadLink) {
+            downloadLink.innerHTML = `
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                </svg>
+                Erro - Tentar Novamente
+            `;
+            downloadLink.style.pointerEvents = 'auto';
+        }
+    }
+}
+
+// 📱 Função para enviar mensagem via WhatsApp usando WAHA
+async function sendWhatsAppMessage(submitData, pdfUrl) {
+    try {
+        console.log('📱 Enviando proposta via WhatsApp...');
+        
+        // Formatar dados da proposta para mensagem
+        const cliente = submitData.clienteNome || 'Cliente';
+        const projeto = submitData.tipoProjeto || 'Projeto';
+        const valor = submitData.valorTotal || 'N/A';
+        const dataEntrega = submitData.prazoEntrega || 'A definir';
+        
+        const mensagem = `🌟 *NOVA PROPOSTA GERADA - LOTUS*\n\n` +
+            `👤 *Cliente:* ${cliente}\n` +
+            `🏗️ *Projeto:* ${projeto}\n` +
+            `💰 *Valor:* R$ ${valor}\n` +
+            `📅 *Prazo:* ${dataEntrega}\n\n` +
+            `📄 *PDF da proposta foi gerado com sucesso!*\n` +
+            `🔗 Link: ${window.location.origin}\n\n` +
+            `✅ *Status:* Aguardando análise do cliente`;
+
+        // Enviar mensagem via WAHA API
+        const response = await fetch(`${WAHA_URL}/api/sendText`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Api-Key': WAHA_API_KEY,
+            },
+            body: JSON.stringify({
+                session: 'default',
+                chatId: `${WHATSAPP_PHONE}@c.us`,
+                text: mensagem
+            })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Proposta enviada via WhatsApp com sucesso:', result);
+            
+            // Mostrar notificação de sucesso
+            showNotification('📱 Proposta enviada via WhatsApp!', 'success');
+        } else {
+            console.error('❌ Erro ao enviar via WhatsApp:', response.status);
+            showNotification('❌ Erro ao enviar WhatsApp', 'error');
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro na comunicação com WAHA:', error);
+        showNotification('❌ Erro na comunicação com WhatsApp', 'error');
+    }
+}
+
+// 🔔 Função para mostrar notificações
+function showNotification(message, type = 'info') {
+    // Criar elemento de notificação
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3'};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 10000;
+        font-size: 14px;
+        max-width: 300px;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Animação de entrada
+    setTimeout(() => {
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Remover após 5 segundos
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+    }, 5000);
+}
+
+// 💾 Função para salvar PDF no servidor
+async function savePDFToServer(pdfBlob, filename, clientData) {
+    try {
+        console.log('💾 Salvando PDF no servidor...');
+        console.log('📄 Arquivo:', filename);
+        console.log('📊 Dados do cliente:', clientData);
+        
+        // Converter blob para base64
+        const base64PDF = await blobToBase64(pdfBlob);
+        
+        // Preparar dados para envio
+        const payload = {
+            pdfBase64: base64PDF,
+            filename: filename,
+            clientData: clientData
+        };
+        
+        // Enviar para o endpoint PHP
+        const response = await fetch('/save-pdf.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('✅ PDF salvo no servidor:', result);
+            
+            if (result.success) {
+                showNotification(`📁 PDF salvo: ${result.numeroProsposta}`, 'success');
+                console.log('📂 Pasta criada:', result.folderPath);
+                console.log('📄 Caminho do PDF:', result.pdfPath);
+            } else {
+                console.error('❌ Erro no servidor:', result.error);
+                showNotification('❌ Erro ao salvar PDF no servidor', 'error');
+            }
+        } else {
+            console.error('❌ Erro HTTP ao salvar PDF:', response.status);
+            showNotification('❌ Erro de conexão ao salvar PDF', 'error');
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao salvar PDF no servidor:', error);
+        showNotification('❌ Erro ao salvar PDF no servidor', 'error');
+    }
+}
+
+// 🔄 Função auxiliar para converter blob em base64
+function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            // Remove o prefixo 'data:application/pdf;base64,'
+            const base64 = reader.result.split(',')[1];
+            resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
 }

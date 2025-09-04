@@ -1,0 +1,1 @@
+2025/09/04 21:48:00 [error] 31#31: *3 open() "/var/www/lotus/favicon.ico" failed (2: No such file or directory), client: 192.168.65.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:8090", referrer: "http://localhost:8090/"
