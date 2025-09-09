@@ -24,13 +24,9 @@ export function Header() {
           />
         </div>
         
-        <h1 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] mb-3 tracking-wide">
+        <h1 className="text-2xl md:text-4xl font-bold text-[#1A1A1A] mb-3 tracking-wide">
           PROPOSTA DE COMPRA
         </h1>
-        
-        <p className="text-[#1A1A1A] text-lg md:text-xl font-medium opacity-80">
-          Complete suas informações para gerar sua proposta personalizada
-        </p>
       </div>
     </div>
   );
