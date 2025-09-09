@@ -105,9 +105,18 @@ export function PropostaForm() {
               currentStep={currentStep}
               totalSteps={totalSteps}
               isSubmitting={isSubmitting}
-              onNext={nextStep}
-              onPrev={prevStep}
-              onSubmit={submitForm}
+              onNext={() => {
+                console.log('🔄 Navigation onNext triggered');
+                nextStep();
+              }}
+              onPrev={() => {
+                console.log('🔄 Navigation onPrev triggered');
+                prevStep();
+              }}
+              onSubmit={() => {
+                console.log('🔄 Navigation onSubmit triggered');
+                submitForm();
+              }}
             />
           </div>
 

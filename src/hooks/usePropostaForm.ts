@@ -130,29 +130,40 @@ export function usePropostaForm() {
     console.log(`🔄 nextStep chamado: currentStep=${currentStep}`);
     console.log(`📊 Dados atuais do formulário:`, formData);
     
-    const isValid = validateCurrentStep();
-    console.log(`✅ Resultado validação: ${isValid}`);
-    
-    if (isValid) {
-      if (currentStep < totalSteps) {
-        const next = getNextValidStep();
-        console.log(`➡️ Avançando de ${currentStep} para ${next}`);
-        setCurrentStep(next);
+    try {
+      const isValid = validateCurrentStep();
+      console.log(`✅ Resultado validação: ${isValid}`);
+      
+      if (isValid) {
+        if (currentStep < totalSteps) {
+          const next = getNextValidStep();
+          console.log(`➡️ Avançando de ${currentStep} para ${next}`);
+          setTimeout(() => {
+            setCurrentStep(next);
+          }, 0);
+        } else {
+          console.log('📤 Último step - será enviado via submitForm');
+        }
       } else {
-        console.log('📤 Último step - será enviado via submitForm');
-        // submitForm será chamado separadamente quando necessário
+        console.log(`❌ Validação falhou no step ${currentStep}`);
+        console.log('📋 Dados que falharam na validação:', formData);
       }
-    } else {
-      console.log(`❌ Validação falhou no step ${currentStep}`);
-      console.log('📋 Dados que falharam na validação:', formData);
+    } catch (error) {
+      console.error('❌ Erro no nextStep:', error);
     }
   }, [currentStep, validateCurrentStep, getNextValidStep, totalSteps, formData]);
 
   const prevStep = useCallback(() => {
-    if (currentStep > 1) {
-      const prev = getPrevValidStep();
-      console.log(`⬅️ Voltando para step ${prev}`);
-      setCurrentStep(prev);
+    try {
+      if (currentStep > 1) {
+        const prev = getPrevValidStep();
+        console.log(`⬅️ Voltando para step ${prev}`);
+        setTimeout(() => {
+          setCurrentStep(prev);
+        }, 0);
+      }
+    } catch (error) {
+      console.error('❌ Erro no prevStep:', error);
     }
   }, [currentStep, getPrevValidStep]);
 
@@ -242,7 +253,12 @@ export function usePropostaForm() {
   useEffect(() => {
     if (currentStep === 3 && !shouldShowSpouseStep()) {
       console.log('🔄 Auto-pular step 3 (cônjuge) - avançando para step 4');
-      setCurrentStep(4);
+      // Safari precisa de setTimeout para state updates
+      const timer = setTimeout(() => {
+        setCurrentStep(4);
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
   }, [currentStep, shouldShowSpouseStep]);
 

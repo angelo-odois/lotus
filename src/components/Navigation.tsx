@@ -17,13 +17,29 @@ export function Navigation({
   onPrev,
   onSubmit
 }: NavigationProps) {
+  const handlePrevClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('🔘 Botão Prev clicado!');
+    onPrev();
+  };
+
+  const handleNextClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('🔘 Botão clicado!', currentStep === totalSteps ? 'ENVIAR' : 'NEXT');
+    if (currentStep === totalSteps && onSubmit) {
+      onSubmit();
+    } else {
+      onNext();
+    }
+  };
+
   return (
     <div className="flex justify-between items-center mt-8">
       <button
-        onClick={() => {
-          console.log('🔘 Botão Prev clicado!');
-          onPrev();
-        }}
+        type="button"
+        onClick={handlePrevClick}
         disabled={currentStep === 1}
         className={`
           flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors
@@ -42,14 +58,8 @@ export function Navigation({
       </div>
 
       <button
-        onClick={() => {
-          console.log('🔘 Botão clicado!', currentStep === totalSteps ? 'ENVIAR' : 'NEXT');
-          if (currentStep === totalSteps && onSubmit) {
-            onSubmit();
-          } else {
-            onNext();
-          }
-        }}
+        type="button"
+        onClick={handleNextClick}
         disabled={isSubmitting}
         className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 rounded-lg font-medium hover:from-yellow-500 hover:to-yellow-600 transition-colors disabled:opacity-50"
       >
