@@ -4,6 +4,7 @@ import { FormData } from '@/types/form';
 import { config } from '@/config';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 const whatsappConfig = {
   url: process.env.WAHA_URL || config.whatsapp.url,
@@ -11,6 +12,32 @@ const whatsappConfig = {
   phone: process.env.WHATSAPP_PHONE || config.whatsapp.phone,
   session: process.env.WHATSAPP_SESSION || config.whatsapp.session
 };
+
+function getChromePath(): string | undefined {
+  const homeDir = os.homedir();
+  const possiblePaths = [
+    // Puppeteer cache paths
+    path.join(homeDir, '.cache/puppeteer/chrome/mac_arm-140.0.7339.80/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing'),
+    path.join(homeDir, '.cache/puppeteer/chrome/mac_arm-121.0.6167.85/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing'),
+    // System Chrome paths
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    // Linux paths
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/google-chrome',
+    '/usr/bin/chromium-browser',
+    '/snap/bin/chromium'
+  ];
+
+  for (const chromePath of possiblePaths) {
+    if (fs.existsSync(chromePath)) {
+      console.log(`✅ Chrome encontrado em: ${chromePath}`);
+      return chromePath;
+    }
+  }
+
+  console.log('⚠️ Chrome não encontrado, usando padrão do Puppeteer');
+  return undefined;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -77,8 +104,10 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: Uploa
     })
   );
   
+  const chromePath = getChromePath();
   const browser = await puppeteer.launch({
     headless: true,
+    executablePath: chromePath,
     args: [
       '--no-sandbox', 
       '--disable-setuid-sandbox',
@@ -115,8 +144,8 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: Uploa
     
     console.log('🌐 Carregando HTML no navegador...');
     await page.setContent(html, { 
-      waitUntil: 'networkidle0',
-      timeout: 30000 
+      waitUntil: 'domcontentloaded',
+      timeout: 10000 
     });
     
     console.log('📄 Gerando PDF...');
@@ -152,8 +181,10 @@ async function convertPDFToImages(base64PDF: string): Promise<string[]> {
     const pdfData = base64PDF.startsWith('data:') ? base64PDF.split(',')[1] : base64PDF;
     // const pdfBuffer = Buffer.from(pdfData, 'base64');
     
+    const chromePath = getChromePath();
     const browser = await puppeteer.launch({
       headless: true,
+      executablePath: chromePath,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     
