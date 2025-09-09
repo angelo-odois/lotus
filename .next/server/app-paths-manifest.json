@@ -1,8 +1,4 @@
 {
-  "/api/download-pdf/[filename]/route": "app/api/download-pdf/[filename]/route.js",
   "/api/proposta/route": "app/api/proposta/route.js",
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/test-pdf/route": "app/api/test-pdf/route.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js",
   "/page": "app/page.js"
 }

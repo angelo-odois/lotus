@@ -85,9 +85,8 @@ export function usePropostaForm() {
     return Math.max(prevStep, 1) as Step;
   }, [currentStep, shouldShowSpouseStep]);
 
-  const validateCurrentStep = () => {
+  const validateCurrentStep = useCallback(() => {
     console.log(`🔍 Validando step ${currentStep}...`);
-    console.log(`📊 FormData completo:`, formData);
     
     const requiredFields: { [key in Step]: (keyof FormData)[] } = {
       1: ['nome', 'cpfCnpj', 'rgInsEst', 'orgaoExpedidor', 'sexo', 'dataNascimento', 
@@ -109,18 +108,9 @@ export function usePropostaForm() {
     
     for (const field of fieldsToValidate) {
       const value = formData[field];
-      // Validação mais robusta para Safari
-      let isEmpty = false;
+      const isEmpty = !value || value.toString().trim() === '';
       
-      if (value === null || value === undefined) {
-        isEmpty = true;
-      } else if (typeof value === 'string') {
-        isEmpty = value.trim() === '';
-      } else {
-        isEmpty = String(value).trim() === '';
-      }
-      
-      console.log(`📝 Campo ${field}: "${value}" (tipo: ${typeof value}) -> ${isEmpty ? 'VAZIO' : 'OK'}`);
+      console.log(`📝 Campo ${field}: "${value}" -> ${isEmpty ? 'VAZIO' : 'OK'}`);
       
       if (isEmpty) {
         emptyFields.push(field);
@@ -129,13 +119,12 @@ export function usePropostaForm() {
 
     if (emptyFields.length > 0) {
       console.log(`❌ Campos vazios: ${emptyFields.join(', ')}`);
-      alert(`⚠️ Preencha os seguintes campos: ${emptyFields.join(', ')}`);
       return false;
     }
 
     console.log(`✅ Todos os campos do step ${currentStep} estão preenchidos`);
     return true;
-  };
+  }, [currentStep, formData, shouldShowSpouseStep]);
 
   const nextStep = () => {
     console.log(`🔄 nextStep chamado: currentStep=${currentStep}`);
@@ -183,18 +172,14 @@ export function usePropostaForm() {
     }
   };
 
-  const goToStep = (step: Step) => {
-    try {
-      if (step === 3 && !shouldShowSpouseStep()) {
-        const adjustedStep = step < currentStep ? 2 : 4;
-        setCurrentStep(adjustedStep as Step);
-      } else {
-        setCurrentStep(step);
-      }
-    } catch (error) {
-      console.error('❌ Erro no goToStep:', error);
+  const goToStep = useCallback((step: Step) => {
+    if (step === 3 && !shouldShowSpouseStep()) {
+      const adjustedStep = step < currentStep ? 2 : 4;
+      setCurrentStep(adjustedStep as Step);
+    } else {
+      setCurrentStep(step);
     }
-  };
+  }, [currentStep, shouldShowSpouseStep]);
 
   const calculateFinancing = useCallback(() => {
     const valorImovel = parseFloat(formData.valorImovel.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
@@ -269,15 +254,18 @@ export function usePropostaForm() {
     setSuccessData({});
   }, []);
 
-  // Verificação manual do step 3 - removido useEffect automático para Safari
-  const checkAndSkipSpouseStep = () => {
+  // Auto-skip do step 3 (cônjuge) quando não aplicável
+  useEffect(() => {
     if (currentStep === 3 && !shouldShowSpouseStep()) {
-      console.log('🔄 Pulando step 3 (cônjuge) - avançando para step 4');
-      setCurrentStep(4);
-      return true;
+      console.log('🔄 Auto-pular step 3 (cônjuge) - avançando para step 4');
+      // Safari precisa de setTimeout para state updates
+      const timer = setTimeout(() => {
+        setCurrentStep(4);
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
-    return false;
-  };
+  }, [currentStep, shouldShowSpouseStep]);
 
   return {
     // Estado

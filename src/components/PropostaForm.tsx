@@ -50,8 +50,9 @@ export function PropostaForm() {
           console.log('📄 Renderizando StepConjuge');
           return <StepConjuge formData={formData} updateFormData={updateFormData} />;
         } else {
-          console.log('⏭️ Pulando step cônjuge');
-          return null;
+          console.log('⏭️ Step cônjuge pulado - renderizando step 4');
+          // Em vez de null, renderizar o próximo step
+          return <StepEmpreendimento formData={formData} updateFormData={updateFormData} />;
         }
       case 4:
         console.log('📄 Renderizando StepEmpreendimento');
@@ -105,18 +106,9 @@ export function PropostaForm() {
               currentStep={currentStep}
               totalSteps={totalSteps}
               isSubmitting={isSubmitting}
-              onNext={() => {
-                console.log('🔄 Navigation onNext triggered');
-                nextStep();
-              }}
-              onPrev={() => {
-                console.log('🔄 Navigation onPrev triggered');
-                prevStep();
-              }}
-              onSubmit={() => {
-                console.log('🔄 Navigation onSubmit triggered');
-                submitForm();
-              }}
+              onNext={nextStep}
+              onPrev={prevStep}
+              onSubmit={submitForm}
             />
           </div>
 

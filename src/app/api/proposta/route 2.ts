@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import puppeteer from 'puppeteer';
 import { FormData } from '@/types/form';
 import { config } from '@/config';
 import fs from 'fs';
@@ -12,93 +13,7 @@ const whatsappConfig = {
   session: process.env.WHATSAPP_SESSION || config.whatsapp.session
 };
 
-async function getPuppeteerInstance() {
-  const isDocker = fs.existsSync('/.dockerenv');
-  const isVercel = process.env.VERCEL || process.env.VERCEL_ENV || process.env.AWS_LAMBDA_FUNCTION_NAME;
-  
-  // Docker environment (Coolify)
-  if (isDocker) {
-    console.log('🐳 Detectado ambiente Docker - usando Chromium do sistema');
-    
-    const puppeteer = await import('puppeteer');
-    
-    // Caminhos possíveis do Chromium no Docker
-    const possibleChromePaths = [
-      process.env.PUPPETEER_EXECUTABLE_PATH,
-      '/usr/bin/chromium',
-      '/usr/bin/chromium-browser', 
-      '/usr/bin/google-chrome-stable',
-      '/usr/bin/google-chrome'
-    ].filter(Boolean);
-    
-    let chromePath = possibleChromePaths[0];
-    
-    // Verificar qual caminho existe
-    for (const path of possibleChromePaths) {
-      if (path && fs.existsSync(path)) {
-        chromePath = path;
-        console.log(`🔍 Chromium encontrado em: ${chromePath}`);
-        break;
-      }
-    }
-    
-    return await puppeteer.default.launch({
-      executablePath: chromePath,
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding',
-        '--disable-features=VizDisplayCompositor'
-      ]
-    });
-  }
-  
-  // Vercel serverless environment
-  if (isVercel) {
-    console.log('🌐 Detectado ambiente serverless (Vercel/AWS) - usando puppeteer-core + chromium');
-    
-    try {
-      const puppeteerCore = await import('puppeteer-core');
-      const chromium = await import('@sparticuz/chromium');
-      
-      const browser = await puppeteerCore.default.launch({
-        args: [
-          ...chromium.default.args,
-          '--hide-scrollbars',
-          '--disable-web-security'
-        ],
-        defaultViewport: chromium.default.defaultViewport,
-        executablePath: await chromium.default.executablePath(),
-        headless: chromium.default.headless,
-        ignoreHTTPSErrors: true,
-      });
-      
-      return browser;
-    } catch (error) {
-      console.error('❌ Erro ao carregar puppeteer-core + chromium:', error);
-      throw new Error(`Falha ao inicializar browser no ambiente serverless: ${error}`);
-    }
-  }
-  
-  // Ambiente local - usar puppeteer normal
-  console.log('🏠 Ambiente local - usando puppeteer padrão');
-  const puppeteer = await import('puppeteer');
-  
-  return await getBrowserConfigLocal(puppeteer.default);
-}
-
-async function getBrowserConfigLocal(puppeteer: any) {
-
-  // Ambiente local - usar Chrome instalado
+function getChromePath(): string | undefined {
   const homeDir = os.homedir();
   const possiblePaths = [
     // Puppeteer cache paths
@@ -116,37 +31,12 @@ async function getBrowserConfigLocal(puppeteer: any) {
   for (const chromePath of possiblePaths) {
     if (fs.existsSync(chromePath)) {
       console.log(`✅ Chrome encontrado em: ${chromePath}`);
-      return {
-        executablePath: chromePath,
-        args: [
-          '--no-sandbox', 
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--single-process',
-          '--disable-gpu'
-        ],
-        headless: true
-      };
+      return chromePath;
     }
   }
 
   console.log('⚠️ Chrome não encontrado, usando padrão do Puppeteer');
-  return {
-    headless: true,
-    args: [
-      '--no-sandbox', 
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process',
-      '--disable-gpu'
-    ]
-  };
+  return undefined;
 }
 
 export async function POST(request: NextRequest) {
@@ -214,7 +104,21 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: Uploa
     })
   );
   
-  const browser = await getPuppeteerInstance();
+  const chromePath = getChromePath();
+  const browser = await puppeteer.launch({
+    headless: true,
+    executablePath: chromePath,
+    args: [
+      '--no-sandbox', 
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-gpu'
+    ]
+  });
   
   try {
     const page = await browser.newPage();
@@ -277,7 +181,12 @@ async function convertPDFToImages(base64PDF: string): Promise<string[]> {
     const pdfData = base64PDF.startsWith('data:') ? base64PDF.split(',')[1] : base64PDF;
     // const pdfBuffer = Buffer.from(pdfData, 'base64');
     
-    const browser = await getPuppeteerInstance();
+    const chromePath = getChromePath();
+    const browser = await puppeteer.launch({
+      headless: true,
+      executablePath: chromePath,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
     
     const page = await browser.newPage();
     await page.setViewport({ width: 1200, height: 1600 });
@@ -545,11 +454,8 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
     }
     
     .document-item {
-      margin-bottom: 20px;
+      margin-bottom: 40px;
       page-break-inside: avoid;
-    }
-    
-    .document-item:not(:first-child) {
       page-break-before: always;
     }
     
@@ -562,12 +468,11 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
       max-width: 100%;
       height: auto;
       border: none;
-      margin: 0;
-      display: block;
+      margin: 10px 0;
     }
     
     .document-page {
-      margin-bottom: 15px;
+      margin-bottom: 25px;
       page-break-inside: avoid;
     }
     
@@ -786,28 +691,12 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
         </div>
       </div>
 
-      <div class="date-footer">
-        Brasília-DF, ${currentDate.toLocaleDateString('pt-BR')}
-      </div>
-
-      <div class="signatures">
-        <div class="signature-row">
-          <div class="signature-cell">
-            <div class="signature-line"></div>
-            <div class="signature-label">Proponente(s) Comprador(es)</div>
-          </div>
-          <div class="signature-cell">
-            <div class="signature-line"></div>
-            <div class="signature-label">CORRETOR RESPONSÁVEL</div>
-          </div>
-        </div>
-      </div>
-
       ${uploadedFiles && uploadedFiles.length > 0 ? `
       <!-- Documentos Anexados -->
       <div class="document-section">
         ${uploadedFiles.map((doc: UploadedFile) => `
           <div class="document-item">
+            <!-- Apenas o conteúdo do documento, sem bordas ou headers -->
             <div class="document-content">
               ${(() => {
                 // Se for imagem, mostrar imagem em tamanho grande
@@ -843,6 +732,23 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
         `).join('')}
       </div>
       ` : ''}
+
+      <div class="date-footer">
+        Brasília-DF, ${currentDate.toLocaleDateString('pt-BR')}
+      </div>
+
+      <div class="signatures">
+        <div class="signature-row">
+          <div class="signature-cell">
+            <div class="signature-line"></div>
+            <div class="signature-label">Proponente(s) Comprador(es)</div>
+          </div>
+          <div class="signature-cell">
+            <div class="signature-line"></div>
+            <div class="signature-label">CORRETOR RESPONSÁVEL</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </body>

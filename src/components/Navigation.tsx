@@ -17,21 +17,25 @@ export function Navigation({
   onPrev,
   onSubmit
 }: NavigationProps) {
-  const handlePrevClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handlePrevClick = () => {
     console.log('🔘 Botão Prev clicado!');
-    onPrev();
+    try {
+      onPrev();
+    } catch (error) {
+      console.error('❌ Erro no Prev:', error);
+    }
   };
 
-  const handleNextClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleNextClick = () => {
     console.log('🔘 Botão clicado!', currentStep === totalSteps ? 'ENVIAR' : 'NEXT');
-    if (currentStep === totalSteps && onSubmit) {
-      onSubmit();
-    } else {
-      onNext();
+    try {
+      if (currentStep === totalSteps && onSubmit) {
+        onSubmit();
+      } else {
+        onNext();
+      }
+    } catch (error) {
+      console.error('❌ Erro no Next:', error);
     }
   };
 
