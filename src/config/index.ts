@@ -15,8 +15,8 @@ export const config = {
 
   steps: [
     'Dados Pessoais',
-    'Endereço', 
     'Cônjuge',
+    'Endereço', 
     'Empreendimento',
     'Unidade',
     'Documentos',

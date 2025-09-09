@@ -28,10 +28,10 @@ export async function POST(request: NextRequest) {
     
     // Salvar PDF
     const filename = `proposta-lotus-${formData.nome?.replace(/\s+/g, '-').toLowerCase() || 'cliente'}-${Date.now()}.pdf`;
-    const filepath = await savePDF(pdfBuffer, filename, formData);
+    const filepath = await savePDF(pdfBuffer, filename);
     
     // Enviar via WhatsApp
-    await sendWhatsAppNotification(formData, filepath, pdfBuffer);
+    await sendWhatsAppNotification(formData, filepath);
     
     return NextResponse.json({
       success: true,
@@ -49,12 +49,20 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: any[] = []): Promise<Buffer> {
+interface UploadedFile {
+  name: string;
+  type: string;
+  base64?: string;
+  category?: string;
+  pdfImages?: string[];
+}
+
+async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: UploadedFile[] = []): Promise<Buffer> {
   console.log('🔄 Iniciando Puppeteer...');
   
   // Processar PDFs anexados para converter em imagens
   const processedFiles = await Promise.all(
-    uploadedFiles.map(async (doc: any) => {
+    uploadedFiles.map(async (doc: UploadedFile) => {
       if (doc.type && doc.type.includes('pdf') && doc.base64) {
         console.log(`🔄 Convertendo PDF anexado: ${doc.name}`);
         try {
@@ -125,7 +133,7 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: any[]
     });
 
     console.log('✅ PDF gerado, tamanho:', pdfBuffer.length, 'bytes');
-    return pdfBuffer;
+    return Buffer.from(pdfBuffer);
     
   } catch (error) {
     console.error('❌ Erro no Puppeteer:', error);
@@ -135,20 +143,6 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: any[]
   }
 }
 
-function getCategoryLabel(category: string): string {
-  const categoryLabels: Record<string, string> = {
-    'rg': 'RG',
-    'cpf': 'CPF',
-    'residencia': 'Comp. Residência',
-    'renda': 'Comp. Renda',
-    'casamento': 'Cert. Casamento',
-    'rg-conjuge': 'RG Cônjuge',
-    'cpf-conjuge': 'CPF Cônjuge',
-    'renda-conjuge': 'Renda Cônjuge',
-    'outros': 'Outros'
-  };
-  return categoryLabels[category] || 'Documento';
-}
 
 async function convertPDFToImages(base64PDF: string): Promise<string[]> {
   try {
@@ -156,7 +150,7 @@ async function convertPDFToImages(base64PDF: string): Promise<string[]> {
     
     // Remover prefixo data: se existir
     const pdfData = base64PDF.startsWith('data:') ? base64PDF.split(',')[1] : base64PDF;
-    const pdfBuffer = Buffer.from(pdfData, 'base64');
+    // const pdfBuffer = Buffer.from(pdfData, 'base64');
     
     const browser = await puppeteer.launch({
       headless: true,
@@ -249,7 +243,7 @@ async function convertPDFToImages(base64PDF: string): Promise<string[]> {
     `;
     
     await page.setContent(pdfHTML);
-    await page.waitForFunction(() => window.pdfRendered, { timeout: 30000 });
+    await page.waitForFunction(() => (window as unknown as { pdfRendered: boolean }).pdfRendered, { timeout: 30000 });
     
     // Capturar como imagem
     const screenshot = await page.screenshot({
@@ -260,7 +254,7 @@ async function convertPDFToImages(base64PDF: string): Promise<string[]> {
     await browser.close();
     
     // Converter screenshot para base64
-    const base64Image = `data:image/png;base64,${screenshot.toString('base64')}`;
+    const base64Image = `data:image/png;base64,${Buffer.from(screenshot).toString('base64')}`;
     
     console.log('✅ PDF convertido para imagem');
     return [base64Image];
@@ -271,7 +265,7 @@ async function convertPDFToImages(base64PDF: string): Promise<string[]> {
   }
 }
 
-function generatePropostaHTML(formData: FormData, uploadedFiles: any[] = []): string {
+function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] = []): string {
   const currentDate = new Date();
   const numeroProsposta = `LP${currentDate.getFullYear()}${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}${String(currentDate.getHours()).padStart(2, '0')}${String(currentDate.getMinutes()).padStart(2, '0')}`;
   
@@ -669,7 +663,7 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: any[] = []): st
       ${uploadedFiles && uploadedFiles.length > 0 ? `
       <!-- Documentos Anexados -->
       <div class="document-section">
-        ${uploadedFiles.map((doc: any) => `
+        ${uploadedFiles.map((doc: UploadedFile) => `
           <div class="document-item">
             <!-- Apenas o conteúdo do documento, sem bordas ou headers -->
             <div class="document-content">
@@ -683,7 +677,7 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: any[] = []): st
                 if (doc.type && doc.type.includes('pdf') && doc.pdfImages && doc.pdfImages.length > 0) {
                   return doc.pdfImages.map((pageImage: string, pageIndex: number) => `
                     <div class="document-page">
-                      <div class="page-number">Página ${pageIndex + 1} de ${doc.pdfImages.length}</div>
+                      <div class="page-number">Página ${pageIndex + 1} de ${doc.pdfImages?.length || 0}</div>
                       <img src="${pageImage}" alt="${doc.name} - Página ${pageIndex + 1}" class="document-image">
                     </div>
                   `).join('');
@@ -730,7 +724,7 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: any[] = []): st
 </html>`;
 }
 
-async function savePDF(pdfBuffer: Buffer, filename: string, clientData: FormData): Promise<string> {
+async function savePDF(pdfBuffer: Buffer, filename: string): Promise<string> {
   const proposalsDir = path.join(process.cwd(), 'propostas');
   
   // Criar diretório se não existir
@@ -745,7 +739,7 @@ async function savePDF(pdfBuffer: Buffer, filename: string, clientData: FormData
   return filepath;
 }
 
-async function sendWhatsAppNotification(formData: FormData, filepath: string, pdfBuffer: Buffer) {
+async function sendWhatsAppNotification(formData: FormData, filepath: string) {
   try {
     const cliente = formData.nome || 'Cliente';
     const empreendimento = formData.empreendimento || 'Empreendimento';

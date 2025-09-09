@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
 
 export async function GET() {
@@ -92,7 +92,7 @@ export async function GET() {
     console.log('✅ PDF teste gerado, tamanho:', pdfBuffer.length, 'bytes');
     
     // Retornar PDF para download direto
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(Buffer.from(pdfBuffer), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="teste-pdf-${Date.now()}.pdf"`

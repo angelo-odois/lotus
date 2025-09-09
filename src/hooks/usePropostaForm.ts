@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react';
 import { FormData, Step, FileUpload } from '@/types/form';
-import { config } from '@/config';
 
 const initialFormData: FormData = {
   // Dados Pessoais
