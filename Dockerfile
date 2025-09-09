@@ -29,13 +29,16 @@ WORKDIR /app
 
 # Copiar package.json e instalar dependências
 COPY package*.json ./
-RUN npm install
+RUN npm install && npm cache clean --force
 
 # Copiar código
 COPY . .
 
-# Fazer build
-RUN npm run build:docker
+# Debug: listar arquivos
+RUN ls -la
+
+# Fazer build com log detalhado
+RUN npm run build:docker || (echo "Build falhou, listando arquivos:" && ls -la .next && exit 1)
 
 # Criar diretório para PDFs
 RUN mkdir -p /app/propostas && chmod 755 /app/propostas

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "NODE_ENV=production next build --turbopack",
-    "build:docker": "NODE_ENV=production next build",
+    "build:docker": "next build",
     "build:prod": "NODE_ENV=production REACT_EDITOR='' next build",
     "start": "NODE_ENV=production next start",
     "lint": "eslint"
