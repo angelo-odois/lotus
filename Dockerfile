@@ -1,7 +1,7 @@
-# Multi-stage build para Next.js
-FROM node:18-slim AS base
+# Dockerfile simplificado para Coolify
+FROM node:18-slim
 
-# Instalar dependências do sistema
+# Instalar dependências necessárias
 RUN apt-get update && apt-get install -y \
     chromium \
     chromium-sandbox \
@@ -18,43 +18,24 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
+# Configurar variáveis de ambiente
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV REACT_EDITOR=""
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
 WORKDIR /app
 
-# Instalar dependências para build (incluindo devDependencies)
-FROM base AS builder
+# Copiar package.json e instalar dependências
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
-# Copiar código e fazer build
+# Copiar código
 COPY . .
 
-# Configurar variáveis para build
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV REACT_EDITOR=""
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-
+# Fazer build
 RUN npm run build:docker
-
-# Estágio de produção
-FROM base AS runner
-
-# Configurar variáveis de produção
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV REACT_EDITOR=""
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-
-# Instalar apenas dependências de produção
-COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
-
-# Copiar arquivos de build
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
 
 # Criar diretório para PDFs
 RUN mkdir -p /app/propostas && chmod 755 /app/propostas
@@ -63,4 +44,4 @@ RUN mkdir -p /app/propostas && chmod 755 /app/propostas
 EXPOSE 3000
 
 # Comando para produção
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
