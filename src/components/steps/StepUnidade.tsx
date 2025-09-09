@@ -55,7 +55,7 @@ export function StepUnidade({ formData, updateFormData, calculateFinancing }: St
                 value={formData.valorImovel}
                 onChange={(e) => updateFormData('valorImovel', formatCurrency(e.target.value))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                placeholder="450.000,00"
+                placeholder="4500.000,00"
               />
             </div>
 
@@ -67,7 +67,7 @@ export function StepUnidade({ formData, updateFormData, calculateFinancing }: St
                 value={formData.valorEntrada}
                 onChange={(e) => updateFormData('valorEntrada', formatCurrency(e.target.value))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                placeholder="90.000,00"
+                placeholder="900.000,00"
               />
             </div>
 
