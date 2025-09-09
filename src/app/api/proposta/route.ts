@@ -13,7 +13,42 @@ const whatsappConfig = {
   session: process.env.WHATSAPP_SESSION || config.whatsapp.session
 };
 
-function getChromePath(): string | undefined {
+async function getBrowserConfig() {
+  const isVercel = process.env.VERCEL || process.env.VERCEL_ENV || process.env.AWS_LAMBDA_FUNCTION_NAME;
+  
+  if (isVercel) {
+    console.log('🌐 Detectado ambiente serverless (Vercel/AWS)');
+    
+    try {
+      // Dynamic import do @sparticuz/chromium para ambiente serverless
+      const chromium = await import('@sparticuz/chromium');
+      
+      return {
+        executablePath: await chromium.default.executablePath(),
+        args: [
+          ...chromium.default.args,
+          '--hide-scrollbars',
+          '--disable-web-security'
+        ],
+        headless: chromium.default.headless
+      };
+    } catch (error) {
+      console.error('❌ Erro ao carregar @sparticuz/chromium:', error);
+      // Fallback para args básicos de serverless
+      return {
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--single-process',
+          '--no-zygote'
+        ]
+      };
+    }
+  }
+
+  // Ambiente local - usar Chrome instalado
   const homeDir = os.homedir();
   const possiblePaths = [
     // Puppeteer cache paths
@@ -31,12 +66,37 @@ function getChromePath(): string | undefined {
   for (const chromePath of possiblePaths) {
     if (fs.existsSync(chromePath)) {
       console.log(`✅ Chrome encontrado em: ${chromePath}`);
-      return chromePath;
+      return {
+        executablePath: chromePath,
+        args: [
+          '--no-sandbox', 
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process',
+          '--disable-gpu'
+        ],
+        headless: true
+      };
     }
   }
 
   console.log('⚠️ Chrome não encontrado, usando padrão do Puppeteer');
-  return undefined;
+  return {
+    headless: true,
+    args: [
+      '--no-sandbox', 
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-gpu'
+    ]
+  };
 }
 
 export async function POST(request: NextRequest) {
@@ -104,21 +164,8 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: Uploa
     })
   );
   
-  const chromePath = getChromePath();
-  const browser = await puppeteer.launch({
-    headless: true,
-    executablePath: chromePath,
-    args: [
-      '--no-sandbox', 
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process',
-      '--disable-gpu'
-    ]
-  });
+  const browserConfig = await getBrowserConfig();
+  const browser = await puppeteer.launch(browserConfig);
   
   try {
     const page = await browser.newPage();
@@ -181,12 +228,8 @@ async function convertPDFToImages(base64PDF: string): Promise<string[]> {
     const pdfData = base64PDF.startsWith('data:') ? base64PDF.split(',')[1] : base64PDF;
     // const pdfBuffer = Buffer.from(pdfData, 'base64');
     
-    const chromePath = getChromePath();
-    const browser = await puppeteer.launch({
-      headless: true,
-      executablePath: chromePath,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+    const browserConfig = await getBrowserConfig();
+    const browser = await puppeteer.launch(browserConfig);
     
     const page = await browser.newPage();
     await page.setViewport({ width: 1200, height: 1600 });

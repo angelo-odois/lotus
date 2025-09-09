@@ -1,36 +1,151 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lotus - Sistema de Propostas
 
-## Getting Started
+Sistema de geração de propostas imobiliárias com integração WhatsApp.
 
-First, run the development server:
+## 🚀 Funcionalidades
+
+- ✅ Formulário multi-step responsivo
+- ✅ Geração automática de PDF com Puppeteer  
+- ✅ Integração com WhatsApp via WAHA API
+- ✅ Upload de documentos com conversão de PDF para imagem
+- ✅ Validação de formulários com Zod
+- ✅ Compatibilidade total com Safari
+
+## 🛠 Tecnologias
+
+- **Next.js 15** - Framework React
+- **TypeScript** - Tipagem estática
+- **Tailwind CSS** - Estilização
+- **Puppeteer** - Geração de PDF
+- **@sparticuz/chromium** - Chrome para ambientes serverless
+- **React Hook Form + Zod** - Validação de formulários
+- **Lucide React** - Ícones
+
+## 📦 Instalação
 
 ```bash
+# Clone o repositório
+git clone <repository-url>
+cd lotus
+
+# Instale as dependências
+npm install
+
+# Configure as variáveis de ambiente
+cp .env.example .env.local
+
+# Execute em desenvolvimento
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🌐 Deploy na Vercel
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1. Configuração das Variáveis de Ambiente
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Na Vercel, configure as seguintes variáveis:
 
-## Learn More
+```
+WAHA_URL=https://waha.nexuso2.com
+WAHA_API_KEY=your-api-key-here
+WHATSAPP_PHONE=5561999999999  
+WHATSAPP_SESSION=lotus
+VERCEL_ENV=production
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Deploy Automático
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Via Vercel CLI
+npm i -g vercel
+vercel --prod
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Ou conecte o repositório no dashboard da Vercel
+```
 
-## Deploy on Vercel
+## 🔧 Configuração Local
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Chrome/Chromium para Puppeteer
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+# Instalar Chrome para Puppeteer (desenvolvimento local)
+npx puppeteer browsers install chrome
+```
+
+### WhatsApp API (WAHA)
+
+Configure uma instância do WAHA API e atualize as variáveis no `.env.local`:
+
+```env
+WAHA_URL=https://sua-instancia-waha.com
+WAHA_API_KEY=sua-api-key
+WHATSAPP_PHONE=5561999999999
+WHATSAPP_SESSION=lotus
+```
+
+## 📁 Estrutura do Projeto
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   ├── proposta/         # API de geração de PDF
+│   │   ├── test-pdf/         # Teste de PDF
+│   │   └── download-pdf/     # Download de PDFs
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   ├── steps/                # Steps do formulário
+│   ├── PropostaForm.tsx      # Formulário principal
+│   ├── Navigation.tsx        # Navegação entre steps
+│   └── ...
+├── hooks/
+│   └── usePropostaForm.ts    # Hook do formulário
+├── types/
+│   └── form.ts               # Tipos TypeScript
+└── config/
+    └── index.ts              # Configurações
+```
+
+## 🐛 Problemas Conhecidos e Soluções
+
+### Safari - Navegação entre Steps
+
+✅ **Resolvido** - Event handlers melhorados com `preventDefault()` e `stopPropagation()`
+
+### Vercel - Puppeteer Chrome
+
+✅ **Resolvido** - Usando `@sparticuz/chromium` para ambientes serverless
+
+### Timeout na Geração de PDF
+
+✅ **Resolvido** - Configurado `waitUntil: 'domcontentloaded'` e timeout de 10s
+
+## 📱 WhatsApp Integration
+
+O sistema envia automaticamente:
+
+1. **Mensagem de confirmação** com detalhes da proposta
+2. **PDF da proposta** como anexo
+3. **Fallback** em caso de erro no envio do PDF
+
+## 🔄 Fluxo do Sistema
+
+1. **Preenchimento** - Cliente preenche formulário multi-step
+2. **Validação** - Campos obrigatórios validados por step  
+3. **Geração** - PDF gerado via Puppeteer com dados + documentos
+4. **Armazenamento** - PDF salvo na pasta `/propostas/`
+5. **Envio** - WhatsApp enviado automaticamente via WAHA API
+
+## 🏗 Scripts Disponíveis
+
+```bash
+npm run dev      # Desenvolvimento com Turbopack
+npm run build    # Build de produção
+npm run start    # Servidor de produção  
+npm run lint     # ESLint
+```
+
+## 📝 Licença
+
+Projeto privado - Lotus Cidade
