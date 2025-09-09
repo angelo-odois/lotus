@@ -13,8 +13,7 @@ export function StepFinalizacao({ formData, uploadedFiles, shouldShowSpouseStep 
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Finalização</h2>
-        <p className="text-gray-600">Revise os dados da sua proposta antes de enviar</p>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">Finalização</h2>
       </div>
 
       <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">

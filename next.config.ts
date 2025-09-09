@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+
 const nextConfig: NextConfig = {
   output: 'standalone',
   eslint: {
@@ -7,9 +8,29 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // devtools: {
-  //   enabled: false
-  // },
+  // Desabilitar devtools em produção
+  productionBrowserSourceMaps: false,
+  // Configuração de minificação para remover devtools
+  swcMinify: true,
+  // Configurações de ambiente
+  env: {
+    REACT_EDITOR: '',
+  },
+  // Configuração do webpack para produção
+  webpack: (config, { dev, isServer }) => {
+    if (!dev && !isServer) {
+      // Desabilitar React DevTools em produção
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'react-dom$': 'react-dom/profiling',
+        'scheduler/tracing': 'scheduler/tracing-profiling'
+      };
+      
+      // Remover console.log e devtools em produção
+      config.optimization.minimize = true;
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

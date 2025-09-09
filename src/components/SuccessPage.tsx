@@ -1,4 +1,4 @@
-via'use client';
+'use client';
 
 import { CheckCircle, Download, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
@@ -89,9 +89,7 @@ export function SuccessPage({ customerName, pdfFilename, onNewProposal }: Succes
                 </div>
               </div>
             )}
-            <div className="bg-gray-50 rounded-lg p-6 mb-8">
-              <h4 className="font-semibold text-gray-900 mb-3">📋 Sua proposta está em análise.</h4>
-            </div> */}
+          </div>
 
           {/* Footer */}
           <footer className="bg-[#1A1A1A] text-white p-8 text-center">

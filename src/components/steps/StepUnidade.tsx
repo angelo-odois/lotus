@@ -26,8 +26,7 @@ export function StepUnidade({ formData, updateFormData, calculateFinancing }: St
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Informe a unidade e valores do investimento</h2>
-{/*         <p className="text-gray-600">Informe a unidade e valores do investimento</p> */}
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">Unidade e Valores</h2>
       </div>
 
       <div className="space-y-6">

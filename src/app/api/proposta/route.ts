@@ -12,7 +12,7 @@ const whatsappConfig = {
   session: process.env.WHATSAPP_SESSION || config.whatsapp.session
 };
 
-async function getPuppeteerInstance() {
+async function getPuppeteerInstance(): Promise<any> {
   const isDocker = fs.existsSync('/.dockerenv');
   const isVercel = process.env.VERCEL || process.env.VERCEL_ENV || process.env.AWS_LAMBDA_FUNCTION_NAME;
   
@@ -76,10 +76,8 @@ async function getPuppeteerInstance() {
           '--hide-scrollbars',
           '--disable-web-security'
         ],
-        defaultViewport: chromium.default.defaultViewport,
         executablePath: await chromium.default.executablePath(),
-        headless: chromium.default.headless,
-        ignoreHTTPSErrors: true,
+        headless: true,
       });
       
       return browser;
@@ -93,11 +91,10 @@ async function getPuppeteerInstance() {
   console.log('🏠 Ambiente local - usando puppeteer padrão');
   const puppeteer = await import('puppeteer');
   
-  return await getBrowserConfigLocal(puppeteer.default);
+  return await puppeteer.default.launch(await getBrowserConfigLocal());
 }
 
-async function getBrowserConfigLocal(puppeteer: any) {
-
+async function getBrowserConfigLocal(): Promise<any> {
   // Ambiente local - usar Chrome instalado
   const homeDir = os.homedir();
   const possiblePaths = [
@@ -150,6 +147,8 @@ async function getBrowserConfigLocal(puppeteer: any) {
 }
 
 export async function POST(request: NextRequest) {
+  console.log('🚀 Iniciando processamento da proposta...');
+  
   try {
     const body = await request.json();
     const formData: FormData = body;
@@ -170,6 +169,8 @@ export async function POST(request: NextRequest) {
     // Enviar via WhatsApp
     await sendWhatsAppNotification(formData, filepath);
     
+    console.log('✅ Proposta processada com sucesso');
+    
     return NextResponse.json({
       success: true,
       message: 'Proposta gerada e enviada com sucesso',
@@ -179,8 +180,18 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Erro na API:', error);
+    
+    // Log mais detalhado do erro
+    if (error instanceof Error) {
+      console.error('❌ Stack trace:', error.stack);
+    }
+    
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Erro interno' },
+      { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Erro interno do servidor',
+        timestamp: new Date().toISOString()
+      },
       { status: 500 }
     );
   }
@@ -270,14 +281,14 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: Uploa
 
 
 async function convertPDFToImages(base64PDF: string): Promise<string[]> {
+  let browser: any = null;
   try {
     console.log('🔄 Convertendo PDF para imagens...');
     
     // Remover prefixo data: se existir
     const pdfData = base64PDF.startsWith('data:') ? base64PDF.split(',')[1] : base64PDF;
-    // const pdfBuffer = Buffer.from(pdfData, 'base64');
     
-    const browser = await getPuppeteerInstance();
+    browser = await getPuppeteerInstance();
     
     const page = await browser.newPage();
     await page.setViewport({ width: 1200, height: 1600 });
@@ -373,7 +384,9 @@ async function convertPDFToImages(base64PDF: string): Promise<string[]> {
       fullPage: true
     });
     
-    await browser.close();
+    if (browser) {
+      await browser.close();
+    }
     
     // Converter screenshot para base64
     const base64Image = `data:image/png;base64,${Buffer.from(screenshot).toString('base64')}`;
@@ -383,6 +396,13 @@ async function convertPDFToImages(base64PDF: string): Promise<string[]> {
     
   } catch (error) {
     console.error('❌ Erro ao converter PDF:', error);
+    if (browser) {
+      try {
+        await browser.close();
+      } catch (closeError) {
+        console.error('❌ Erro ao fechar browser:', closeError);
+      }
+    }
     return [];
   }
 }
@@ -740,7 +760,6 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
         </table>
       </div>
       ` : ''}
-      </div>
 
       <!-- Dados do Imóvel -->
       <div class="section">
