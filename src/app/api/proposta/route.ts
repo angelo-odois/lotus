@@ -30,7 +30,7 @@ async function getBrowserConfig() {
           '--hide-scrollbars',
           '--disable-web-security'
         ],
-        headless: chromium.default.headless
+        headless: true
       };
     } catch (error) {
       console.error('❌ Erro ao carregar @sparticuz/chromium:', error);
