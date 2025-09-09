@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { FormData, Step, FileUpload } from '@/types/form';
 
 const initialFormData: FormData = {
@@ -79,8 +79,8 @@ export function usePropostaForm() {
 
   const getPrevValidStep = useCallback((): Step => {
     let prevStep = (currentStep - 1) as Step;
-    if (prevStep === 3 && !shouldShowSpouseStep()) {
-      prevStep = 2;
+    if (currentStep === 4 && !shouldShowSpouseStep()) {
+      prevStep = 2; // Pular step 3 quando voltar do 4
     }
     return Math.max(prevStep, 1) as Step;
   }, [currentStep, shouldShowSpouseStep]);
@@ -237,6 +237,14 @@ export function usePropostaForm() {
     setIsSuccess(false);
     setSuccessData({});
   }, []);
+
+  // Auto-skip do step 3 (cônjuge) quando não aplicável
+  useEffect(() => {
+    if (currentStep === 3 && !shouldShowSpouseStep()) {
+      console.log('🔄 Auto-pular step 3 (cônjuge) - avançando para step 4');
+      setCurrentStep(4);
+    }
+  }, [currentStep, shouldShowSpouseStep]);
 
   return {
     // Estado
