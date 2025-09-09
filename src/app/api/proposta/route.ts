@@ -22,8 +22,28 @@ async function getPuppeteerInstance() {
     
     const puppeteer = await import('puppeteer');
     
+    // Caminhos possíveis do Chromium no Docker
+    const possibleChromePaths = [
+      process.env.PUPPETEER_EXECUTABLE_PATH,
+      '/usr/bin/chromium',
+      '/usr/bin/chromium-browser', 
+      '/usr/bin/google-chrome-stable',
+      '/usr/bin/google-chrome'
+    ].filter(Boolean);
+    
+    let chromePath = possibleChromePaths[0];
+    
+    // Verificar qual caminho existe
+    for (const path of possibleChromePaths) {
+      if (path && fs.existsSync(path)) {
+        chromePath = path;
+        console.log(`🔍 Chromium encontrado em: ${chromePath}`);
+        break;
+      }
+    }
+    
     return await puppeteer.default.launch({
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
+      executablePath: chromePath,
       headless: true,
       args: [
         '--no-sandbox',
@@ -36,7 +56,8 @@ async function getPuppeteerInstance() {
         '--disable-gpu',
         '--disable-background-timer-throttling',
         '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding'
+        '--disable-renderer-backgrounding',
+        '--disable-features=VizDisplayCompositor'
       ]
     });
   }

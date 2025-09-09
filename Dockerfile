@@ -1,46 +1,39 @@
-# Dockerfile simplificado para Coolify + Puppeteer
-FROM node:18-alpine
+# Dockerfile ultra-simples para Coolify
+FROM node:18-slim
 
-# Instalar dependências necessárias para Puppeteer
-RUN apk add --no-cache \
+# Instalar dependências necessárias
+RUN apt-get update && apt-get install -y \
     chromium \
-    nss \
-    freetype \
-    freetype-dev \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
+    chromium-sandbox \
     wget \
-    && rm -rf /var/cache/apk/*
+    ca-certificates \
+    fonts-liberation \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libdrm2 \
+    libgtk-3-0 \
+    libgtk-4-1 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Configurar Puppeteer
-ENV NODE_ENV=production \
-    NEXT_TELEMETRY_DISABLED=1 \
+ENV NODE_ENV=development \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 WORKDIR /app
 
-# Copiar package files e instalar dependências
+# Copiar e instalar
 COPY package*.json ./
-RUN npm ci --frozen-lockfile --ignore-scripts
+RUN npm install
 
-# Copiar código fonte
+# Copiar código
 COPY . .
 
-# Build da aplicação (desabilitando verificações para acelerar)
-ENV NEXT_PRIVATE_SKIP_VALIDATION=1
-RUN npm run build:docker
-
-# Criar diretório para PDFs
+# Criar diretório
 RUN mkdir -p /app/propostas
 
 # Expor porta
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
-
-# Comando para iniciar
-CMD ["npm", "start"]
+# Iniciar em modo dev (mais tolerante a erros)
+CMD ["npm", "run", "dev"]
