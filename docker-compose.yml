@@ -1,117 +1,44 @@
+version: '3.8'
+
 services:
-  # Aplicação principal Lotus
   lotus-app:
-    build: .
-    container_name: lotus-app
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: lotus-propostas
     ports:
-      - "8090:80"
-    volumes:
-      - ./propostas:/var/www/lotus/propostas
-      - ./logs:/var/log/nginx
-      - lotus-storage:/var/www/storage
+      - "3000:3000"
     environment:
       - NODE_ENV=production
-      - WAHA_URL=https://waha.nexuso2.com
-      - WHATSAPP_PHONE=+5511999999999
-    restart: unless-stopped
-    networks:
-      - lotus-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.lotus.rule=Host(`lotus.localhost`)"
-      - "traefik.http.services.lotus.loadbalancer.server.port=80"
-
-
-  # Redis para cache (opcional)
-  redis:
-    image: redis:7-alpine
-    container_name: lotus-redis
-    ports:
-      - "8092:6379"
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      # WhatsApp Configuration - Configure estas variáveis no Coolify
+      - WAHA_URL=${WAHA_URL:-https://waha.nexuso2.com}
+      - WAHA_API_KEY=${WAHA_API_KEY}
+      - WHATSAPP_PHONE=${WHATSAPP_PHONE}
+      - WHATSAPP_SESSION=${WHATSAPP_SESSION:-lotus}
     volumes:
-      - redis-data:/data
-    command: redis-server --appendonly yes
+      # Pasta para PDFs gerados (persistir dados)
+      - ./propostas:/app/propostas
+      - /etc/localtime:/etc/localtime:ro  # Sincronizar timezone
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
     networks:
       - lotus-network
 
-  # Traefik para proxy reverso (opcional)
-  traefik:
-    image: traefik:v2.10
-    container_name: lotus-traefik
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-    ports:
-      - "8093:80"
-      - "8094:443"
-      - "8095:8080"  # Dashboard
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - traefik-data:/data
-    restart: unless-stopped
-    networks:
-      - lotus-network
-    labels:
-      - "traefik.enable=true"
-
-  # File browser para gerenciar arquivos
-  filebrowser:
-    image: filebrowser/filebrowser:latest
-    container_name: lotus-filebrowser
-    ports:
-      - "8096:80"
-    volumes:
-      - lotus-storage:/srv
-      - ./propostas:/srv/propostas
-    environment:
-      - FB_BASEURL=/files
-    restart: unless-stopped
-    networks:
-      - lotus-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.filebrowser.rule=Host(`files.lotus.localhost`)"
-
-  # Backup service
-  backup:
-    image: alpine:latest
-    container_name: lotus-backup
-    volumes:
-      - lotus-storage:/data/storage
-      - ./propostas:/data/propostas
-      - ./backups:/backups
-    command: >
-      sh -c "
-      while true; do
-        echo 'Iniciando backup...'
-        tar -czf /backups/lotus-backup-$(date +%Y%m%d-%H%M%S).tar.gz -C /data .
-        echo 'Backup concluído: lotus-backup-$(date +%Y%m%d-%H%M%S).tar.gz'
-        # Manter apenas os 10 backups mais recentes
-        ls -t /backups/lotus-backup-*.tar.gz | tail -n +11 | xargs -r rm
-        sleep 86400  # Backup diário
-      done
-      "
-    restart: unless-stopped
-    networks:
-      - lotus-network
-
-# Volumes persistentes
-volumes:
-  redis-data:
-    driver: local
-  lotus-storage:
-    driver: local
-  traefik-data:
-    driver: local
-
-# Rede interna
 networks:
   lotus-network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16

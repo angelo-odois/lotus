@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer';
 import { FormData } from '@/types/form';
 import { config } from '@/config';
 import fs from 'fs';
@@ -13,40 +12,70 @@ const whatsappConfig = {
   session: process.env.WHATSAPP_SESSION || config.whatsapp.session
 };
 
-async function getBrowserConfig() {
+async function getPuppeteerInstance() {
+  const isDocker = fs.existsSync('/.dockerenv');
   const isVercel = process.env.VERCEL || process.env.VERCEL_ENV || process.env.AWS_LAMBDA_FUNCTION_NAME;
   
+  // Docker environment (Coolify)
+  if (isDocker) {
+    console.log('🐳 Detectado ambiente Docker - usando Chromium do sistema');
+    
+    const puppeteer = await import('puppeteer');
+    
+    return await puppeteer.default.launch({
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-gpu',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding'
+      ]
+    });
+  }
+  
+  // Vercel serverless environment
   if (isVercel) {
-    console.log('🌐 Detectado ambiente serverless (Vercel/AWS)');
+    console.log('🌐 Detectado ambiente serverless (Vercel/AWS) - usando puppeteer-core + chromium');
     
     try {
-      // Dynamic import do @sparticuz/chromium para ambiente serverless
+      const puppeteerCore = await import('puppeteer-core');
       const chromium = await import('@sparticuz/chromium');
       
-      return {
-        executablePath: await chromium.default.executablePath(),
+      const browser = await puppeteerCore.default.launch({
         args: [
           ...chromium.default.args,
           '--hide-scrollbars',
           '--disable-web-security'
         ],
-        headless: true
-      };
+        defaultViewport: chromium.default.defaultViewport,
+        executablePath: await chromium.default.executablePath(),
+        headless: chromium.default.headless,
+        ignoreHTTPSErrors: true,
+      });
+      
+      return browser;
     } catch (error) {
-      console.error('❌ Erro ao carregar @sparticuz/chromium:', error);
-      // Fallback para args básicos de serverless
-      return {
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--single-process',
-          '--no-zygote'
-        ]
-      };
+      console.error('❌ Erro ao carregar puppeteer-core + chromium:', error);
+      throw new Error(`Falha ao inicializar browser no ambiente serverless: ${error}`);
     }
   }
+  
+  // Ambiente local - usar puppeteer normal
+  console.log('🏠 Ambiente local - usando puppeteer padrão');
+  const puppeteer = await import('puppeteer');
+  
+  return await getBrowserConfigLocal(puppeteer.default);
+}
+
+async function getBrowserConfigLocal(puppeteer: any) {
 
   // Ambiente local - usar Chrome instalado
   const homeDir = os.homedir();
@@ -164,8 +193,7 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: Uploa
     })
   );
   
-  const browserConfig = await getBrowserConfig();
-  const browser = await puppeteer.launch(browserConfig);
+  const browser = await getPuppeteerInstance();
   
   try {
     const page = await browser.newPage();
@@ -228,8 +256,7 @@ async function convertPDFToImages(base64PDF: string): Promise<string[]> {
     const pdfData = base64PDF.startsWith('data:') ? base64PDF.split(',')[1] : base64PDF;
     // const pdfBuffer = Buffer.from(pdfData, 'base64');
     
-    const browserConfig = await getBrowserConfig();
-    const browser = await puppeteer.launch(browserConfig);
+    const browser = await getPuppeteerInstance();
     
     const page = await browser.newPage();
     await page.setViewport({ width: 1200, height: 1600 });
