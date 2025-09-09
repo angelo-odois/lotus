@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+:root {
+  /* Paleta Lotus */
+  --lotus-yellow: #FFC629;
+  --lotus-yellow-light: #FFD93D;
+  --lotus-yellow-dark: #E6B324;
+  --lotus-charcoal: #1A1A1A;
+  --lotus-cream: #FEFCF7;
+  
+  --background: var(--lotus-cream);
+  --foreground: var(--lotus-charcoal);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  line-height: 1.6;
+  font-feature-settings: 'kern' 1;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
