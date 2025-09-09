@@ -1,4 +1,4 @@
-'use client';
+via'use client';
 
 import { CheckCircle, Download, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
@@ -62,7 +62,7 @@ export function SuccessPage({ customerName, pdfFilename, onNewProposal }: Succes
                   <MessageCircle className="h-6 w-6 text-blue-600" />
                   <div>
                     <p className="font-medium text-blue-900">WhatsApp Enviado</p>
-                    <p className="text-sm text-blue-700">PDF anexado na mensagem</p>
+                    <p className="text-sm text-blue-700">Proposta enviada</p>
                   </div>
                 </div>
               </div>
@@ -89,40 +89,9 @@ export function SuccessPage({ customerName, pdfFilename, onNewProposal }: Succes
                 </div>
               </div>
             )}
-
-            {/* Next steps */}
             <div className="bg-gray-50 rounded-lg p-6 mb-8">
-              <h4 className="font-semibold text-gray-900 mb-3">📋 Próximos Passos</h4>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-start space-x-2">
-                  <span className="text-[#FFC629] font-bold">1.</span>
-                  <span>Nossa equipe analisará sua proposta em até 48 horas</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-[#FFC629] font-bold">2.</span>
-                  <span>Entraremos em contato via WhatsApp ou telefone</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-[#FFC629] font-bold">3.</span>
-                  <span>Agendaremos uma visita para apresentar as unidades</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Actions */}
-            <div className="text-center space-y-4">
-              <button
-                onClick={onNewProposal}
-                className="w-full bg-[#1A1A1A] text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
-              >
-                ➕ Fazer Nova Proposta
-              </button>
-              
-              <p className="text-xs text-gray-500">
-                Em caso de dúvidas, entre em contato conosco pelo WhatsApp
-              </p>
-            </div>
-          </div>
+              <h4 className="font-semibold text-gray-900 mb-3">📋 Sua proposta está em análise.</h4>
+            </div> */}
 
           {/* Footer */}
           <footer className="bg-[#1A1A1A] text-white p-8 text-center">
