@@ -7,9 +7,9 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  devtools: {
-    enabled: false
-  },
+  // devtools: {
+  //   enabled: false
+  // },
 };
 
 export default nextConfig;
