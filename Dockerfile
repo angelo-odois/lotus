@@ -1,7 +1,7 @@
-# Dockerfile ultra-simples para Coolify
-FROM node:18-slim
+# Multi-stage build para produção otimizada
+FROM node:18-slim AS base
 
-# Instalar dependências necessárias
+# Instalar dependências necessárias para Puppeteer e build
 RUN apt-get update && apt-get install -y \
     chromium \
     chromium-sandbox \
@@ -13,27 +13,33 @@ RUN apt-get update && apt-get install -y \
     libdrm2 \
     libgtk-3-0 \
     libgtk-4-1 \
+    python3 \
+    make \
+    g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# Configurar Puppeteer
-ENV NODE_ENV=development \
+# Configurar Puppeteer para produção
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    REACT_EDITOR="" \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 WORKDIR /app
 
-# Copiar e instalar
+# Instalar dependências
 COPY package*.json ./
-RUN npm install
+RUN npm ci --only=production
 
-# Copiar código
+# Copiar código e fazer build
 COPY . .
+RUN npm run build:docker
 
-# Criar diretório
-RUN mkdir -p /app/propostas
+# Criar diretório para PDFs
+RUN mkdir -p /app/propostas && chmod 755 /app/propostas
 
 # Expor porta
 EXPOSE 3000
 
-# Iniciar em modo dev (mais tolerante a erros)
-CMD ["npm", "run", "dev"]
+# Comando para produção
+CMD ["npm", "start"]

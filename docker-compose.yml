@@ -10,8 +10,10 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      - REACT_EDITOR=""
       - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
       # WhatsApp Configuration - Configure estas variáveis no Coolify
       - WAHA_URL=${WAHA_URL:-https://waha.nexuso2.com}
       - WAHA_API_KEY=${WAHA_API_KEY}

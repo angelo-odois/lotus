@@ -29,7 +29,18 @@ const nextConfig: NextConfig = {
       // Remover console.log e devtools em produção
       config.optimization.minimize = true;
     }
+    
+    // Configuração para Puppeteer no Docker
+    config.externals = config.externals || [];
+    if (!isServer) {
+      config.externals.push('puppeteer');
+    }
+    
     return config;
+  },
+  // Configuração experimental para melhorar build
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
   },
 };
 
