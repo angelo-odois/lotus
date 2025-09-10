@@ -71,6 +71,12 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   handler satisfies RouteHandlerConfig<"/api/test-pdf">
 }
 
+// Validate ../../src/app/health/route.ts
+{
+  const handler = {} as typeof import("../../src/app/health/route.js")
+  handler satisfies RouteHandlerConfig<"/health">
+}
+
 
 
 

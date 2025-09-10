@@ -1,4 +1,4 @@
-# Dockerfile ultra-simples para Coolify
+# Dockerfile otimizado para Coolify
 FROM node:18-slim
 
 # Instalar dependências necessárias
@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     chromium \
     chromium-sandbox \
     wget \
+    curl \
     ca-certificates \
     fonts-liberation \
     libasound2 \
@@ -15,25 +16,41 @@ RUN apt-get update && apt-get install -y \
     libgtk-4-1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Configurar Puppeteer
-ENV NODE_ENV=development \
+# Configurar para produção com Puppeteer
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+    PORT=3000 \
+    HOSTNAME="0.0.0.0"
 
 WORKDIR /app
 
-# Copiar e instalar
+# Copiar package.json e instalar dependências
 COPY package*.json ./
-RUN npm install
+RUN npm ci --production=false
 
 # Copiar código
 COPY . .
 
-# Criar diretório
-RUN mkdir -p /app/propostas
+# Construir aplicação (sem turbopack)
+RUN NEXT_TELEMETRY_DISABLED=1 npx next build
+
+# Limpar dependências de desenvolvimento
+RUN npm prune --production
+
+# Criar diretório para PDFs
+RUN mkdir -p /app/propostas && chown -R node:node /app
+
+# Usar usuário não-root
+USER node
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:3000 || exit 1
 
 # Expor porta
 EXPOSE 3000
 
-# Iniciar em modo dev (mais tolerante a erros)
-CMD ["npm", "run", "dev"]
+# Iniciar aplicação
+CMD ["npm", "start"]

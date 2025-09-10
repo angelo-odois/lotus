@@ -42,6 +42,9 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
+  // Configurações para startup mais rápido
+  poweredByHeader: false,
+  generateEtags: false,
 };
 
 export default nextConfig;

@@ -1,0 +1,5 @@
+# Configuração para Coolify
+health_check_path: /
+health_check_timeout: 60
+startup_timeout: 120
+port: 3000
