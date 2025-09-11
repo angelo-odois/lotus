@@ -24,7 +24,8 @@ ENV NEXT_TELEMETRY_DISABLED=1 \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     PORT=3000 \
-    HOSTNAME="0.0.0.0"
+    HOSTNAME="0.0.0.0" \
+    NODE_OPTIONS="--max_old_space_size=4096"
 
 WORKDIR /app
 
@@ -35,7 +36,7 @@ RUN npm install
 # Copiar código
 COPY . .
 
-# Construir aplicação (sem turbopack)
+# Construir aplicação
 RUN npm run build:docker
 
 # Definir NODE_ENV para produção após o build
