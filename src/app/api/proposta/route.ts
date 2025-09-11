@@ -183,9 +183,6 @@ export async function POST(request: NextRequest) {
     const filename = `proposta-lotus-${formData.nome?.replace(/\s+/g, '-').toLowerCase() || 'cliente'}-${Date.now()}.pdf`;
     const filepath = await savePDF(pdfBuffer, filename);
     
-    // Enviar via WhatsApp
-    await sendWhatsAppNotification(formData, filepath);
-    
     console.log('✅ Proposta processada com sucesso');
     
     return NextResponse.json({

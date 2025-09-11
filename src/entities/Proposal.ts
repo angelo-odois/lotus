@@ -21,6 +21,9 @@ export class Proposal {
   })
   status!: ProposalStatus;
 
+  @Column({ type: 'text', name: 'form_data', nullable: true })
+  formData?: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
