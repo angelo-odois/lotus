@@ -42,11 +42,6 @@ RUN npm run build:docker
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
 
-# Copy standalone server and static files
-COPY --chown=nextjs:nodejs .next/standalone ./
-COPY --chown=nextjs:nodejs .next/static ./.next/static
-COPY --chown=nextjs:nodejs public ./public
-
 # Create directories and set permissions  
 RUN mkdir -p /app/propostas && chown -R nextjs:nodejs /app
 
