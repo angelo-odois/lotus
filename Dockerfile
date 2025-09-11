@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install -y \
     libdrm2 \
     libgtk-3-0 \
     libgtk-4-1 \
+    python3 \
+    make \
+    g++ \
     && rm -rf /var/lib/apt/lists/*
 
 # Configurar para produção com Puppeteer
@@ -28,16 +31,13 @@ WORKDIR /app
 
 # Copiar package.json e instalar dependências
 COPY package*.json ./
-RUN npm ci --production=false
+RUN npm install
 
 # Copiar código
 COPY . .
 
 # Construir aplicação (sem turbopack)
 RUN NEXT_TELEMETRY_DISABLED=1 npx next build
-
-# Limpar dependências de desenvolvimento
-RUN npm prune --production
 
 # Criar diretório para PDFs
 RUN mkdir -p /app/propostas && chown -R node:node /app
