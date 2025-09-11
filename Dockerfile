@@ -19,9 +19,8 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# Configurar para produção com Puppeteer
-ENV NODE_ENV=production \
-    NEXT_TELEMETRY_DISABLED=1 \
+# Configurar para build
+ENV NEXT_TELEMETRY_DISABLED=1 \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     PORT=3000 \
@@ -37,7 +36,10 @@ RUN npm install
 COPY . .
 
 # Construir aplicação (sem turbopack)
-RUN NEXT_TELEMETRY_DISABLED=1 npx next build
+RUN npm run build:docker
+
+# Definir NODE_ENV para produção após o build
+ENV NODE_ENV=production
 
 # Criar diretório para PDFs
 RUN mkdir -p /app/propostas && chown -R node:node /app
