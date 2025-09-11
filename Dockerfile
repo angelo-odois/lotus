@@ -32,8 +32,17 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV NODE_OPTIONS="--max_old_space_size=4096"
 ENV JWT_SECRET_CURRENT="temp-build-secret-32-chars-minimum-for-build-only"
 
-# Build the application
-RUN npm run build:docker
+# Build the application with verbose logging
+RUN echo "Starting build process..." && \
+    npm --version && \
+    node --version && \
+    echo "Environment variables:" && \
+    env | grep -E "(NODE|NPM|NEXT|PUPPETEER|JWT)" && \
+    echo "Running build:docker..." && \
+    npm run build:docker && \
+    echo "Build completed, copying static files for standalone..." && \
+    cp -r .next/static .next/standalone/.next/ && \
+    cp -r public .next/standalone/
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs
