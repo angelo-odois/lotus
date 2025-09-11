@@ -16,7 +16,15 @@ const whatsappConfig = {
 
 async function getPuppeteerInstance(): Promise<any> {
   const isDocker = fs.existsSync('/.dockerenv');
-  const isVercel = process.env.VERCEL || process.env.VERCEL_ENV || process.env.AWS_LAMBDA_FUNCTION_NAME;
+  const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV || process.env.AWS_LAMBDA_FUNCTION_NAME;
+  
+  console.log('🔍 Detectando ambiente:', {
+    isDocker,
+    isVercel,
+    NODE_ENV: process.env.NODE_ENV,
+    VERCEL: process.env.VERCEL,
+    VERCEL_ENV: process.env.VERCEL_ENV
+  });
   
   // Docker environment (Coolify)
   if (isDocker) {
@@ -93,7 +101,22 @@ async function getPuppeteerInstance(): Promise<any> {
   console.log('🏠 Ambiente local - usando puppeteer padrão');
   const puppeteer = await import('puppeteer');
   
-  return await puppeteer.default.launch(await getBrowserConfigLocal());
+  try {
+    return await puppeteer.default.launch(await getBrowserConfigLocal());
+  } catch (error) {
+    console.error('❌ Erro ao iniciar Puppeteer local:', error);
+    console.log('🔄 Tentando com configuração simplificada...');
+    
+    // Fallback com configuração mais simples
+    return await puppeteer.default.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage'
+      ]
+    });
+  }
 }
 
 async function getBrowserConfigLocal(): Promise<any> {
