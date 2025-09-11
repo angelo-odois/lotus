@@ -57,4 +57,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 EXPOSE 3000
 
-CMD ["node", ".next/standalone/server.js"]
+CMD ["sh", "./start-server.sh"]
