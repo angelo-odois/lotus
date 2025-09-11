@@ -44,7 +44,6 @@ RUN mkdir -p /app/propostas && chown -R nextjs:nodejs /app
 
 # Set runtime environment variables
 ENV NODE_ENV=production
-ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 ENV CHROME_BIN=/usr/bin/chromium-browser
 ENV PUPPETEER_ARGS="--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage"
