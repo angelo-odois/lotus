@@ -1,5 +1,5 @@
 # Dockerfile otimizado para Coolify
-FROM node:18-slim
+FROM node:20-slim
 
 # Instalar dependências necessárias
 RUN apt-get update && apt-get install -y \
