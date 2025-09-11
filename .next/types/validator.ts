@@ -47,16 +47,76 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 }
 
 
+// Validate ../../src/app/admin/page.tsx
+{
+  const handler = {} as typeof import("../../src/app/admin/page.js")
+  handler satisfies AppPageConfig<"/admin">
+}
+
+// Validate ../../src/app/login/page.tsx
+{
+  const handler = {} as typeof import("../../src/app/login/page.js")
+  handler satisfies AppPageConfig<"/login">
+}
+
 // Validate ../../src/app/page.tsx
 {
   const handler = {} as typeof import("../../src/app/page.js")
   handler satisfies AppPageConfig<"/">
 }
 
+// Validate ../../src/app/proposals/page.tsx
+{
+  const handler = {} as typeof import("../../src/app/proposals/page.js")
+  handler satisfies AppPageConfig<"/proposals">
+}
+
+// Validate ../../src/app/api/debug-auth/route.ts
+{
+  const handler = {} as typeof import("../../src/app/api/debug-auth/route.js")
+  handler satisfies RouteHandlerConfig<"/api/debug-auth">
+}
+
 // Validate ../../src/app/api/download-pdf/[filename]/route.ts
 {
   const handler = {} as typeof import("../../src/app/api/download-pdf/[filename]/route.js")
   handler satisfies RouteHandlerConfig<"/api/download-pdf/[filename]">
+}
+
+// Validate ../../src/app/api/login/route.ts
+{
+  const handler = {} as typeof import("../../src/app/api/login/route.js")
+  handler satisfies RouteHandlerConfig<"/api/login">
+}
+
+// Validate ../../src/app/api/logout/route.ts
+{
+  const handler = {} as typeof import("../../src/app/api/logout/route.js")
+  handler satisfies RouteHandlerConfig<"/api/logout">
+}
+
+// Validate ../../src/app/api/proposals/[id]/approve/route.ts
+{
+  const handler = {} as typeof import("../../src/app/api/proposals/[id]/approve/route.js")
+  handler satisfies RouteHandlerConfig<"/api/proposals/[id]/approve">
+}
+
+// Validate ../../src/app/api/proposals/[id]/pdf/route.ts
+{
+  const handler = {} as typeof import("../../src/app/api/proposals/[id]/pdf/route.js")
+  handler satisfies RouteHandlerConfig<"/api/proposals/[id]/pdf">
+}
+
+// Validate ../../src/app/api/proposals/[id]/view/route.ts
+{
+  const handler = {} as typeof import("../../src/app/api/proposals/[id]/view/route.js")
+  handler satisfies RouteHandlerConfig<"/api/proposals/[id]/view">
+}
+
+// Validate ../../src/app/api/proposals/route.ts
+{
+  const handler = {} as typeof import("../../src/app/api/proposals/route.js")
+  handler satisfies RouteHandlerConfig<"/api/proposals">
 }
 
 // Validate ../../src/app/api/proposta/route.ts

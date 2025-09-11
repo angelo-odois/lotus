@@ -10,8 +10,7 @@ const nextConfig: NextConfig = {
   },
   // Desabilitar devtools em produção
   productionBrowserSourceMaps: false,
-  // Configuração de minificação para remover devtools
-  swcMinify: true,
+  // swcMinify removido - deprecated no Next.js 15
   // Configurações de ambiente
   env: {
     REACT_EDITOR: '',

@@ -1,4 +1,10 @@
 {
-  "/api/proposta/route": "app/api/proposta/route.js",
-  "/page": "app/page.js"
+  "/api/login/route": "app/api/login/route.js",
+  "/api/proposals/[id]/approve/route": "app/api/proposals/[id]/approve/route.js",
+  "/api/proposals/[id]/pdf/route": "app/api/proposals/[id]/pdf/route.js",
+  "/api/proposals/[id]/view/route": "app/api/proposals/[id]/view/route.js",
+  "/api/proposals/route": "app/api/proposals/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/login/page": "app/login/page.js",
+  "/proposals/page": "app/proposals/page.js"
 }
