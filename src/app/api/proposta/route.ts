@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { FormData } from '@/types/form';
 import { config } from '@/config';
+import { createProposal } from '@/lib/queries';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { v4 as uuidv4 } from 'uuid';
 
 const whatsappConfig = {
   url: process.env.WAHA_URL || config.whatsapp.url,
@@ -159,6 +161,21 @@ export async function POST(request: NextRequest) {
       documentos: uploadedFiles.length 
     });
 
+    // Gerar ID único para a proposta
+    const proposalId = uuidv4();
+    
+    // Salvar no banco de dados PRIMEIRO
+    console.log('💾 Salvando proposta no banco de dados...');
+    await createProposal({
+      id: proposalId,
+      clientName: formData.nome || 'Cliente não informado',
+      attachmentCount: uploadedFiles.length,
+      status: 'sent', // Status inicial: enviada
+      formData: JSON.stringify(formData)
+    });
+    
+    console.log('✅ Proposta salva no banco com ID:', proposalId);
+
     // Gerar PDF com Puppeteer (muito mais confiável)
     const pdfBuffer = await generatePDFWithPuppeteer(formData, uploadedFiles);
     
@@ -174,6 +191,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Proposta gerada e enviada com sucesso',
+      proposalId,
       filename,
       filepath
     });

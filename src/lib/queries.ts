@@ -14,6 +14,7 @@ export interface ProposalData {
   clientName: string;
   attachmentCount: number;
   status: string;
+  formData?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -73,13 +74,29 @@ export async function findProposalById(id: string): Promise<ProposalData | null>
   
   const result = await db.query(
     `SELECT id, client_name as clientName, attachment_count as attachmentCount,
-            status, created_at as createdAt, updated_at as updatedAt
+            status, form_data as formData, created_at as createdAt, updated_at as updatedAt
      FROM proposals 
      WHERE id = ?`,
     [id]
   );
   
   return result.length > 0 ? result[0] as ProposalData : null;
+}
+
+export async function createProposal(data: {
+  id: string;
+  clientName: string;
+  attachmentCount: number;
+  status: string;
+  formData: string;
+}): Promise<void> {
+  const db = await getDatabase();
+  
+  await db.query(
+    `INSERT INTO proposals (id, client_name, attachment_count, status, form_data, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+    [data.id, data.clientName, data.attachmentCount, data.status, data.formData]
+  );
 }
 
 export async function updateProposalStatus(id: string, status: string): Promise<void> {
