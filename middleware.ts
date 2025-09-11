@@ -53,6 +53,9 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  return response;
+}
+
 async function getUserFromMiddleware(request: NextRequest) {
   try {
     const cookieName = process.env.NODE_ENV === 'production' ? '__Host-session' : 'session';
@@ -76,9 +79,6 @@ async function getUserFromMiddleware(request: NextRequest) {
     console.log('🔍 Middleware error:', error);
     return null;
   }
-}
-
-  return response;
 }
 
 export const config = {
