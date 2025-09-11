@@ -35,6 +35,18 @@ const nextConfig: NextConfig = {
       config.externals.push('puppeteer');
     }
     
+    // Suprimir warnings do TypeORM sobre drivers não utilizados
+    config.ignoreWarnings = [
+      {
+        module: /node_modules\/typeorm/,
+        message: /Critical dependency:/,
+      },
+      {
+        module: /node_modules\/typeorm/,
+        message: /Module not found:/,
+      },
+    ];
+    
     return config;
   },
   // Configuração experimental para melhorar build
