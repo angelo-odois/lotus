@@ -14,7 +14,9 @@ export default function LoginPage() {
   useEffect(() => {
     async function fetchCSRF() {
       try {
-        const response = await fetch('/api/login');
+        const response = await fetch('/api/login', {
+          credentials: 'include' // Include cookies for CSRF token
+        });
         const data = await response.json();
         setCsrfToken(data.csrfToken);
       } catch {
@@ -35,6 +37,7 @@ export default function LoginPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Include cookies in the request
         body: JSON.stringify({
           email,
           password,
