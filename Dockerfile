@@ -25,14 +25,11 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Set environment variables
+# Set environment variables for build
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_ENV=production
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV NODE_OPTIONS="--max_old_space_size=4096"
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
 ENV JWT_SECRET_CURRENT="temp-build-secret-32-chars-minimum-for-build-only"
 
 # Build the application
@@ -44,6 +41,13 @@ RUN adduser -S nextjs -u 1001
 
 # Create directories and set permissions  
 RUN mkdir -p /app/propostas && chown -R nextjs:nodejs /app
+
+# Set runtime environment variables
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+ENV CHROME_BIN=/usr/bin/chromium-browser
+ENV PUPPETEER_ARGS="--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage"
 
 # Change to non-root user
 USER nextjs
