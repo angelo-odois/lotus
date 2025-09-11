@@ -33,6 +33,7 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV NODE_OPTIONS="--max_old_space_size=4096"
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+ENV JWT_SECRET_CURRENT="temp-build-secret-32-chars-minimum-for-build-only"
 
 # Build the application
 RUN npm run build:docker
