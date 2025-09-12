@@ -43,6 +43,7 @@ export default function ProposalsPage() {
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [approving, setApproving] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const router = useRouter();
 
   async function fetchProposals(page = 1, q = '') {
@@ -118,6 +119,48 @@ export default function ProposalsPage() {
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
       setApproving(null);
+    }
+  }
+
+  async function handleDelete(proposalId: string, clientName: string) {
+    if (!confirm(`Tem certeza que deseja apagar a proposta de ${clientName}?\n\nEsta ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    setDeleting(proposalId);
+    setError('');
+
+    try {
+      const csrfToken = getCsrfToken();
+      if (!csrfToken) {
+        throw new Error('Token CSRF não encontrado');
+      }
+
+      const response = await fetch(`/api/proposals/${proposalId}/delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken,
+        },
+        body: JSON.stringify({ csrfToken }),
+      });
+
+      if (response.status === 401) {
+        router.push('/login');
+        return;
+      }
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Erro ao apagar proposta');
+      }
+
+      // Atualizar a lista
+      await fetchProposals();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+    } finally {
+      setDeleting(null);
     }
   }
 
@@ -269,6 +312,18 @@ export default function ProposalsPage() {
                         >
                           📄 PDF
                         </a>
+                        
+                        {/* Delete (apenas para propostas não aprovadas) */}
+                        {proposal.status !== 'approved' && (
+                          <button
+                            onClick={() => handleDelete(proposal.id, proposal.clientName)}
+                            disabled={deleting === proposal.id}
+                            className="inline-flex items-center px-2 py-1 border border-red-300 text-xs font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Apagar proposta"
+                          >
+                            {deleting === proposal.id ? '⏳' : '🗑️'} {deleting === proposal.id ? 'Apagando...' : 'Apagar'}
+                          </button>
+                        )}
                         
                         {/* Aprovar */}
                         {proposal.status === 'approved' ? (

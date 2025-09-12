@@ -49,28 +49,77 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Configure Puppeteer for different environments
     const isVercel = process.env.VERCEL === '1';
     const isDev = process.env.NODE_ENV === 'development';
+    const chromiumPath = process.env.PUPPETEER_EXECUTABLE_PATH;
 
     let browser;
-    if (isVercel) {
-      // Vercel configuration
-      browser = await puppeteer.launch({
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
-        headless: chromium.headless,
-      });
-    } else if (isDev) {
-      // Local development
-      browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });
-    } else {
-      // Production with installed Chrome
-      browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });
+    try {
+      if (isVercel) {
+        // Vercel configuration with @sparticuz/chromium
+        browser = await puppeteer.launch({
+          args: chromium.args,
+          defaultViewport: chromium.defaultViewport,
+          executablePath: await chromium.executablePath(),
+          headless: chromium.headless,
+        });
+      } else if (chromiumPath && chromiumPath !== 'undefined') {
+        // Production with specified Chrome path (Docker/Coolify)
+        browser = await puppeteer.launch({
+          headless: true,
+          executablePath: chromiumPath,
+          args: [
+            '--no-sandbox', 
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-extensions',
+            '--disable-plugins',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding',
+            '--no-first-run'
+          ]
+        });
+      } else {
+        // Local development - try system Chrome first
+        const systemChromePaths = [
+          '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', // macOS
+          '/usr/bin/google-chrome-stable', // Linux
+          '/usr/bin/google-chrome', // Linux alt
+          '/usr/bin/chromium-browser', // Linux Chromium
+          '/usr/bin/chromium', // Linux Chromium alt
+        ];
+
+        let chromePath = null;
+        
+        // Try to find system Chrome
+        for (const path of systemChromePaths) {
+          try {
+            const fs = require('fs');
+            if (fs.existsSync(path)) {
+              chromePath = path;
+              break;
+            }
+          } catch (e) {
+            continue;
+          }
+        }
+
+        if (chromePath) {
+          browser = await puppeteer.launch({
+            headless: true,
+            executablePath: chromePath,
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+          });
+        } else {
+          // Fallback to default Puppeteer Chrome
+          browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error launching browser:', error);
+      throw new Error(`Erro ao inicializar o navegador: ${error.message}`);
     }
 
     const page = await browser.newPage();
