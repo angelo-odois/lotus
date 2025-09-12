@@ -9,23 +9,34 @@ services:
     ports:
       - "3000:3000"
     environment:
+      # OBRIGATÓRIAS
       - NODE_ENV=production
+      - JWT_SECRET_CURRENT=${JWT_SECRET_CURRENT}
+      
+      # Next.js
       - NEXT_TELEMETRY_DISABLED=1
       - REACT_EDITOR=""
+      
+      # Database
+      - DATABASE_URL=${DATABASE_URL:-sqlite:/app/database/database.sqlite}
+      
+      # Puppeteer/PDF
       - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
       - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-      # WhatsApp Configuration - Configure estas variáveis no Coolify
+      
+      # WhatsApp (opcionais)
       - WAHA_URL=${WAHA_URL:-https://waha.nexuso2.com}
       - WAHA_API_KEY=${WAHA_API_KEY}
       - WHATSAPP_PHONE=${WHATSAPP_PHONE}
       - WHATSAPP_SESSION=${WHATSAPP_SESSION:-lotus}
     volumes:
-      # Pasta para PDFs gerados (persistir dados)
+      # Persistir dados
       - ./propostas:/app/propostas
-      - /etc/localtime:/etc/localtime:ro  # Sincronizar timezone
+      - ./database:/app/database
+      - /etc/localtime:/etc/localtime:ro
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1"]
       interval: 30s
       timeout: 15s
       retries: 5
