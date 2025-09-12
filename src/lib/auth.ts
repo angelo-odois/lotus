@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { NextRequest } from 'next/server';
 import { findUserByEmail } from './queries';
+import { detectHTTPSEnvironment, getCookieName } from './environment';
 
 interface JWTPayload {
   sub: string;
@@ -19,7 +20,8 @@ if (!JWT_SECRET_CURRENT) {
   throw new Error('JWT_SECRET_CURRENT is required');
 }
 
-const COOKIE_NAME = process.env.NODE_ENV === 'production' ? '__Host-session' : 'session';
+// Usar função centralizada de detecção (será determinado por request quando disponível)
+const COOKIE_NAME = 'session'; // Default, será sobrescrito por getCookieName()
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12);
@@ -64,7 +66,8 @@ export function verifyJWT(token: string): JWTPayload | null {
 
 export async function getUserFromRequest(request: NextRequest) {
   try {
-    const token = request.cookies.get(COOKIE_NAME)?.value;
+    const cookieName = getCookieName(request);
+    const token = request.cookies.get(cookieName)?.value;
     if (!token) return null;
 
     const payload = verifyJWT(token);
@@ -93,27 +96,31 @@ export function shouldRefreshToken(token: string): boolean {
   }
 }
 
-export function createSecureCookie(token: string): string {
-  const isProduction = process.env.NODE_ENV === 'production';
+export function createSecureCookie(token: string, request?: { nextUrl?: { protocol: string; hostname: string } }): string {
   const maxAge = 7 * 24 * 60 * 60; // 7 days
+  const isHTTPS = detectHTTPSEnvironment(request);
+  const cookieName = getCookieName(request);
   
   return [
-    `${COOKIE_NAME}=${token}`,
+    `${cookieName}=${token}`,
     `Max-Age=${maxAge}`,
     'Path=/',
     'HttpOnly',
     'SameSite=Lax',
-    isProduction ? 'Secure' : '',
+    isHTTPS ? 'Secure' : '',
   ].filter(Boolean).join('; ');
 }
 
-export function clearSecureCookie(): string {
+export function clearSecureCookie(request?: { nextUrl?: { protocol: string; hostname: string } }): string {
+  const isHTTPS = detectHTTPSEnvironment(request);
+  const cookieName = getCookieName(request);
+  
   return [
-    `${COOKIE_NAME}=`,
+    `${cookieName}=`,
     'Max-Age=0',
     'Path=/',
     'HttpOnly',
     'SameSite=Lax',
-    process.env.NODE_ENV === 'production' ? 'Secure' : '',
+    isHTTPS ? 'Secure' : '',
   ].filter(Boolean).join('; ');
 }

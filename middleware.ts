@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT, shouldRefreshToken, createJWT, createSecureCookie } from '@/lib/auth';
 import { findUserByEmail } from '@/lib/queries';
+import { getCookieName } from '@/lib/environment';
 
 const protectedRoutes = ['/admin', '/proposals'];
 const authRoutes = ['/login'];
@@ -45,10 +46,11 @@ export async function middleware(request: NextRequest) {
 
     // Token refresh
     if (user && isProtectedRoute) {
-      const token = request.cookies.get(process.env.NODE_ENV === 'production' ? '__Host-session' : 'session')?.value;
+      const cookieName = getCookieName(request);
+      const token = request.cookies.get(cookieName)?.value;
       if (token && shouldRefreshToken(token)) {
         const newToken = createJWT(user.id);
-        response.headers.set('Set-Cookie', createSecureCookie(newToken));
+        response.headers.set('Set-Cookie', createSecureCookie(newToken, request));
       }
     }
   }
@@ -58,7 +60,7 @@ export async function middleware(request: NextRequest) {
 
 async function getUserFromMiddleware(request: NextRequest) {
   try {
-    const cookieName = process.env.NODE_ENV === 'production' ? '__Host-session' : 'session';
+    const cookieName = getCookieName(request);
     const token = request.cookies.get(cookieName)?.value;
     
     console.log('🔍 Middleware debug:', {

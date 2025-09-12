@@ -4,6 +4,7 @@ import { verifyPassword, createJWT, createSecureCookie, generateCSRFToken } from
 import { checkRateLimit } from '@/lib/rateLimiter';
 import { loginSchema } from '@/lib/validation';
 import { audit, getClientIP, getUserAgent } from '@/lib/audit';
+import { getCookieName, detectHTTPSEnvironment } from '@/lib/environment';
 
 export async function POST(request: NextRequest) {
   try {
@@ -73,10 +74,12 @@ export async function POST(request: NextRequest) {
     });
 
     // Set session cookie using NextResponse cookies API
-    const cookieName = process.env.NODE_ENV === 'production' ? '__Host-session' : 'session';
+    const isHTTPS = detectHTTPSEnvironment(request);
+    const cookieName = getCookieName(request);
+    
     response.cookies.set(cookieName, token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isHTTPS,
       sameSite: 'lax',
       path: '/',
       maxAge: 7 * 24 * 60 * 60
@@ -85,7 +88,7 @@ export async function POST(request: NextRequest) {
     // Set CSRF token cookie
     response.cookies.set('XSRF-TOKEN', newCSRFToken, {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isHTTPS,
       sameSite: 'lax',
       path: '/',
       maxAge: 7 * 24 * 60 * 60
@@ -104,11 +107,12 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const csrfToken = generateCSRFToken();
+  const isHTTPS = detectHTTPSEnvironment(request);
   
   const response = NextResponse.json({ csrfToken });
   response.cookies.set('XSRF-TOKEN', csrfToken, {
     httpOnly: false,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isHTTPS,
     sameSite: 'lax',
     path: '/',
     maxAge: 7 * 24 * 60 * 60
