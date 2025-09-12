@@ -123,7 +123,8 @@ async function getBrowserConfigLocal(): Promise<any> {
   // Ambiente local - usar Chrome instalado
   const homeDir = os.homedir();
   const possiblePaths = [
-    // Puppeteer cache paths
+    // Puppeteer cache paths - newest first
+    path.join(homeDir, '.cache/puppeteer/chrome/mac_arm-140.0.7339.82/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing'),
     path.join(homeDir, '.cache/puppeteer/chrome/mac_arm-140.0.7339.80/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing'),
     path.join(homeDir, '.cache/puppeteer/chrome/mac_arm-121.0.6167.85/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing'),
     // System Chrome paths
