@@ -10,37 +10,47 @@ export function detectHTTPSEnvironment(request?: { nextUrl?: { protocol: string;
     return true;
   }
 
-  // Coolify com domínio configurado
+  // FORÇAR cookies simples se estivermos acessando via IP (mesmo em produção)
+  // Isso resolve o problema do Coolify quando acessado via IP
+  if (request?.nextUrl?.hostname) {
+    const hostname = request.nextUrl.hostname;
+    
+    // Se é IP (localhost, 127.0.0.1, ou qualquer IP), usar cookies simples
+    if (hostname === 'localhost' || 
+        hostname === '127.0.0.1' || 
+        hostname.startsWith('192.168.') ||
+        hostname.startsWith('10.') ||
+        hostname.startsWith('172.') ||
+        /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) {
+      return false;
+    }
+  }
+
+  // Coolify com domínio configurado - só usar HTTPS para o domínio específico
   if (process.env.COOLIFY_DOMAIN) {
-    // Se temos o request, verificar o hostname
+    // Se temos o request, verificar o hostname exato
     if (request?.nextUrl?.hostname === process.env.COOLIFY_DOMAIN) {
       return true;
     }
-    // Se não temos o request mas a variável existe, assumir que é produção com HTTPS
+    // Se não temos request, assumir cookies simples para compatibilidade
     if (!request) {
-      return true;
+      return false;
     }
   }
 
   // Detectar pelo request se disponível
   if (request?.nextUrl) {
-    // HTTPS explícito
+    // HTTPS explícito E não é IP
     if (request.nextUrl.protocol === 'https:') {
-      return true;
-    }
-    
-    // Domínio real (não IP nem localhost)
-    const hostname = request.nextUrl.hostname;
-    if (hostname !== 'localhost' && 
-        hostname !== '127.0.0.1' && 
-        !hostname.startsWith('192.168.') &&
-        !hostname.startsWith('10.') &&
-        !hostname.startsWith('172.')) {
-      return true;
+      const hostname = request.nextUrl.hostname;
+      // Verificar se não é IP
+      if (!/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) {
+        return true;
+      }
     }
   }
 
-  // Default: false para compatibilidade com IP
+  // Default: false para máxima compatibilidade
   return false;
 }
 

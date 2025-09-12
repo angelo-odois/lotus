@@ -44,6 +44,8 @@ export default function ProposalsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [approving, setApproving] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [selectedProposals, setSelectedProposals] = useState<string[]>([]);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const router = useRouter();
 
   async function fetchProposals(page = 1, q = '') {
@@ -164,6 +166,91 @@ export default function ProposalsPage() {
     }
   }
 
+  async function handleBulkDelete() {
+    const deletableProposals = proposals.filter(p => 
+      selectedProposals.includes(p.id) && p.status !== 'approved'
+    );
+    
+    if (deletableProposals.length === 0) {
+      setError('Nenhuma proposta selecionada pode ser apagada (propostas aprovadas não podem ser removidas)');
+      return;
+    }
+
+    const clientNames = deletableProposals.map(p => p.clientName).join(', ');
+    if (!confirm(`Tem certeza que deseja apagar ${deletableProposals.length} proposta(s)?\n\nClientes: ${clientNames}\n\nEsta ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    setBulkDeleting(true);
+    setError('');
+
+    try {
+      const csrfToken = getCsrfToken();
+      if (!csrfToken) {
+        throw new Error('Token CSRF não encontrado');
+      }
+
+      const response = await fetch('/api/proposals/bulk-delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken,
+        },
+        body: JSON.stringify({ 
+          proposalIds: selectedProposals,
+          csrfToken 
+        }),
+      });
+
+      if (response.status === 401) {
+        router.push('/login');
+        return;
+      }
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao apagar propostas');
+      }
+
+      // Limpar seleção e atualizar lista
+      setSelectedProposals([]);
+      await fetchProposals();
+      
+      // Mostrar sucesso
+      if (data.skippedCount > 0) {
+        setError(`${data.deletedCount} proposta(s) apagada(s). ${data.skippedCount} proposta(s) aprovada(s) não foram removidas.`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+    } finally {
+      setBulkDeleting(false);
+    }
+  }
+
+  function handleSelectAll() {
+    const selectableProposals = proposals
+      .filter(p => p.status !== 'approved')
+      .map(p => p.id);
+    
+    if (selectedProposals.length === selectableProposals.length) {
+      // Desmarcar todos
+      setSelectedProposals([]);
+    } else {
+      // Selecionar todos os não aprovados
+      setSelectedProposals(selectableProposals);
+    }
+  }
+
+  function handleSelectProposal(proposalId: string, isApproved: boolean) {
+    if (isApproved) return; // Não permite selecionar propostas aprovadas
+
+    setSelectedProposals(prev => 
+      prev.includes(proposalId)
+        ? prev.filter(id => id !== proposalId)
+        : [...prev, proposalId]
+    );
+  }
+
   async function handleLogout() {
     try {
       await fetch('/api/logout', { method: 'POST' });
@@ -246,11 +333,51 @@ export default function ProposalsPage() {
           </div>
         )}
 
+        {/* Bulk Actions */}
+        {selectedProposals.length > 0 && (
+          <div className="mb-4 bg-blue-50 border border-blue-200 rounded-md p-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-blue-800">
+                {selectedProposals.length} proposta(s) selecionada(s)
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSelectedProposals([])}
+                  className="text-xs text-blue-600 hover:text-blue-800 px-2 py-1 border border-blue-300 rounded hover:bg-blue-100"
+                >
+                  Limpar Seleção
+                </button>
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleting}
+                  className="text-xs text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded disabled:opacity-50"
+                >
+                  {bulkDeleting ? '🔄 Apagando...' : '🗑️ Apagar Selecionadas'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Table */}
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-4 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    checked={
+                      proposals.length > 0 && 
+                      selectedProposals.length === proposals.filter(p => p.status !== 'approved').length &&
+                      proposals.filter(p => p.status !== 'approved').length > 0
+                    }
+                    onChange={handleSelectAll}
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    disabled={loading || proposals.every(p => p.status === 'approved')}
+                    title="Selecionar todas as propostas não aprovadas"
+                  />
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Cliente
                 </th>
@@ -268,19 +395,29 @@ export default function ProposalsPage() {
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
                     Carregando...
                   </td>
                 </tr>
               ) : proposals.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
                     {searchQuery ? 'Nenhuma proposta encontrada' : 'Nenhuma proposta disponível'}
                   </td>
                 </tr>
               ) : (
                 proposals.map((proposal) => (
-                  <tr key={proposal.id}>
+                  <tr key={proposal.id} className={selectedProposals.includes(proposal.id) ? 'bg-blue-50' : ''}>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        checked={selectedProposals.includes(proposal.id)}
+                        onChange={() => handleSelectProposal(proposal.id, proposal.status === 'approved')}
+                        disabled={proposal.status === 'approved'}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded disabled:opacity-50"
+                        title={proposal.status === 'approved' ? 'Propostas aprovadas não podem ser selecionadas' : 'Selecionar esta proposta'}
+                      />
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {proposal.clientName}
                     </td>
