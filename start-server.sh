@@ -35,9 +35,22 @@ if [ ! -f ".next/standalone/server.js" ]; then
     exit 1
 fi
 
-# Criar diretórios necessários
+# Criar diretórios necessários e verificar permissões
 mkdir -p /app/propostas
 mkdir -p /app/database
+
+echo "📁 Verificando permissões dos diretórios:"
+ls -la /app/
+
+# Testar se consegue criar arquivo no diretório do banco
+echo "🗄️  Testando escrita no diretório do banco:"
+touch /app/database/test.db && rm /app/database/test.db
+if [ $? -eq 0 ]; then
+    echo "✅ Diretório do banco está acessível"
+else
+    echo "❌ ERRO: Não é possível escrever no diretório do banco"
+    exit 1
+fi
 
 echo "✅ server.js encontrado"
 echo "📁 Iniciando aplicação Next.js..."

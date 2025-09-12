@@ -49,7 +49,9 @@ RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
 
 # Create directories and set permissions  
-RUN mkdir -p /app/propostas && chown -R nextjs:nodejs /app
+RUN mkdir -p /app/propostas /app/database && \
+    chown -R nextjs:nodejs /app && \
+    chmod -R 755 /app
 
 # Set runtime environment variables
 ENV NODE_ENV=production

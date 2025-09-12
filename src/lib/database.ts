@@ -4,7 +4,7 @@ import { User } from '@/entities/User';
 import { Proposal } from '@/entities/Proposal';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
-const databaseUrl = process.env.DATABASE_URL || 'sqlite:./database.sqlite';
+const databaseUrl = process.env.DATABASE_URL || 'sqlite:/app/database/database.sqlite';
 
 const isPostgres = databaseUrl.startsWith('postgres://') || databaseUrl.startsWith('postgresql://');
 
@@ -27,12 +27,21 @@ export async function initializeDatabase() {
   }
 
   try {
+    console.log('🗄️  Connecting to database:', databaseUrl);
+    console.log('📁 Database type:', isPostgres ? 'PostgreSQL' : 'SQLite');
+    
     await AppDataSource.initialize();
     isInitialized = true;
-    console.log('🗄️  Database connection established');
+    console.log('✅ Database connection established successfully');
     return AppDataSource;
   } catch (error) {
     console.error('❌ Database connection failed:', error);
+    console.error('📋 Database URL:', databaseUrl);
+    console.error('🔍 Error details:', {
+      name: error.name,
+      message: error.message,
+      code: error.code
+    });
     throw error;
   }
 }
