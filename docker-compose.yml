@@ -17,8 +17,8 @@ services:
       - NEXT_TELEMETRY_DISABLED=1
       - REACT_EDITOR=""
       
-      # Database
-      - DATABASE_URL=${DATABASE_URL:-sqlite:/app/database/database.sqlite}
+      # Database (usando padrão local)
+      # - DATABASE_URL=${DATABASE_URL:-sqlite:./database.sqlite}
       
       # Puppeteer/PDF
       - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true

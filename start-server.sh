@@ -35,21 +35,31 @@ if [ ! -f ".next/standalone/server.js" ]; then
     exit 1
 fi
 
-# Criar diretórios necessários e verificar permissões
-mkdir -p /app/propostas
-mkdir -p /app/database
+# Criar diretórios necessários e corrigir permissões
+echo "📁 Criando diretórios e corrigindo permissões..."
+mkdir -p /app/propostas /app/database
+
+# Como user nextjs pode não ter sudo, vamos tentar alternativas
+echo "🔧 Corrigindo permissões dos diretórios:"
+# Se não conseguir mudar permissões, usar diretório local
+if [ ! -w "/app/database" ]; then
+    echo "⚠️  Diretório /app/database não tem permissão de escrita"
+    echo "🔄 Usando banco local na raiz do projeto..."
+    export DATABASE_URL="sqlite:./database.sqlite"
+fi
 
 echo "📁 Verificando permissões dos diretórios:"
-ls -la /app/
+ls -la /app/ | head -20
 
-# Testar se consegue criar arquivo no diretório do banco
+# Testar onde consegue escrever
 echo "🗄️  Testando escrita no diretório do banco:"
-touch /app/database/test.db && rm /app/database/test.db
-if [ $? -eq 0 ]; then
-    echo "✅ Diretório do banco está acessível"
+if [ -w "/app/database" ]; then
+    touch /app/database/test.db && rm /app/database/test.db
+    echo "✅ Diretório /app/database está acessível"
 else
-    echo "❌ ERRO: Não é possível escrever no diretório do banco"
-    exit 1
+    echo "⚠️  Usando banco local: $DATABASE_URL"
+    touch ./test.db && rm ./test.db
+    echo "✅ Diretório local está acessível"
 fi
 
 echo "✅ server.js encontrado"

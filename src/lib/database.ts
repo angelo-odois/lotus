@@ -4,7 +4,8 @@ import { User } from '@/entities/User';
 import { Proposal } from '@/entities/Proposal';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
-const databaseUrl = process.env.DATABASE_URL || 'sqlite:/app/database/database.sqlite';
+// Usar banco local se não especificado - evita problemas de permissão
+const databaseUrl = process.env.DATABASE_URL || 'sqlite:./database.sqlite';
 
 const isPostgres = databaseUrl.startsWith('postgres://') || databaseUrl.startsWith('postgresql://');
 
