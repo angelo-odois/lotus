@@ -3,12 +3,17 @@
 echo "🚀 Iniciando servidor Lotus..."
 
 # COOLIFY PROTECTION: Remover variáveis automáticas problemáticas
-# Essas variáveis são definidas automaticamente pelo Coolify e podem quebrar a aplicação
 echo "🛡️  Removendo variáveis automáticas do Coolify que podem causar problemas..."
-unset SERVICE_FQDN_LOTUS_APP
-unset SERVICE_URL_LOTUS_APP
-unset SERVICE_FQDN
-unset SERVICE_URL
+echo "🔍 Variáveis SERVICE encontradas:"
+env | grep -E "^SERVICE_" || echo "Nenhuma variável SERVICE encontrada"
+
+# Remove todas as variáveis SERVICE_* que o Coolify adiciona automaticamente
+for var in $(env | grep -E "^SERVICE_" | cut -d= -f1); do
+    echo "🗑️  Removendo: $var"
+    unset $var
+done
+
+echo "✅ Variáveis SERVICE limpas"
 
 echo "📊 Variáveis de ambiente:"
 echo "NODE_ENV: $NODE_ENV"

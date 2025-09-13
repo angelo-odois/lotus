@@ -38,6 +38,7 @@ Copie **EXATAMENTE** estas variáveis para o Coolify:
 
 ```env
 DATABASE_URL=postgres://postgres:vcClbZixT5W8M6wiBf6oocvrnsGrEPG0EGlvcSnKZ7sGhIQMkrGNxWAsgoH87cfC@212.85.13.91:5432/lotus
+JWT_SECRET_CURRENT=lotus-production-jwt-secret-32-chars-minimum-2024-secure-key
 NODE_ENV=production
 NEXT_TELEMETRY_DISABLED=1
 ```
@@ -59,33 +60,43 @@ NEXT_TELEMETRY_DISABLED=1
 DATABASE_URL=postgres://postgres:vcClbZixT5W8M6wiBf6oocvrnsGrEPG0EGlvcSnKZ7sGhIQMkrGNxWAsgoH87cfC@212.85.13.91:5432/lotus
 ```
 
-### ❌ **Health Check falhando ("no available server")**
+### ❌ **Erro 404 - Failed to load resource**
 
-**DISPONÍVEIS 3 ENDPOINTS DE HEALTH CHECK:**
+**DISPONÍVEIS MÚLTIPLOS ENDPOINTS PARA DEBUG:**
 
-1. **`/api/health`** (recomendado) - Retorna texto "OK"
-2. **`/api/status`** - Retorna texto "OK" 
-3. **`/api/ping`** - Retorna JSON {"status":"ok"}
+1. **`/api/ping`** - JSON simples {"status":"ok"}
+2. **`/api/health`** - Texto simples "OK" 
+3. **`/api/coolify-debug`** - Info detalhada do ambiente
+4. **`/api`** - Endpoint raiz da API
 
-**CONFIGURAÇÕES PARA TESTAR NO COOLIFY:**
+**CONFIGURAÇÃO RECOMENDADA NO COOLIFY:**
 
 ```bash
-# OPÇÃO 1 (recomendado):
-health_check_path: /api/health
-health_check_method: GET
-health_check_response_text: OK
-health_check_timeout: 60
-startup_timeout: 300
+# Use estas configurações EXATAS:
+Domain: lt.odois.dev
+Port: 3000
+Health Check Path: /api/ping
+Health Check Method: GET
+Health Check Timeout: 30s
+Startup Timeout: 180s
 
-# OPÇÃO 2 (se falhar):
-health_check_path: /api/status
-health_check_method: GET
-health_check_response_text: OK
+# NÃO defina health_check_response_text - deixe vazio!
+```
 
-# OPÇÃO 3 (se ainda falhar):
-health_check_path: /api/ping
-health_check_method: GET
-health_check_response_text: ok
+**DEBUGGING 404 - TESTE ESTAS URLs:**
+
+```bash
+# 1. Primeiro teste o health check:
+curl https://lt.odois.dev/api/ping
+
+# 2. Teste o debug específico do Coolify:
+curl https://lt.odois.dev/api/coolify-debug
+
+# 3. Teste a página principal:
+curl https://lt.odois.dev/
+
+# 4. Teste a API raiz:
+curl https://lt.odois.dev/api
 ```
 
 **TROUBLESHOOTING AVANÇADO:**
