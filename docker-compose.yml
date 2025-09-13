@@ -9,38 +9,36 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # OBRIGATÓRIAS
-      - NODE_ENV=production
-      - JWT_SECRET_CURRENT=${JWT_SECRET_CURRENT}
+      # OBRIGATÓRIA - PostgreSQL Database
+      - DATABASE_URL=${DATABASE_URL}
       
-      # Next.js
+      # OBRIGATÓRIA - Ambiente
+      - NODE_ENV=production
+      
+      # Next.js otimizações
       - NEXT_TELEMETRY_DISABLED=1
       - REACT_EDITOR=""
       
-      # Database (usando padrão local)
-      # - DATABASE_URL=${DATABASE_URL:-sqlite:./database.sqlite}
+      # Coolify - Prevenção de variáveis conflitantes
+      # Essas variáveis são automaticamente removidas pelo start-server.sh
+      # para evitar conflitos com o domínio personalizado
       
-      # Puppeteer/PDF
-      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-      
-      # WhatsApp (opcionais)
-      - WAHA_URL=${WAHA_URL:-https://waha.nexuso2.com}
-      - WAHA_API_KEY=${WAHA_API_KEY}
-      - WHATSAPP_PHONE=${WHATSAPP_PHONE}
-      - WHATSAPP_SESSION=${WHATSAPP_SESSION:-lotus}
     volumes:
-      # Persistir dados
-      - ./propostas:/app/propostas
-      - ./database:/app/database
+      # Volume para dados persistentes (se necessário no futuro)
+      - lotus-data:/app/data
       - /etc/localtime:/etc/localtime:ro
+      
     restart: unless-stopped
+    
+    # Health Check - Coolify compatível
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
       interval: 30s
       timeout: 15s
-      retries: 5
+      retries: 3
       start_period: 60s
+      
+    # Resource limits otimizados para Coolify
     deploy:
       resources:
         limits:
@@ -49,9 +47,39 @@ services:
         reservations:
           memory: 512M
           cpus: '0.25'
+          
     networks:
       - lotus-network
+
+  # ⚠️ PostgreSQL NÃO incluído pois Coolify usa PostgreSQL externo
+  # DATABASE_URL deve apontar para a instância PostgreSQL externa
+  
+volumes:
+  # Volume para dados da aplicação (se necessário)
+  lotus-data:
+    driver: local
 
 networks:
   lotus-network:
     driver: bridge
+
+# 📋 INSTRUÇÕES PARA COOLIFY:
+# 
+# 1. Variáveis de ambiente obrigatórias:
+#    DATABASE_URL=postgres://postgres:password@host:5432/lotus
+#    NODE_ENV=production
+#
+# 2. Health Check configurar no Coolify:
+#    Path: /api/health
+#    Method: GET
+#    Expected Response: OK
+#    Timeout: 60s
+#
+# 3. Domain: lt.odois.dev
+#
+# 4. Resources:
+#    Memory: 512MB (reserved) / 1GB (limit)
+#    CPU: 0.25 (reserved) / 0.5 (limit)
+#
+# 5. IMPORTANTE: O projeto remove automaticamente variáveis
+#    SERVICE_FQDN_* e SERVICE_URL_* do Coolify que causam conflitos

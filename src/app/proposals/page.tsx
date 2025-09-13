@@ -175,11 +175,11 @@ export default function ProposalsPage() {
   }
 
   async function handleBulkDelete() {
-    const deletableProposals = proposals.filter(p => 
+    const deletableProposals = proposals?.filter(p => 
       selectedProposals.includes(p.id) && p.status !== 'approved'
     );
     
-    if (deletableProposals.length === 0) {
+    if (!deletableProposals || deletableProposals.length === 0) {
       setError('Nenhuma proposta selecionada pode ser apagada (propostas aprovadas não podem ser removidas)');
       return;
     }
@@ -373,13 +373,13 @@ export default function ProposalsPage() {
                   <input
                     type="checkbox"
                     checked={
-                      proposals.length > 0 && 
-                      selectedProposals.length === proposals.filter(p => p.status !== 'approved').length &&
-                      proposals.filter(p => p.status !== 'approved').length > 0
+                      proposals?.length > 0 && 
+                      selectedProposals.length === proposals?.filter(p => p.status !== 'approved').length &&
+                      proposals?.filter(p => p.status !== 'approved').length > 0
                     }
                     onChange={handleSelectAll}
                     className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                    disabled={loading || proposals.every(p => p.status === 'approved')}
+                    disabled={loading || proposals?.every(p => p.status === 'approved')}
                     title="Selecionar todas as propostas não aprovadas"
                   />
                 </th>
@@ -413,14 +413,14 @@ export default function ProposalsPage() {
                     Carregando...
                   </td>
                 </tr>
-              ) : proposals.length === 0 ? (
+              ) : !proposals || proposals.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
                     {searchQuery ? 'Nenhuma proposta encontrada' : 'Nenhuma proposta disponível'}
                   </td>
                 </tr>
               ) : (
-                proposals.map((proposal) => (
+                proposals?.map((proposal) => (
                   <tr key={proposal.id} className={selectedProposals.includes(proposal.id) ? 'bg-blue-50' : ''}>
                     <td className="px-4 py-4 whitespace-nowrap">
                       <input
