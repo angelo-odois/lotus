@@ -5,12 +5,12 @@ import Image from 'next/image';
 
 interface SuccessPageProps {
   customerName: string;
-  proposalId?: string;
+  pdfFilename?: string;
   message?: string;
   onNewProposal: () => void;
 }
 
-export function SuccessPage({ customerName, proposalId, message, onNewProposal }: SuccessPageProps) {
+export function SuccessPage({ customerName, pdfFilename, message, onNewProposal }: SuccessPageProps) {
 
   return (
     <div className="min-h-screen bg-[#FEFCF7] font-inter">
@@ -36,37 +36,43 @@ export function SuccessPage({ customerName, proposalId, message, onNewProposal }
                 Olá, {customerName}! 👋
               </h2>
               <p className="text-gray-600 leading-relaxed">
-                {message || 'Sua proposta foi registrada com sucesso. Nossa equipe de vendas entrará em contato em breve para dar andamento ao processo.'}
+                {message || 'Sua proposta foi gerada com sucesso! Faça o download do arquivo PDF abaixo.'}
               </p>
-              {proposalId && (
-                <p className="text-sm text-gray-500 mt-2">
-                  ID da Proposta: <code className="bg-gray-100 px-2 py-1 rounded">{proposalId}</code>
-                </p>
-              )}
             </div>
 
-            {/* Status cards */}
-            <div className="grid grid-cols-1 gap-4 mb-8">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <div className="flex items-center space-x-3">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
-                  <div>
-                    <p className="font-medium text-green-900">Dados Coletados</p>
-                    <p className="text-sm text-green-700">Proposta registrada no sistema</p>
+            {/* Download PDF */}
+            {pdfFilename && (
+              <div className="grid grid-cols-1 gap-4 mb-8">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Download className="h-6 w-6 text-blue-600" />
+                      <div>
+                        <p className="font-medium text-blue-900">PDF Gerado</p>
+                        <p className="text-sm text-blue-700">Sua proposta está pronta para download</p>
+                      </div>
+                    </div>
+                    <a
+                      href={`/api/download-pdf/${pdfFilename}`}
+                      download
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center space-x-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      <span>Download</span>
+                    </a>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Next steps */}
             <div className="bg-[#FFC629]/10 border border-[#FFC629]/30 rounded-xl p-6 mb-8">
               <div className="text-center">
-                <MessageCircle className="mx-auto h-12 w-12 text-[#1A1A1A] mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  📞 Próximos Passos
+                  ✨ Proposta Concluída
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  Nossa equipe analisará sua proposta e entrará em contato para dar andamento ao processo
+                  Sua proposta foi gerada com sucesso! Salve o PDF para seus registros.
                 </p>
                 <button
                   onClick={onNewProposal}

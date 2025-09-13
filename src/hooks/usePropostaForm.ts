@@ -235,62 +235,20 @@ export function usePropostaForm() {
         documentos: submitData.documentos.length
       });
 
-      // Organizar dados para nova API
-      const collectData = {
-        dadosPessoais: {
-          nomeCompleto: submitData.nome,
-          email: submitData.email,
-          telefone: submitData.telefone,
-          cpf: submitData.cpf,
-          rg: submitData.rg,
-          estadoCivil: submitData.estadoCivil,
-          nacionalidade: submitData.nacionalidade,
-          profissao: submitData.profissao,
-          rendaMensal: submitData.rendaMensal
-        },
-        endereco: {
-          cep: submitData.cep,
-          rua: submitData.rua,
-          numero: submitData.numero,
-          complemento: submitData.complemento,
-          bairro: submitData.bairro,
-          cidade: submitData.cidade,
-          estado: submitData.estado
-        },
-        dadosConjuge: submitData.conjuge ? {
-          nomeConjuge: submitData.nomeConjuge,
-          cpfConjuge: submitData.cpfConjuge,
-          telefoneConjuge: submitData.telefoneConjuge,
-          profissaoConjuge: submitData.profissaoConjuge,
-          rendaConjuge: submitData.rendaConjuge
-        } : null,
-        empreendimento: {
-          nome: submitData.empreendimento,
-          endereco: submitData.enderecoEmpreendimento
-        },
-        unidade: {
-          numero: submitData.unidadeNumero,
-          valorImovel: submitData.valorImovel,
-          valorEntrada: submitData.valorEntrada,
-          financiamento: submitData.financiamento,
-          valorFinanciamento: submitData.valorFinanciamento
-        },
-        documentos: submitData.documentos
-      };
-
-      // Enviar para nova API de coleta
-      const response = await fetch('/api/collect', {
+      // Gerar PDF diretamente
+      const response = await fetch('/api/proposta', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(collectData)
+        body: JSON.stringify(submitData)
       });
 
       if (response.ok) {
         const result = await response.json();
-        console.log('✅ Proposta coletada:', result);
+        console.log('✅ PDF gerado:', result);
         
         setSuccessData({ 
-          proposalId: result.proposalId,
+          filename: result.filename,
+          downloadUrl: result.downloadUrl,
           message: result.message 
         });
         setIsSuccess(true);

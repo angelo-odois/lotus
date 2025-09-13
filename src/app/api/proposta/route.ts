@@ -1,18 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { FormData } from '@/types/form';
-import { config } from '@/config';
-import { createProposal } from '@/lib/queries';
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
 import { v4 as uuidv4 } from 'uuid';
-
-const whatsappConfig = {
-  url: process.env.WAHA_URL || config.whatsapp.url,
-  apiKey: process.env.WAHA_API_KEY || config.whatsapp.apiKey,
-  phone: process.env.WHATSAPP_PHONE || config.whatsapp.phone,
-  session: process.env.WHATSAPP_SESSION || config.whatsapp.session
-};
 
 async function getPuppeteerInstance(): Promise<any> {
   const isDocker = fs.existsSync('/.dockerenv');
@@ -173,62 +163,41 @@ async function getBrowserConfigLocal(): Promise<any> {
 }
 
 export async function POST(request: NextRequest) {
-  console.log('🚀 Iniciando processamento da proposta...');
+  console.log('🚀 Iniciando geração de PDF...');
   
   try {
     const body = await request.json();
     const formData: FormData = body;
     const uploadedFiles = body.documentos || [];
     
-    console.log('📄 Gerando PDF no servidor...', { 
+    console.log('📄 Gerando PDF...', { 
       nome: formData.nome, 
       documentos: uploadedFiles.length 
     });
 
-    // Gerar ID único para a proposta
-    const proposalId = uuidv4();
-    
-    // Salvar no banco de dados PRIMEIRO
-    console.log('💾 Salvando proposta no banco de dados...');
-    await createProposal({
-      id: proposalId,
-      clientName: formData.nome || 'Cliente não informado',
-      attachmentCount: uploadedFiles.length,
-      status: 'sent', // Status inicial: enviada
-      formData: JSON.stringify(formData)
-    });
-    
-    console.log('✅ Proposta salva no banco com ID:', proposalId);
-
-    // Gerar PDF com Puppeteer (muito mais confiável)
+    // Gerar PDF com Puppeteer
     const pdfBuffer = await generatePDFWithPuppeteer(formData, uploadedFiles);
     
-    // Salvar PDF
+    // Salvar PDF para download
     const filename = `proposta-lotus-${formData.nome?.replace(/\s+/g, '-').toLowerCase() || 'cliente'}-${Date.now()}.pdf`;
     const filepath = await savePDF(pdfBuffer, filename);
     
-    console.log('✅ Proposta processada com sucesso');
+    console.log('✅ PDF gerado com sucesso');
     
     return NextResponse.json({
       success: true,
-      message: 'Proposta gerada e enviada com sucesso',
-      proposalId,
+      message: 'PDF gerado com sucesso',
       filename,
-      filepath
+      downloadUrl: `/api/download-pdf/${filename}`
     });
 
   } catch (error) {
     console.error('❌ Erro na API:', error);
     
-    // Log mais detalhado do erro
-    if (error instanceof Error) {
-      console.error('❌ Stack trace:', error.stack);
-    }
-    
     return NextResponse.json(
       { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Erro interno do servidor',
+        error: error instanceof Error ? error.message : 'Erro ao gerar PDF',
         timestamp: new Date().toISOString()
       },
       { status: 500 }
@@ -806,7 +775,7 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
         <table class="form-table">
           <tr>
             <td class="form-label">EMPREENDIMENTO:</td>
-            <td class="form-value">${formData.empreendimento ? config.empreendimentos[formData.empreendimento as keyof typeof config.empreendimentos] : ''}</td>
+            <td class="form-value">${formData.empreendimento || ''}</td>
           </tr>
           <tr>
             <td class="form-label">INCORPORADORA:</td>
@@ -922,133 +891,3 @@ async function savePDF(pdfBuffer: Buffer, filename: string): Promise<string> {
   return filepath;
 }
 
-async function sendWhatsAppNotification(formData: FormData, filepath: string) {
-  try {
-    const cliente = formData.nome || 'Cliente';
-    const empreendimento = formData.empreendimento || 'Empreendimento';
-    const unidade = formData.unidadeNumero || 'N/A';
-    const valorImovel = formData.valorImovel || 'N/A';
-    
-    const mensagem = `🏠 *NOVA PROPOSTA DE COMPRA - LOTUS*\n\n` +
-      `👤 *Cliente:* ${cliente}\n` +
-      `🏢 *Empreendimento:* ${empreendimento.toUpperCase()}\n` +
-      `🏠 *Unidade:* ${unidade}\n` +
-      `💰 *Valor:* R$ ${valorImovel}\n` +
-      `📅 *Data:* ${new Date().toLocaleDateString('pt-BR')}\n\n` +
-      `📄 *PDF da proposta anexado!*\n` +
-      `✅ *Status:* Aguardando análise`;
-
-    console.log('📱 Enviando mensagem WhatsApp...');
-
-    // Enviar mensagem
-    const textResponse = await fetch(`${whatsappConfig.url}/api/sendText`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Api-Key': whatsappConfig.apiKey,
-      },
-      body: JSON.stringify({
-        session: whatsappConfig.session,
-        chatId: `${whatsappConfig.phone}@c.us`,
-        text: mensagem
-      })
-    });
-
-    if (!textResponse.ok) {
-      const errorText = await textResponse.text();
-      console.error('❌ Erro texto WhatsApp:', textResponse.status, errorText);
-      throw new Error(`Erro ao enviar mensagem: ${textResponse.status}`);
-    }
-
-    console.log('✅ Mensagem WhatsApp enviada');
-
-    // Ler o PDF do arquivo salvo para garantir integridade
-    console.log('📎 Lendo PDF do arquivo para WhatsApp...');
-    const savedPdfBuffer = fs.readFileSync(filepath);
-    
-    console.log('📊 PDF do arquivo info:', {
-      length: savedPdfBuffer.length,
-      isBuffer: Buffer.isBuffer(savedPdfBuffer),
-      filename: path.basename(filepath)
-    });
-
-    // Verificar cabeçalho do PDF salvo
-    const pdfHeader = savedPdfBuffer.subarray(0, 4).toString('ascii');
-    console.log('📄 PDF Header do arquivo:', pdfHeader);
-    
-    if (pdfHeader !== '%PDF') {
-      console.error('❌ PDF salvo é inválido. Header:', pdfHeader);
-      console.log('📊 Primeiros 20 bytes:', Array.from(savedPdfBuffer.subarray(0, 20)));
-      throw new Error(`PDF salvo é inválido - cabeçalho: ${pdfHeader}`);
-    }
-
-    // Converter para base64
-    const base64PDF = savedPdfBuffer.toString('base64');
-    console.log('📊 Base64 info:', {
-      length: base64PDF.length,
-      firstChars: base64PDF.substring(0, 20)
-    });
-
-    console.log('📤 Enviando PDF via WhatsApp...');
-    
-    const fileResponse = await fetch(`${whatsappConfig.url}/api/sendFile`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Api-Key': whatsappConfig.apiKey,
-      },
-      body: JSON.stringify({
-        session: whatsappConfig.session,
-        chatId: `${whatsappConfig.phone}@c.us`,
-        file: {
-          mimetype: 'application/pdf',
-          filename: path.basename(filepath),
-          data: base64PDF
-        },
-        caption: `📄 Proposta de compra - ${cliente}`
-      })
-    });
-
-    if (!fileResponse.ok) {
-      const errorText = await fileResponse.text();
-      console.error('❌ Erro arquivo WhatsApp:', fileResponse.status, errorText);
-      throw new Error(`Erro ao enviar PDF: ${fileResponse.status} - ${errorText}`);
-    }
-
-    const fileResult = await fileResponse.json();
-    console.log('✅ PDF WhatsApp enviado:', fileResult);
-    
-  } catch (error) {
-    console.error('❌ Erro geral WhatsApp:', error);
-    
-    // Se falhou, pelo menos enviar mensagem informando
-    try {
-      console.log('🔄 Tentando enviar apenas mensagem de fallback...');
-      const fallbackMessage = `❌ *PROPOSTA LOTUS - ERRO NO PDF*\n\n` +
-        `👤 *Cliente:* ${formData.nome || 'Cliente'}\n` +
-        `📅 *Data:* ${new Date().toLocaleDateString('pt-BR')}\n\n` +
-        `⚠️ *Houve um problema no envio do PDF*\n` +
-        `📧 *PDF foi salvo no servidor para envio posterior*`;
-      
-      await fetch(`${whatsappConfig.url}/api/sendText`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Api-Key': whatsappConfig.apiKey,
-        },
-        body: JSON.stringify({
-          session: whatsappConfig.session,
-          chatId: `${whatsappConfig.phone}@c.us`,
-          text: fallbackMessage
-        })
-      });
-      
-      console.log('📱 Mensagem de fallback enviada');
-    } catch (fallbackError) {
-      console.error('❌ Erro no fallback também:', fallbackError);
-    }
-    
-    // Não fazer throw para não quebrar o processo todo
-    console.log('⚠️ Continuando sem envio de PDF via WhatsApp');
-  }
-}
