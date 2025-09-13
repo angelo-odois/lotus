@@ -32,9 +32,12 @@ NEXT_TELEMETRY_DISABLED=1
 
 ### ✅ **1. Configurações no Coolify**
 - [ ] **Domain**: `lt.odois.dev`
-- [ ] **Health Check**: `/api/health` (NÃO `/`)
+- [ ] **Health Check Path**: `/api/ping` (endpoint super simples)
+- [ ] **Health Check Method**: `GET`
+- [ ] **Health Check Response Text**: `ok`
+- [ ] **Health Check Timeout**: `60s`
 - [ ] **Port**: `3000`
-- [ ] **Timeout**: 180s (startup) / 30s (health)
+- [ ] **Startup Timeout**: `300s` (5 minutos)
 
 ### ✅ **2. Variáveis de Ambiente**
 Copie **EXATAMENTE** estas variáveis para o Coolify:
@@ -65,11 +68,21 @@ NEXT_TELEMETRY_DISABLED=1
 JWT_SECRET_CURRENT=lotus-production-jwt-secret-32-chars-minimum-2024-secure-key
 ```
 
-### ❌ **Health Check falhando**
+### ❌ **Health Check falhando ("no available server")**
 ```bash
-# PROBLEMA: Health check configurado para "/"
-# SOLUÇÃO: Configure para "/api/health"
-health_check_path: /api/health
+# PROBLEMA: Coolify não consegue acessar o health check
+# SOLUÇÕES:
+# 1. Use o endpoint simples: /api/ping
+# 2. Configure "Health Check Response Text": ok
+# 3. Aumente timeout: 60s
+# 4. Startup timeout: 300s (5 minutos)
+
+# CONFIGURAÇÃO CORRETA:
+health_check_path: /api/ping
+health_check_method: GET
+health_check_response_text: ok
+health_check_timeout: 60
+startup_timeout: 300
 ```
 
 ### ❌ **Container não inicia**
