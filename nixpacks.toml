@@ -1,0 +1,23 @@
+[providers]
+node = true
+
+[build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm start"
+
+[variables]
+NODE_ENV = "production"
+NEXT_TELEMETRY_DISABLED = "1"
+PORT = "3000"
+
+[phases.build]
+dependsOn = ["install"]
+
+[phases.install]
+cmds = ["npm ci"]
+
+[config]
+port = 3000
+healthcheck = "/api/ping"
