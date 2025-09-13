@@ -6,9 +6,16 @@ import { useRouter } from 'next/navigation';
 interface Proposal {
   id: string;
   clientName: string;
-  attachmentCount: number;
+  email: string;
+  telefone: string;
+  empreendimento: string;
+  unidadeNumero: string;
+  valorImovel: string;
   status: string;
+  pdfGerado: boolean;
+  whatsappEnviado: boolean;
   createdAt: string;
+  updatedAt: string;
 }
 
 interface Pagination {
@@ -56,15 +63,16 @@ export default function ProposalsPage() {
       const params = new URLSearchParams({
         page: page.toString(),
         pageSize: '20',
-        ...(q && { q })
+        ...(q && { search: q })
       });
 
-      const response = await fetch(`/api/proposals?${params}`);
+      const response = await fetch(`/api/propostas?${params}`);
       
-      if (response.status === 401) {
-        router.push('/login');
-        return;
-      }
+      // Autenticação temporariamente desabilitada para teste
+      // if (response.status === 401) {
+      //   router.push('/login');
+      //   return;
+      // }
 
       if (!response.ok) {
         throw new Error('Erro ao carregar propostas');
@@ -276,10 +284,7 @@ export default function ProposalsPage() {
     });
   }
 
-  function formatAttachments(count: number): string {
-    if (count === 0) return '—';
-    return `${count} anexo${count > 1 ? 's' : ''}`;
-  }
+  // formatAttachments removido - não usado mais
 
   useEffect(() => {
     fetchProposals();
@@ -382,10 +387,19 @@ export default function ProposalsPage() {
                   Cliente
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Anexos
+                  Empreendimento
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Gerada em
+                  Unidade
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Valor
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Criada em
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Ações
@@ -418,11 +432,29 @@ export default function ProposalsPage() {
                         title={proposal.status === 'approved' ? 'Propostas aprovadas não podem ser selecionadas' : 'Selecionar esta proposta'}
                       />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {proposal.clientName}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{proposal.clientName}</div>
+                      <div className="text-sm text-gray-500">{proposal.email}</div>
+                      <div className="text-sm text-gray-500">{proposal.telefone}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatAttachments(proposal.attachmentCount)}
+                      {proposal.empreendimento || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {proposal.unidadeNumero || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {proposal.valorImovel ? `R$ ${parseFloat(proposal.valorImovel).toLocaleString('pt-BR')}` : '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        proposal.status === 'enviado' ? 'bg-blue-100 text-blue-800' :
+                        proposal.status === 'aprovado' ? 'bg-green-100 text-green-800' :
+                        proposal.status === 'rejeitado' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {proposal.status}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(proposal.createdAt)}

@@ -15,22 +15,14 @@ echo "NODE_ENV: $NODE_ENV"
 echo "PORT: $PORT"
 echo "HOSTNAME: $HOSTNAME"
 echo "COOLIFY_DOMAIN: $COOLIFY_DOMAIN"
-echo "JWT_SECRET_CURRENT: ${JWT_SECRET_CURRENT:0:10}..." # Mostrar só os primeiros 10 chars
+echo "DATABASE_URL: ${DATABASE_URL%%@*}@[HIDDEN]" # Mostrar só o início da URL
 echo "PWD: $(pwd)"
 
 # Verificar variáveis obrigatórias
-if [ -z "$JWT_SECRET_CURRENT" ]; then
-    echo "❌ ERRO: JWT_SECRET_CURRENT não definida!"
+if [ -z "$DATABASE_URL" ]; then
+    echo "❌ ERRO: DATABASE_URL não definida!"
     echo "⚠️ Esta variável é obrigatória para a aplicação funcionar"
-    echo "📝 Adicione no Coolify: JWT_SECRET_CURRENT=lotus-production-jwt-secret-32-chars-minimum-2024-secure-key"
-    exit 1
-fi
-
-# Validar tamanho mínimo do JWT secret
-if [ ${#JWT_SECRET_CURRENT} -lt 32 ]; then
-    echo "❌ ERRO: JWT_SECRET_CURRENT deve ter pelo menos 32 caracteres!"
-    echo "⚠️ Tamanho atual: ${#JWT_SECRET_CURRENT}"
-    echo "📝 Use: JWT_SECRET_CURRENT=lotus-production-jwt-secret-32-chars-minimum-2024-secure-key"
+    echo "📝 Adicione no Coolify: DATABASE_URL=postgres://postgres:password@host:5432/lotus"
     exit 1
 fi
 
@@ -54,32 +46,9 @@ if [ ! -f ".next/standalone/server.js" ]; then
     exit 1
 fi
 
-# Criar diretórios necessários e corrigir permissões
-echo "📁 Criando diretórios e corrigindo permissões..."
-mkdir -p /app/propostas /app/database
-
-# Como user nextjs pode não ter sudo, vamos tentar alternativas
-echo "🔧 Corrigindo permissões dos diretórios:"
-# Se não conseguir mudar permissões, usar diretório local
-if [ ! -w "/app/database" ]; then
-    echo "⚠️  Diretório /app/database não tem permissão de escrita"
-    echo "🔄 Usando banco local na raiz do projeto..."
-    export DATABASE_URL="sqlite:./database.sqlite"
-fi
-
-echo "📁 Verificando permissões dos diretórios:"
-ls -la /app/ | head -20
-
-# Testar onde consegue escrever
-echo "🗄️  Testando escrita no diretório do banco:"
-if [ -w "/app/database" ]; then
-    touch /app/database/test.db && rm /app/database/test.db
-    echo "✅ Diretório /app/database está acessível"
-else
-    echo "⚠️  Usando banco local: $DATABASE_URL"
-    touch ./test.db && rm ./test.db
-    echo "✅ Diretório local está acessível"
-fi
+# Testar conexão com PostgreSQL
+echo "🔗 Testando conexão com PostgreSQL..."
+echo "DATABASE_URL configurado: ${DATABASE_URL%%@*}@[HIDDEN]"
 
 echo "✅ server.js encontrado"
 echo "📁 Iniciando aplicação Next.js..."

@@ -235,23 +235,69 @@ export function usePropostaForm() {
         documentos: submitData.documentos.length
       });
 
-      // Enviar para API
-      const response = await fetch('/api/proposta', {
+      // Organizar dados para nova API
+      const collectData = {
+        dadosPessoais: {
+          nomeCompleto: submitData.nome,
+          email: submitData.email,
+          telefone: submitData.telefone,
+          cpf: submitData.cpf,
+          rg: submitData.rg,
+          estadoCivil: submitData.estadoCivil,
+          nacionalidade: submitData.nacionalidade,
+          profissao: submitData.profissao,
+          rendaMensal: submitData.rendaMensal
+        },
+        endereco: {
+          cep: submitData.cep,
+          rua: submitData.rua,
+          numero: submitData.numero,
+          complemento: submitData.complemento,
+          bairro: submitData.bairro,
+          cidade: submitData.cidade,
+          estado: submitData.estado
+        },
+        dadosConjuge: submitData.conjuge ? {
+          nomeConjuge: submitData.nomeConjuge,
+          cpfConjuge: submitData.cpfConjuge,
+          telefoneConjuge: submitData.telefoneConjuge,
+          profissaoConjuge: submitData.profissaoConjuge,
+          rendaConjuge: submitData.rendaConjuge
+        } : null,
+        empreendimento: {
+          nome: submitData.empreendimento,
+          endereco: submitData.enderecoEmpreendimento
+        },
+        unidade: {
+          numero: submitData.unidadeNumero,
+          valorImovel: submitData.valorImovel,
+          valorEntrada: submitData.valorEntrada,
+          financiamento: submitData.financiamento,
+          valorFinanciamento: submitData.valorFinanciamento
+        },
+        documentos: submitData.documentos
+      };
+
+      // Enviar para nova API de coleta
+      const response = await fetch('/api/collect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(submitData)
+        body: JSON.stringify(collectData)
       });
 
       if (response.ok) {
         const result = await response.json();
-        console.log('✅ Proposta enviada:', result);
+        console.log('✅ Proposta coletada:', result);
         
-        setSuccessData({ filename: result.filename });
+        setSuccessData({ 
+          proposalId: result.proposalId,
+          message: result.message 
+        });
         setIsSuccess(true);
       } else {
-        const errorText = await response.text();
-        console.error('❌ Erro servidor:', response.status, errorText);
-        throw new Error(`Erro ${response.status}: ${errorText}`);
+        const errorData = await response.json();
+        console.error('❌ Erro servidor:', response.status, errorData);
+        throw new Error(`Erro ${response.status}: ${errorData.error || 'Erro desconhecido'}`);
       }
     } catch (error) {
       console.error('❌ Erro ao enviar:', error);

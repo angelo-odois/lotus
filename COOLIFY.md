@@ -11,18 +11,12 @@ O Coolify define automaticamente variáveis como `SERVICE_FQDN_LOTUS_APP` e `SER
 ✅ **SOLUÇÃO**: O projeto já tem proteção automática contra essas variáveis.
 
 ```env
-# 🔐 OBRIGATÓRIO - JWT Secret (mínimo 32 caracteres)
-JWT_SECRET_CURRENT=lotus-production-jwt-secret-32-chars-minimum-2024-secure-key
+# 🔐 OBRIGATÓRIO - PostgreSQL Database
+DATABASE_URL=postgres://postgres:vcClbZixT5W8M6wiBf6oocvrnsGrEPG0EGlvcSnKZ7sGhIQMkrGNxWAsgoH87cfC@212.85.13.91:5432/lotus
 
 # 🌐 OBRIGATÓRIO - Ambiente
 NODE_ENV=production
 
-# 🐳 OBRIGATÓRIO - Puppeteer para Docker
-PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-
-# 🔧 RECOMENDADO - Domain
-COOLIFY_DOMAIN=lt.odois.dev
 
 # 🔧 OPCIONAL - Telemetria
 NEXT_TELEMETRY_DISABLED=1
@@ -43,11 +37,8 @@ NEXT_TELEMETRY_DISABLED=1
 Copie **EXATAMENTE** estas variáveis para o Coolify:
 
 ```env
-JWT_SECRET_CURRENT=lotus-production-jwt-secret-32-chars-minimum-2024-secure-key
+DATABASE_URL=postgres://postgres:vcClbZixT5W8M6wiBf6oocvrnsGrEPG0EGlvcSnKZ7sGhIQMkrGNxWAsgoH87cfC@212.85.13.91:5432/lotus
 NODE_ENV=production
-PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-COOLIFY_DOMAIN=lt.odois.dev
 NEXT_TELEMETRY_DISABLED=1
 ```
 
@@ -62,10 +53,10 @@ NEXT_TELEMETRY_DISABLED=1
 
 ## 🔍 **Troubleshooting**
 
-### ❌ **"JWT_SECRET_CURRENT is required"**
+### ❌ **"DATABASE_URL is required"**
 ```bash
 # SOLUÇÃO: Adicione a variável no Coolify
-JWT_SECRET_CURRENT=lotus-production-jwt-secret-32-chars-minimum-2024-secure-key
+DATABASE_URL=postgres://postgres:vcClbZixT5W8M6wiBf6oocvrnsGrEPG0EGlvcSnKZ7sGhIQMkrGNxWAsgoH87cfC@212.85.13.91:5432/lotus
 ```
 
 ### ❌ **Health Check falhando ("no available server")**
@@ -119,14 +110,14 @@ curl http://localhost:3000/api/ping
 ### ❌ **Container não inicia**
 ```bash
 # VERIFIQUE: Logs do container no Coolify
-# CAUSA COMUM: JWT_SECRET_CURRENT faltando ou muito curto (< 32 chars)
+# CAUSA COMUM: DATABASE_URL faltando ou incorreta
 ```
 
-### ❌ **PDF não gera**
+### ❌ **Erro de banco de dados**
 ```bash
-# VERIFIQUE: Variáveis do Puppeteer
-PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+# VERIFIQUE: DATABASE_URL correta
+# TESTE: curl https://lt.odois.dev/api/setup
+# ERRO COMUM: "database 'lotus' does not exist"
 ```
 
 ### ❌ **Acesso ao domínio lt.odois.dev não funciona**
