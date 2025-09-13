@@ -12,6 +12,15 @@ echo "PWD: $(pwd)"
 if [ -z "$JWT_SECRET_CURRENT" ]; then
     echo "❌ ERRO: JWT_SECRET_CURRENT não definida!"
     echo "⚠️ Esta variável é obrigatória para a aplicação funcionar"
+    echo "📝 Adicione no Coolify: JWT_SECRET_CURRENT=lotus-production-jwt-secret-32-chars-minimum-2024-secure-key"
+    exit 1
+fi
+
+# Validar tamanho mínimo do JWT secret
+if [ ${#JWT_SECRET_CURRENT} -lt 32 ]; then
+    echo "❌ ERRO: JWT_SECRET_CURRENT deve ter pelo menos 32 caracteres!"
+    echo "⚠️ Tamanho atual: ${#JWT_SECRET_CURRENT}"
+    echo "📝 Use: JWT_SECRET_CURRENT=lotus-production-jwt-secret-32-chars-minimum-2024-secure-key"
     exit 1
 fi
 
