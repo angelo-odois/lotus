@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromRequest } from '@/lib/auth';
 import { csrfSchema } from '@/lib/validation';
 import { audit, getClientIP, getUserAgent } from '@/lib/audit';
-import { getDatabase } from '@/lib/database';
+import { executeQuery } from '@/lib/postgres';
 import { z } from 'zod';
 
 const bulkDeleteSchema = z.object({
@@ -61,12 +61,12 @@ export async function POST(request: NextRequest) {
 
     const { proposalIds } = validation.data;
 
-    const db = await getDatabase();
-    
     // First, get all proposals to check their status
-    const placeholders = proposalIds.map(() => '?').join(',');
-    const proposals = await db.query(
-      `SELECT id, client_name, status FROM proposals WHERE id IN (${placeholders})`,
+    const placeholders = proposalIds.map((_, i) => `$${i + 1}`).join(',');
+    const proposals = await executeQuery(
+      `SELECT id, dados_pessoais->>'nomeCompleto' as client_name, status 
+       FROM propostas 
+       WHERE id IN (${placeholders})`,
       proposalIds
     );
 
@@ -105,9 +105,9 @@ export async function POST(request: NextRequest) {
     const deletableIds = deletableProposals.map((p: any) => p.id);
 
     if (deletableIds.length > 0) {
-      const deletePlaceholders = deletableIds.map(() => '?').join(',');
-      await db.query(
-        `DELETE FROM proposals WHERE id IN (${deletePlaceholders})`,
+      const deletePlaceholders = deletableIds.map((_, i) => `$${i + 1}`).join(',');
+      await executeQuery(
+        `DELETE FROM propostas WHERE id IN (${deletePlaceholders})`,
         deletableIds
       );
 

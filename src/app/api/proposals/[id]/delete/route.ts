@@ -3,7 +3,7 @@ import { findProposalById } from '@/lib/queries';
 import { getUserFromRequest } from '@/lib/auth';
 import { proposalParamsSchema, csrfSchema } from '@/lib/validation';
 import { audit, getClientIP, getUserAgent } from '@/lib/audit';
-import { getDatabase } from '@/lib/database';
+import { executeQuery } from '@/lib/postgres';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -84,8 +84,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     // Delete the proposal
-    const db = await getDatabase();
-    await db.query('DELETE FROM proposals WHERE id = ?', [id]);
+    await executeQuery('DELETE FROM propostas WHERE id = $1', [id]);
 
     audit('proposal_deleted', {
       userId: user.id,
