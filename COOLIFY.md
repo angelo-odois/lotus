@@ -69,20 +69,51 @@ JWT_SECRET_CURRENT=lotus-production-jwt-secret-32-chars-minimum-2024-secure-key
 ```
 
 ### ❌ **Health Check falhando ("no available server")**
-```bash
-# PROBLEMA: Coolify não consegue acessar o health check
-# SOLUÇÕES:
-# 1. Use o endpoint simples: /api/ping
-# 2. Configure "Health Check Response Text": ok
-# 3. Aumente timeout: 60s
-# 4. Startup timeout: 300s (5 minutos)
 
-# CONFIGURAÇÃO CORRETA:
+**DISPONÍVEIS 3 ENDPOINTS DE HEALTH CHECK:**
+
+1. **`/api/health`** (recomendado) - Retorna texto "OK"
+2. **`/api/status`** - Retorna texto "OK" 
+3. **`/api/ping`** - Retorna JSON {"status":"ok"}
+
+**CONFIGURAÇÕES PARA TESTAR NO COOLIFY:**
+
+```bash
+# OPÇÃO 1 (recomendado):
+health_check_path: /api/health
+health_check_method: GET
+health_check_response_text: OK
+health_check_timeout: 60
+startup_timeout: 300
+
+# OPÇÃO 2 (se falhar):
+health_check_path: /api/status
+health_check_method: GET
+health_check_response_text: OK
+
+# OPÇÃO 3 (se ainda falhar):
 health_check_path: /api/ping
 health_check_method: GET
 health_check_response_text: ok
-health_check_timeout: 60
-startup_timeout: 300
+```
+
+**TROUBLESHOOTING AVANÇADO:**
+```bash
+# 1. VERIFICAR se o container está rodando:
+# Logs devem mostrar: "Ready in XXXms"
+
+# 2. TESTAR INTERNAMENTE no Coolify:
+# Se possível, exec no container:
+curl http://localhost:3000/api/health
+curl http://localhost:3000/api/status  
+curl http://localhost:3000/api/ping
+
+# 3. VERIFICAR PORTA:
+# Coolify deve usar porta 3000 (não 80)
+
+# 4. TIMEOUT MAIS ALTO:
+# Startup: 600s (10 minutos)
+# Health: 120s (2 minutos)
 ```
 
 ### ❌ **Container não inicia**
