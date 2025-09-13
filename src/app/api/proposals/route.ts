@@ -1,24 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { findProposals } from '@/lib/queries';
-import { getUserFromRequest } from '@/lib/auth';
 import { proposalQuerySchema, sanitizeString } from '@/lib/validation';
-import { audit, getClientIP, getUserAgent } from '@/lib/audit';
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getUserFromRequest(request);
-    if (!user) {
-      audit('unauthorized_access', { 
-        ip: getClientIP(request), 
-        userAgent: getUserAgent(request),
-        path: '/api/proposals'
-      });
-      return NextResponse.json(
-        { error: 'Não autorizado', code: 'UNAUTHORIZED' },
-        { status: 401 }
-      );
-    }
-
     const { searchParams } = new URL(request.url);
     const query = {
       q: searchParams.get('q') || undefined,

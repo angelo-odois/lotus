@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { findProposalById, updateProposalStatus } from '@/lib/queries';
-import { getUserFromRequest } from '@/lib/auth';
-import { proposalParamsSchema, csrfSchema } from '@/lib/validation';
-import { audit, getClientIP, getUserAgent } from '@/lib/audit';
+import { proposalParamsSchema } from '@/lib/validation';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -10,18 +8,6 @@ interface RouteParams {
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
-    const user = await getUserFromRequest(request);
-    if (!user) {
-      audit('unauthorized_access', { 
-        ip: getClientIP(request), 
-        userAgent: getUserAgent(request),
-        path: `/api/proposals/*/approve`
-      });
-      return NextResponse.json(
-        { error: 'Não autorizado', code: 'UNAUTHORIZED' },
-        { status: 401 }
-      );
-    }
 
     const { id } = await params;
     const paramsValidation = proposalParamsSchema.safeParse({ id });
@@ -32,30 +18,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const body = await request.json();
-    const csrfValidation = csrfSchema.safeParse(body);
-    if (!csrfValidation.success) {
-      return NextResponse.json(
-        { error: 'Token CSRF obrigatório', code: 'CSRF_REQUIRED' },
-        { status: 400 }
-      );
-    }
-
-    // CSRF validation
-    const csrfToken = csrfValidation.data.csrfToken;
-    const csrfCookie = request.cookies.get('XSRF-TOKEN')?.value;
-    if (!csrfCookie || csrfCookie !== csrfToken) {
-      audit('csrf_violation', { 
-        userId: user.id, 
-        ip: getClientIP(request), 
-        userAgent: getUserAgent(request),
-        proposalId: id
-      });
-      return NextResponse.json(
-        { error: 'Token CSRF inválido', code: 'CSRF_ERROR' },
-        { status: 403 }
-      );
-    }
 
     const proposal = await findProposalById(id);
 
@@ -82,13 +44,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // Update status to approved
     await updateProposalStatus(id, 'approved');
 
-    audit('proposal_approved', {
-      userId: user.id,
-      proposalId: id,
-      clientName: proposal.clientName,
-      ip: getClientIP(request),
-      userAgent: getUserAgent(request)
-    });
 
     return NextResponse.json({
       ok: true,

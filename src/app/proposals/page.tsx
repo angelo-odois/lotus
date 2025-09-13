@@ -27,21 +27,6 @@ interface Pagination {
   hasPrev: boolean;
 }
 
-function getCsrfToken(): string {
-  const name = 'XSRF-TOKEN=';
-  const decodedCookie = decodeURIComponent(document.cookie);
-  const ca = decodedCookie.split(';');
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) === ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) === 0) {
-      return c.substring(name.length, c.length);
-    }
-  }
-  return '';
-}
 
 export default function ProposalsPage() {
   const [proposals, setProposals] = useState<Proposal[]>([]);
@@ -68,11 +53,6 @@ export default function ProposalsPage() {
 
       const response = await fetch(`/api/propostas?${params}`);
       
-      // Autenticação temporariamente desabilitada para teste
-      // if (response.status === 401) {
-      //   router.push('/login');
-      //   return;
-      // }
 
       if (!response.ok) {
         throw new Error('Erro ao carregar propostas');
@@ -93,24 +73,13 @@ export default function ProposalsPage() {
     setError('');
 
     try {
-      const csrfToken = getCsrfToken();
-      if (!csrfToken) {
-        throw new Error('Token CSRF não encontrado');
-      }
-
       const response = await fetch(`/api/proposals/${proposalId}/approve`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-csrf-token': csrfToken,
         },
-        body: JSON.stringify({ csrfToken }),
+        body: JSON.stringify({}),
       });
-
-      if (response.status === 401) {
-        router.push('/login');
-        return;
-      }
 
       if (!response.ok) {
         const data = await response.json();
@@ -141,24 +110,13 @@ export default function ProposalsPage() {
     setError('');
 
     try {
-      const csrfToken = getCsrfToken();
-      if (!csrfToken) {
-        throw new Error('Token CSRF não encontrado');
-      }
-
       const response = await fetch(`/api/proposals/${proposalId}/delete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-csrf-token': csrfToken,
         },
-        body: JSON.stringify({ csrfToken }),
+        body: JSON.stringify({}),
       });
-
-      if (response.status === 401) {
-        router.push('/login');
-        return;
-      }
 
       if (!response.ok) {
         const data = await response.json();
@@ -193,27 +151,15 @@ export default function ProposalsPage() {
     setError('');
 
     try {
-      const csrfToken = getCsrfToken();
-      if (!csrfToken) {
-        throw new Error('Token CSRF não encontrado');
-      }
-
       const response = await fetch('/api/proposals/bulk-delete', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-csrf-token': csrfToken,
         },
         body: JSON.stringify({ 
-          proposalIds: selectedProposals,
-          csrfToken 
+          proposalIds: selectedProposals
         }),
       });
-
-      if (response.status === 401) {
-        router.push('/login');
-        return;
-      }
 
       const data = await response.json();
       if (!response.ok) {
@@ -259,14 +205,6 @@ export default function ProposalsPage() {
     );
   }
 
-  async function handleLogout() {
-    try {
-      await fetch('/api/logout', { method: 'POST' });
-      router.push('/login');
-    } catch {
-      router.push('/login');
-    }
-  }
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -299,12 +237,6 @@ export default function ProposalsPage() {
             <h1 className="text-2xl font-bold text-gray-900">
               Dashboard de Propostas
             </h1>
-            <button
-              onClick={handleLogout}
-              className="text-sm text-gray-600 hover:text-gray-900 px-3 py-1 rounded border border-gray-300 hover:bg-gray-50"
-            >
-              Sair
-            </button>
           </div>
         </div>
       </div>

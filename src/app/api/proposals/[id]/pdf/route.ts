@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { findProposalById } from '@/lib/queries';
-import { getUserFromRequest } from '@/lib/auth';
 import { proposalParamsSchema } from '@/lib/validation';
-import { audit, getClientIP, getUserAgent } from '@/lib/audit';
 import puppeteer from 'puppeteer';
 import chromium from '@sparticuz/chromium';
 
@@ -12,18 +10,6 @@ interface RouteParams {
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const user = await getUserFromRequest(request);
-    if (!user) {
-      audit('unauthorized_access', { 
-        ip: getClientIP(request), 
-        userAgent: getUserAgent(request),
-        path: `/api/proposals/*/pdf`
-      });
-      return NextResponse.json(
-        { error: 'Não autorizado', code: 'UNAUTHORIZED' },
-        { status: 401 }
-      );
-    }
 
     const { id } = await params;
     const paramsValidation = proposalParamsSchema.safeParse({ id });
