@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { detectHTTPSEnvironment, getCookieName } from '@/lib/environment';
 
 export async function GET(request: NextRequest) {
   try {
-    const isHTTPS = detectHTTPSEnvironment(request);
-    const cookieName = getCookieName(request);
+    const isHTTPS = request.nextUrl.protocol === 'https:' || 
+                    request.headers.get('x-forwarded-proto') === 'https' ||
+                    process.env.NODE_ENV === 'production';
+    const cookieName = isHTTPS ? '__Host-session' : 'session';
     
     // Coletar informações do ambiente
     const debugInfo = {
