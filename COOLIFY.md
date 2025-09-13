@@ -4,6 +4,12 @@
 
 O projeto **NÃO FUNCIONARÁ** sem estas variáveis no Coolify:
 
+## 🛡️ **IMPORTANTE - Proteção contra variáveis automáticas**
+
+O Coolify define automaticamente variáveis como `SERVICE_FQDN_LOTUS_APP` e `SERVICE_URL_LOTUS_APP` que **QUEBRAM** o acesso ao domínio `lt.odois.dev`. 
+
+✅ **SOLUÇÃO**: O projeto já tem proteção automática contra essas variáveis.
+
 ```env
 # 🔐 OBRIGATÓRIO - JWT Secret (mínimo 32 caracteres)
 JWT_SECRET_CURRENT=lotus-production-jwt-secret-32-chars-minimum-2024-secure-key
@@ -77,6 +83,17 @@ health_check_path: /api/health
 # VERIFIQUE: Variáveis do Puppeteer
 PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+```
+
+### ❌ **Acesso ao domínio lt.odois.dev não funciona**
+```bash
+# PROBLEMA: Coolify define automaticamente SERVICE_FQDN_LOTUS_APP e SERVICE_URL_LOTUS_APP
+# CAUSA: Essas variáveis interferem na detecção de HTTPS e cookies
+# SOLUÇÃO: O projeto já remove essas variáveis automaticamente no start-server.sh
+
+# VERIFICAR logs do container:
+# "⚠️  Coolify auto-var detected (ignored): SERVICE_FQDN_LOTUS_APP=..."
+# "🛡️  Removendo variáveis automáticas do Coolify que podem causar problemas..."
 ```
 
 ## 🧪 **Testes Após Deploy**

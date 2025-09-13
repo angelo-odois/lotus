@@ -5,6 +5,22 @@ export function detectHTTPSEnvironment(request?: { nextUrl?: { protocol: string;
     return false;
   }
 
+  // COOLIFY PROTECTION: Ignorar variáveis automáticas do Coolify que podem quebrar a aplicação
+  // SERVICE_FQDN_* e SERVICE_URL_* são definidas automaticamente e podem causar problemas
+  const coolifyAutoVars = [
+    'SERVICE_FQDN_LOTUS_APP',
+    'SERVICE_URL_LOTUS_APP', 
+    'SERVICE_FQDN',
+    'SERVICE_URL'
+  ];
+  
+  // Log para debug se alguma dessas variáveis estiver definida
+  coolifyAutoVars.forEach(varName => {
+    if (process.env[varName]) {
+      console.log(`⚠️  Coolify auto-var detected (ignored): ${varName}=${process.env[varName]}`);
+    }
+  });
+
   // Vercel sempre usa HTTPS
   if (process.env.VERCEL_URL) {
     return true;
