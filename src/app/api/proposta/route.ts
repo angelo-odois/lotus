@@ -14,20 +14,57 @@ async function getPuppeteerInstance(): Promise<any> {
     NODE_ENV: process.env.NODE_ENV
   });
   
-  // Docker environment (Coolify)
+  // Docker environment (Coolify) - Configuração ultra robusta
   if (isDocker) {
-    console.log('🐳 Ambiente Docker - usando Chromium');
+    console.log('🐳 Ambiente Docker - configuração ultra robusta para Coolify');
     const puppeteer = await import('puppeteer');
     
     return await puppeteer.default.launch({
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
       headless: true,
+      devtools: false,
+      ignoreDefaultArgs: ['--disable-extensions', '--enable-automation'],
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
-        '--single-process'
+        '--single-process',
+        '--no-zygote',
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor,TranslateUI,BlinkGenPropertyTrees',
+        '--run-all-compositor-stages-before-draw',
+        '--disable-background-timer-throttling',
+        '--disable-renderer-backgrounding',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-ipc-flooding-protection',
+        '--disable-client-side-phishing-detection',
+        '--disable-default-apps',
+        '--disable-hang-monitor',
+        '--disable-prompt-on-repost',
+        '--disable-sync',
+        '--disable-background-networking',
+        '--disable-breakpad',
+        '--disable-component-update',
+        '--disable-domain-reliability',
+        '--disable-extensions',
+        '--disable-plugins',
+        '--disable-default-apps',
+        '--disable-software-rasterizer',
+        '--disable-background-timer-throttling',
+        '--metrics-recording-only',
+        '--no-first-run',
+        '--safebrowsing-disable-auto-update',
+        '--password-store=basic',
+        '--use-mock-keychain',
+        '--disable-field-trial-config',
+        '--disable-back-forward-cache',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding',
+        '--disable-features=ScriptStreaming',
+        '--aggressive-cache-discard',
+        '--memory-pressure-off',
+        '--max_old_space_size=4096'
       ]
     });
   }
@@ -151,7 +188,9 @@ interface UploadedFile {
 async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: UploadedFile[] = []): Promise<Buffer> {
   console.log('🔄 Iniciando Puppeteer...');
   
-  const maxRetries = 3;
+  const isDocker = fs.existsSync('/.dockerenv');
+  const maxRetries = isDocker ? 5 : 3; // Mais tentativas para Docker
+  const baseDelay = isDocker ? 2000 : 1000; // Delay maior para Docker
   let lastError: Error | null = null;
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -169,9 +208,12 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: Uploa
       console.log('📏 HTML tamanho:', html.length, 'caracteres');
       
       console.log('🌐 Carregando HTML no navegador...');
+      const contentTimeout = isDocker ? 30000 : 15000;
+      const pdfTimeout = isDocker ? 60000 : 30000;
+      
       await page.setContent(html, { 
         waitUntil: 'domcontentloaded',
-        timeout: 15000 
+        timeout: contentTimeout 
       });
       
       console.log('📄 Gerando PDF...');
@@ -184,7 +226,7 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: Uploa
           right: '15mm'
         },
         printBackground: true,
-        timeout: 30000
+        timeout: pdfTimeout
       });
 
       console.log('✅ PDF gerado com sucesso, tamanho:', pdfBuffer.length, 'bytes');
@@ -207,9 +249,10 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: Uploa
         break;
       }
       
-      // Aguardar um pouco antes de tentar novamente
-      console.log(`⏳ Aguardando ${attempt * 1000}ms antes da próxima tentativa...`);
-      await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+      // Aguardar um pouco antes de tentar novamente (mais tempo para Docker)
+      const delay = baseDelay * attempt;
+      console.log(`⏳ Aguardando ${delay}ms antes da próxima tentativa...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
   

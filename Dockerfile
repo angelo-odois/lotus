@@ -47,14 +47,24 @@ RUN adduser -S nextjs -u 1001
 
 # Create directories and set permissions  
 RUN mkdir -p /app/data && \
+    mkdir -p /tmp/runtime-nextjs && \
+    mkdir -p /tmp/.X11-unix && \
     chown -R nextjs:nodejs /app && \
-    chmod -R 755 /app
+    chown -R nextjs:nodejs /tmp/runtime-nextjs && \
+    chmod -R 755 /app && \
+    chmod -R 755 /tmp/runtime-nextjs
 
 # Set runtime environment variables
 ENV NODE_ENV=production
 ENV HOSTNAME="0.0.0.0"
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PUPPETEER_DISABLE_HEADLESS_WARNING=true
+ENV CHROME_BIN=/usr/bin/chromium-browser
+ENV CHROME_PATH=/usr/bin/chromium-browser
+ENV DISPLAY=:99
+ENV XDG_RUNTIME_DIR=/tmp/runtime-nextjs
+ENV TMPDIR=/tmp
 
 # Change to non-root user
 USER nextjs
