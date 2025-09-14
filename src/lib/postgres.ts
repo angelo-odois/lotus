@@ -1,13 +1,31 @@
 import { Pool } from 'pg';
 
 // Configuração PostgreSQL para formulário Lotus
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  max: 10,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
-});
+const getDatabaseConfig = () => {
+  const databaseUrl = process.env.DATABASE_URL || '';
+  
+  // Se for o servidor específico (212.85.13.91), desabilitar SSL
+  if (databaseUrl.includes('212.85.13.91')) {
+    return {
+      connectionString: databaseUrl,
+      ssl: false,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    };
+  }
+  
+  // Para outros servidores (produção/Coolify), usar SSL
+  return {
+    connectionString: databaseUrl,
+    ssl: { rejectUnauthorized: false },
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000,
+  };
+};
+
+const pool = new Pool(getDatabaseConfig());
 
 // Função para executar queries
 export async function executeQuery<T = any>(query: string, params: any[] = []): Promise<T[]> {
