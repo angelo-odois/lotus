@@ -216,27 +216,19 @@ interface UploadedFile {
 async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: UploadedFile[] = []): Promise<Buffer> {
   console.log('🔄 Iniciando Puppeteer...');
   
-  // Processar PDFs anexados para converter em imagens
-  const processedFiles = await Promise.all(
-    uploadedFiles.map(async (doc: UploadedFile) => {
-      if (doc.type && doc.type.includes('pdf') && doc.base64) {
-        console.log(`🔄 Convertendo PDF anexado: ${doc.name}`);
-        try {
-          const images = await convertPDFToImages(doc.base64);
-          return { ...doc, pdfImages: images };
-        } catch (error) {
-          console.error(`❌ Erro ao converter ${doc.name}:`, error);
-          return doc;
-        }
-      }
-      return doc;
-    })
-  );
-  
   const browser = await getPuppeteerInstance();
   
   try {
+    // Processar arquivos anexados (sem conversão de PDF para evitar erros)
+    const processedFiles = uploadedFiles.map(doc => {
+      console.log(`📎 Documento anexado: ${doc.name} (${doc.type})`);
+      return doc;
+    });
+    
     const page = await browser.newPage();
+    
+    // Configurar timeout e viewport
+    page.setDefaultTimeout(30000); // 30 segundos
     await page.setViewport({ width: 800, height: 1200 });
     
     console.log('📄 Gerando HTML...');
@@ -288,132 +280,6 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: Uploa
 }
 
 
-async function convertPDFToImages(base64PDF: string): Promise<string[]> {
-  let browser: any = null;
-  try {
-    console.log('🔄 Convertendo PDF para imagens...');
-    
-    // Remover prefixo data: se existir
-    const pdfData = base64PDF.startsWith('data:') ? base64PDF.split(',')[1] : base64PDF;
-    
-    browser = await getPuppeteerInstance();
-    
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1200, height: 1600 });
-    
-    // Criar um HTML que carrega o PDF
-    const pdfHTML = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-        <style>
-          body { 
-            margin: 0; 
-            padding: 30px; 
-            background: white; 
-            font-family: Arial, sans-serif;
-          }
-          .page { 
-            margin-bottom: 30px; 
-            text-align: center; 
-            background: white;
-            padding: 20px;
-          }
-          canvas { 
-            border: none; 
-            width: 100%;
-            max-width: 100%;
-            height: auto;
-          }
-        </style>
-      </head>
-      <body>
-        <div id="pdf-container"></div>
-        <script>
-          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-          
-          async function renderPDF() {
-            try {
-              const pdfData = '${pdfData}';
-              const binaryString = atob(pdfData);
-              const bytes = new Uint8Array(binaryString.length);
-              for (let i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-              }
-              
-              const pdf = await pdfjsLib.getDocument(bytes).promise;
-              const container = document.getElementById('pdf-container');
-              
-              const maxPages = Math.min(pdf.numPages, 3);
-              console.log('PDF Pages:', pdf.numPages, 'Rendering:', maxPages);
-              
-              for (let i = 1; i <= maxPages; i++) {
-                const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 3.0 }); // Aumentar escala para melhor qualidade
-                
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-                
-                await page.render({
-                  canvasContext: context,
-                  viewport: viewport
-                }).promise;
-                
-                const pageDiv = document.createElement('div');
-                pageDiv.className = 'page';
-                pageDiv.appendChild(canvas);
-                container.appendChild(pageDiv);
-              }
-              
-              window.pdfRendered = true;
-            } catch (error) {
-              console.error('Erro no PDF:', error);
-              document.getElementById('pdf-container').innerHTML = '<div>Erro ao processar PDF</div>';
-              window.pdfRendered = true;
-            }
-          }
-          
-          renderPDF().catch(console.error);
-        </script>
-      </body>
-      </html>
-    `;
-    
-    await page.setContent(pdfHTML);
-    await page.waitForFunction(() => (window as unknown as { pdfRendered: boolean }).pdfRendered, { timeout: 30000 });
-    
-    // Capturar como imagem
-    const screenshot = await page.screenshot({
-      type: 'png',
-      fullPage: true
-    });
-    
-    if (browser) {
-      await browser.close();
-    }
-    
-    // Converter screenshot para base64
-    const base64Image = `data:image/png;base64,${Buffer.from(screenshot).toString('base64')}`;
-    
-    console.log('✅ PDF convertido para imagem');
-    return [base64Image];
-    
-  } catch (error) {
-    console.error('❌ Erro ao converter PDF:', error);
-    if (browser) {
-      try {
-        await browser.close();
-      } catch (closeError) {
-        console.error('❌ Erro ao fechar browser:', closeError);
-      }
-    }
-    return [];
-  }
-}
 
 function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] = []): string {
   const currentDate = new Date();
