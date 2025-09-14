@@ -45,15 +45,35 @@ async function getPuppeteerInstance(): Promise<any> {
     });
   }
   
-  // Ambiente local - configuração simples
-  console.log('🏠 Ambiente local - usando Puppeteer padrão');
+  // Ambiente local - configuração ultra-estável
+  console.log('🏠 Ambiente local - configuração ultra-estável');
   const puppeteer = await import('puppeteer');
   
   return await puppeteer.default.launch({
     headless: true,
+    devtools: false,
+    ignoreDefaultArgs: ['--disable-extensions'],
     args: [
       '--no-sandbox',
-      '--disable-setuid-sandbox'
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-web-security',
+      '--disable-features=VizDisplayCompositor',
+      '--run-all-compositor-stages-before-draw',
+      '--disable-background-timer-throttling',
+      '--disable-renderer-backgrounding',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-ipc-flooding-protection',
+      '--disable-client-side-phishing-detection',
+      '--disable-default-apps',
+      '--disable-hang-monitor',
+      '--disable-prompt-on-repost',
+      '--disable-sync',
+      '--metrics-recording-only',
+      '--no-first-run',
+      '--safebrowsing-disable-auto-update',
+      '--password-store=basic',
+      '--use-mock-keychain'
     ]
   });
 }
@@ -122,48 +142,70 @@ interface UploadedFile {
 async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: UploadedFile[] = []): Promise<Buffer> {
   console.log('🔄 Iniciando Puppeteer...');
   
-  let browser;
-  try {
-    browser = await getPuppeteerInstance();
-    const page = await browser.newPage();
-    
-    // Configurações simples e confiáveis
-    await page.setViewport({ width: 800, height: 1200 });
-    
-    console.log('📄 Gerando HTML...');
-    const html = generatePropostaHTML(formData, uploadedFiles);
-    console.log('📏 HTML tamanho:', html.length, 'caracteres');
-    
-    console.log('🌐 Carregando HTML no navegador...');
-    await page.setContent(html, { waitUntil: 'networkidle0' });
-    
-    console.log('📄 Gerando PDF...');
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      margin: {
-        top: '20mm',
-        bottom: '20mm',
-        left: '15mm',
-        right: '15mm'
-      },
-      printBackground: true
-    });
+  const maxRetries = 3;
+  let lastError: Error | null = null;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    let browser;
+    try {
+      console.log(`🔄 Tentativa ${attempt}/${maxRetries}...`);
+      browser = await getPuppeteerInstance();
+      const page = await browser.newPage();
+      
+      // Configurações otimizadas
+      await page.setViewport({ width: 800, height: 1200 });
+      
+      console.log('📄 Gerando HTML...');
+      const html = generatePropostaHTML(formData, uploadedFiles);
+      console.log('📏 HTML tamanho:', html.length, 'caracteres');
+      
+      console.log('🌐 Carregando HTML no navegador...');
+      await page.setContent(html, { 
+        waitUntil: 'domcontentloaded',
+        timeout: 15000 
+      });
+      
+      console.log('📄 Gerando PDF...');
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        margin: {
+          top: '20mm',
+          bottom: '20mm',
+          left: '15mm',
+          right: '15mm'
+        },
+        printBackground: true,
+        timeout: 30000
+      });
 
-    console.log('✅ PDF gerado, tamanho:', pdfBuffer.length, 'bytes');
-    return Buffer.from(pdfBuffer);
-    
-  } catch (error) {
-    console.error('❌ Erro no Puppeteer:', error);
-    throw error;
-  } finally {
-    if (browser) {
-      try {
-        await browser.close();
-      } catch (closeError) {
-        console.warn('⚠️ Erro ao fechar browser:', closeError);
+      console.log('✅ PDF gerado com sucesso, tamanho:', pdfBuffer.length, 'bytes');
+      return Buffer.from(pdfBuffer);
+      
+    } catch (error) {
+      lastError = error as Error;
+      console.error(`❌ Erro na tentativa ${attempt}:`, error);
+      
+      if (browser) {
+        try {
+          await browser.close();
+        } catch (closeError) {
+          console.warn('⚠️ Erro ao fechar browser na tentativa', attempt, ':', closeError);
+        }
       }
+      
+      // Se é a última tentativa, re-throw o erro
+      if (attempt === maxRetries) {
+        break;
+      }
+      
+      // Aguardar um pouco antes de tentar novamente
+      console.log(`⏳ Aguardando ${attempt * 1000}ms antes da próxima tentativa...`);
+      await new Promise(resolve => setTimeout(resolve, attempt * 1000));
     }
   }
+  
+  console.error(`❌ Falha em todas as ${maxRetries} tentativas. Último erro:`, lastError);
+  throw lastError || new Error('Falha na geração do PDF após múltiplas tentativas');
 }
 
 
