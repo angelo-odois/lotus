@@ -1,12 +1,18 @@
 # Use Node.js 20 Alpine for smaller image size
 FROM node:20-alpine
 
-# Install dependencies for building Node.js native modules
+# Install dependencies for building Node.js native modules and Puppeteer
 RUN apk add --no-cache \
     python3 \
     make \
     g++ \
-    ca-certificates
+    ca-certificates \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ttf-freefont \
+    wget
 
 WORKDIR /app
 
@@ -47,6 +53,8 @@ RUN mkdir -p /app/data && \
 # Set runtime environment variables
 ENV NODE_ENV=production
 ENV HOSTNAME="0.0.0.0"
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Change to non-root user
 USER nextjs

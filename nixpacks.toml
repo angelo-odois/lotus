@@ -1,23 +1,18 @@
-[providers]
-node = true
-
-[build]
-cmds = ["npm run build"]
-
-[start]
-cmd = "npm start"
+providers = ["node"]
 
 [variables]
 NODE_ENV = "production"
 NEXT_TELEMETRY_DISABLED = "1"
 PORT = "3000"
 
-[phases.build]
-dependsOn = ["install"]
+[phases.setup]
+nixPkgs = ["nodejs_20", "npm"]
 
 [phases.install]
 cmds = ["npm ci"]
 
-[config]
-port = 3000
-healthcheck = "/api/ping"
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm start"
