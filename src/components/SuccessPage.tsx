@@ -74,12 +74,12 @@ export function SuccessPage({ customerName, pdfFilename, message, onNewProposal 
                 <p className="text-gray-600 mb-4">
                   Sua proposta foi gerada com sucesso! Salve o PDF para seus registros.
                 </p>
-                <button
+                {/* <button
                   onClick={onNewProposal}
                   className="bg-[#FFC629] text-[#1A1A1A] px-6 py-3 rounded-lg font-semibold hover:bg-[#FFD93D] transition-colors inline-flex items-center space-x-2"
                 >
                   <span>Nova Proposta</span>
-                </button>
+                </button> */}
               </div>
             </div>
           </div>

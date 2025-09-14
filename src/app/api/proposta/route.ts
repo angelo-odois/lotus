@@ -4,56 +4,32 @@ import fs from 'fs';
 import path from 'path';
 import { salvarProposta, initializeDatabase, type FileUpload } from '@/lib/database';
 
-// Função para converter PDF em imagens
-async function convertPdfToImages(base64Pdf: string): Promise<string[]> {
+// Função para extrair informações do PDF
+async function extractPdfInfo(base64Pdf: string, fileName: string): Promise<{pages: number, size: string}> {
   try {
-    console.log('🔄 Convertendo PDF para imagens...');
+    console.log('🔄 Analisando PDF:', fileName);
     
     // Remover o prefixo data:application/pdf;base64,
     const pdfBuffer = Buffer.from(base64Pdf.replace(/^data:application\/pdf;base64,/, ''), 'base64');
     
-    // Salvar PDF temporariamente
-    const tempPdfPath = path.join(process.cwd(), 'temp-pdf-' + Date.now() + '.pdf');
-    fs.writeFileSync(tempPdfPath, pdfBuffer);
+    // Importar pdf-lib para analisar o PDF
+    const { PDFDocument } = await import('pdf-lib');
     
-    // Importar pdf2pic dinamicamente
-    const { fromPath } = await import('pdf2pic');
+    // Carregar o PDF
+    const pdfDoc = await PDFDocument.load(pdfBuffer);
+    const pageCount = pdfDoc.getPageCount();
+    const sizeKb = Math.round(pdfBuffer.length / 1024);
     
-    const convert = fromPath(tempPdfPath, {
-      density: 150,           // DPI
-      saveFilename: 'page',
-      savePath: process.cwd(),
-      format: 'png',
-      width: 800,
-      height: 1200
-    });
+    console.log(`✅ PDF analisado: ${pageCount} páginas, ${sizeKb}KB`);
     
-    // Converter todas as páginas
-    const results = await convert.bulk(-1); // -1 converte todas as páginas
-    
-    const images: string[] = [];
-    
-    for (const result of results) {
-      if (result.path) {
-        // Ler a imagem e converter para base64
-        const imageBuffer = fs.readFileSync(result.path);
-        const base64Image = `data:image/png;base64,${imageBuffer.toString('base64')}`;
-        images.push(base64Image);
-        
-        // Remover arquivo temporário da imagem
-        fs.unlinkSync(result.path);
-      }
-    }
-    
-    // Remover PDF temporário
-    fs.unlinkSync(tempPdfPath);
-    
-    console.log(`✅ PDF convertido: ${images.length} páginas`);
-    return images;
+    return {
+      pages: pageCount,
+      size: `${sizeKb}KB`
+    };
     
   } catch (error) {
-    console.error('❌ Erro ao converter PDF:', error);
-    return [];
+    console.error('❌ Erro ao analisar PDF:', error);
+    return { pages: 0, size: '0KB' };
   }
 }
 
@@ -258,15 +234,15 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: Uploa
       
       console.log('📄 Processando arquivos anexados...');
       
-      // Processar arquivos PDF para converter em imagens
+      // Processar arquivos PDF para extrair informações
       const processedFiles = [];
       for (const file of uploadedFiles) {
         if (file.type.includes('pdf') && file.base64) {
-          console.log(`🔄 Convertendo PDF: ${file.name}`);
-          const pdfImages = await convertPdfToImages(file.base64);
+          console.log(`🔄 Processando PDF: ${file.name}`);
+          const pdfInfo = await extractPdfInfo(file.base64, file.name);
           processedFiles.push({
             ...file,
-            pdfImages
+            pdfInfo
           });
         } else {
           processedFiles.push(file);
@@ -769,13 +745,21 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
                   `).join('');
                 }
                 
-                // Fallback mínimo para PDFs sem conversão
+                // Exibir informações do PDF
                 if (doc.type && doc.type.includes('pdf')) {
+                  const info = doc.pdfInfo || { pages: 0, size: '0KB' };
                   return `
-                    <div style="text-align: center; padding: 40px; background: #f8f9fa;">
-                      <div style="font-size: 64px; margin-bottom: 15px;">📄</div>
-                      <div style="font-weight: bold; font-size: 14px;">${doc.name}</div>
-                      <div style="color: #666; font-size: 11px; margin-top: 8px;">Documento PDF anexado</div>
+                    <div style="text-align: center; padding: 30px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px solid #FFC629; border-radius: 10px; margin: 20px 0;">
+                      <div style="font-size: 48px; margin-bottom: 15px; color: #dc3545;">📄</div>
+                      <div style="font-weight: bold; font-size: 16px; color: #000; margin-bottom: 8px;">${doc.name}</div>
+                      <div style="background: #FFC629; padding: 8px 16px; border-radius: 20px; display: inline-block; margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: #000;">Documento PDF Anexado</span>
+                      </div>
+                      <div style="color: #666; font-size: 12px; margin-top: 10px;">
+                        <div style="margin: 5px 0;"><strong>📊 ${info.pages} página${info.pages !== 1 ? 's' : ''}</strong></div>
+                        <div style="margin: 5px 0;"><strong>💾 ${info.size}</strong></div>
+                        <div style="margin: 10px 0; color: #28a745; font-weight: bold;">✅ Documento verificado e anexado à proposta</div>
+                      </div>
                     </div>
                   `;
                 }
