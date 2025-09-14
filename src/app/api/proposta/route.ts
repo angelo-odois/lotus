@@ -4,6 +4,67 @@ import fs from 'fs';
 import path from 'path';
 import { salvarProposta, initializeDatabase, type FileUpload } from '@/lib/database';
 
+// Função para converter PDF em imagens usando pdfjs-dist
+async function convertPdfToImages(base64Pdf: string, fileName: string): Promise<string[]> {
+  try {
+    console.log('🔄 Convertendo PDF para imagens:', fileName);
+    
+    // Remover o prefixo data:application/pdf;base64,
+    const pdfData = base64Pdf.replace(/^data:application\/pdf;base64,/, '');
+    const pdfBuffer = Buffer.from(pdfData, 'base64');
+    
+    // Importar pdfjs-dist e canvas
+    const pdfjs = await import('pdfjs-dist');
+    const { createCanvas } = await import('canvas');
+    
+    // Configurar worker path
+    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+    
+    // Carregar o PDF
+    const loadingTask = pdfjs.getDocument({ data: pdfBuffer });
+    const pdf = await loadingTask.promise;
+    
+    console.log(`📄 PDF carregado: ${pdf.numPages} páginas`);
+    
+    const images: string[] = [];
+    
+    // Converter cada página
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      try {
+        const page = await pdf.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 2.0 }); // Escala alta para qualidade
+        
+        const canvas = createCanvas(viewport.width, viewport.height);
+        const context = canvas.getContext('2d');
+        
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport,
+        };
+        
+        await page.render(renderContext).promise;
+        
+        // Converter para base64
+        const imageBuffer = canvas.toBuffer('image/png');
+        const base64Image = `data:image/png;base64,${imageBuffer.toString('base64')}`;
+        images.push(base64Image);
+        
+        console.log(`✅ Página ${pageNum} convertida`);
+        
+      } catch (pageError) {
+        console.error(`❌ Erro na página ${pageNum}:`, pageError);
+      }
+    }
+    
+    console.log(`✅ PDF convertido: ${images.length} páginas para imagens`);
+    return images;
+    
+  } catch (error) {
+    console.error('❌ Erro ao converter PDF:', error);
+    return [];
+  }
+}
+
 // Função para extrair informações do PDF
 async function extractPdfInfo(base64Pdf: string, fileName: string): Promise<{pages: number, size: string}> {
   try {
@@ -234,14 +295,21 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: Uploa
       
       console.log('📄 Processando arquivos anexados...');
       
-      // Processar arquivos PDF para extrair informações
+      // Processar arquivos PDF para converter em imagens
       const processedFiles = [];
       for (const file of uploadedFiles) {
         if (file.type.includes('pdf') && file.base64) {
           console.log(`🔄 Processando PDF: ${file.name}`);
+          
+          // Tentar converter PDF para imagens
+          const pdfImages = await convertPdfToImages(file.base64, file.name);
+          
+          // Se a conversão falhar, ainda extrair informações básicas
           const pdfInfo = await extractPdfInfo(file.base64, file.name);
+          
           processedFiles.push({
             ...file,
+            pdfImages: pdfImages.length > 0 ? pdfImages : undefined,
             pdfInfo
           });
         } else {
