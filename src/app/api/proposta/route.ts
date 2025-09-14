@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { FormData } from '@/types/form';
 import fs from 'fs';
 import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { salvarProposta, initializeDatabase, type FileUpload } from '@/lib/database';
 
 async function getPuppeteerInstance(): Promise<any> {
   const isDocker = fs.existsSync('/.dockerenv');
@@ -87,90 +87,40 @@ async function getPuppeteerInstance(): Promise<any> {
     }
   }
   
-  // Ambiente local - usar puppeteer normal
-  console.log('🏠 Ambiente local - usando puppeteer padrão');
+  // Ambiente local - usar configuração simples e confiável
+  console.log('🏠 Ambiente local - usando puppeteer com config simples');
   const puppeteer = await import('puppeteer');
   
-  try {
-    return await puppeteer.default.launch(await getBrowserConfigLocal());
-  } catch (error) {
-    console.error('❌ Erro ao iniciar Puppeteer local:', error);
-    console.log('🔄 Tentando com configuração simplificada...');
-    
-    // Fallback com configuração mais simples
-    return await puppeteer.default.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage'
-      ]
-    });
-  }
-}
-
-async function getBrowserConfigLocal(): Promise<any> {
-  // Ambiente local - usar Chrome instalado
-  const homeDir = os.homedir();
-  const possiblePaths = [
-    // Puppeteer cache paths - newest first
-    path.join(homeDir, '.cache/puppeteer/chrome/mac_arm-140.0.7339.82/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing'),
-    path.join(homeDir, '.cache/puppeteer/chrome/mac_arm-140.0.7339.80/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing'),
-    path.join(homeDir, '.cache/puppeteer/chrome/mac_arm-121.0.6167.85/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing'),
-    // System Chrome paths
-    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    // Linux paths
-    '/usr/bin/google-chrome-stable',
-    '/usr/bin/google-chrome',
-    '/usr/bin/chromium-browser',
-    '/snap/bin/chromium'
-  ];
-
-  for (const chromePath of possiblePaths) {
-    if (fs.existsSync(chromePath)) {
-      console.log(`✅ Chrome encontrado em: ${chromePath}`);
-      return {
-        executablePath: chromePath,
-        args: [
-          '--no-sandbox', 
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--single-process',
-          '--disable-gpu'
-        ],
-        headless: true
-      };
-    }
-  }
-
-  console.log('⚠️ Chrome não encontrado, usando padrão do Puppeteer');
-  return {
+  return await puppeteer.default.launch({
     headless: true,
     args: [
-      '--no-sandbox', 
+      '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process',
-      '--disable-gpu'
-    ]
-  };
+      '--disable-web-security',
+      '--disable-features=VizDisplayCompositor',
+      '--disable-extensions',
+      '--disable-background-timer-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-renderer-backgrounding'
+    ],
+    timeout: 30000
+  });
 }
 
+
 export async function POST(request: NextRequest) {
-  console.log('🚀 Iniciando geração de PDF...');
+  console.log('🚀 Iniciando processamento da proposta...');
   
   try {
+    // Inicializar banco se necessário
+    await initializeDatabase();
+    
     const body = await request.json();
     const formData: FormData = body;
-    const uploadedFiles = body.documentos || [];
+    const uploadedFiles: FileUpload[] = body.documentos || [];
     
-    console.log('📄 Gerando PDF...', { 
+    console.log('📄 Processando proposta...', { 
       nome: formData.nome, 
       documentos: uploadedFiles.length 
     });
@@ -182,13 +132,19 @@ export async function POST(request: NextRequest) {
     const filename = `proposta-lotus-${formData.nome?.replace(/\s+/g, '-').toLowerCase() || 'cliente'}-${Date.now()}.pdf`;
     const filepath = await savePDF(pdfBuffer, filename);
     
-    console.log('✅ PDF gerado com sucesso');
+    console.log('✅ PDF gerado, salvando no banco...');
+    
+    // Salvar dados no PostgreSQL
+    const propostaId = await salvarProposta(formData, uploadedFiles, filename);
+    
+    console.log(`✅ Proposta processada: PDF gerado e dados salvos (ID: ${propostaId})`);
     
     return NextResponse.json({
       success: true,
-      message: 'PDF gerado com sucesso',
+      message: 'Proposta processada com sucesso',
       filename,
-      downloadUrl: `/api/download-pdf/${filename}`
+      downloadUrl: `/api/download-pdf/${filename}`,
+      propostaId
     });
 
   } catch (error) {
