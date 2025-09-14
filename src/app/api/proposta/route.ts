@@ -73,7 +73,16 @@ async function getPuppeteerInstance(): Promise<any> {
       '--no-first-run',
       '--safebrowsing-disable-auto-update',
       '--password-store=basic',
-      '--use-mock-keychain'
+      '--use-mock-keychain',
+      '--disable-background-networking',
+      '--disable-breakpad',
+      '--disable-component-update',
+      '--disable-domain-reliability',
+      '--disable-features=TranslateUI',
+      '--disable-background-timer-throttling',
+      '--disable-renderer-backgrounding',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-ipc-flooding-protection'
     ]
   });
 }
@@ -100,7 +109,7 @@ export async function POST(request: NextRequest) {
     
     // Salvar PDF para download
     const filename = `proposta-lotus-${formData.nome?.replace(/\s+/g, '-').toLowerCase() || 'cliente'}-${Date.now()}.pdf`;
-    const filepath = await savePDF(pdfBuffer, filename);
+    await savePDF(pdfBuffer, filename);
     
     console.log('✅ PDF gerado, salvando no banco...');
     
