@@ -15,7 +15,15 @@ RUN apk add --no-cache \
     wget \
     imagemagick \
     ghostscript \
-    poppler-utils
+    poppler-utils \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev \
+    libjpeg-turbo-dev \
+    freetype-dev
 
 WORKDIR /app
 
