@@ -6,105 +6,55 @@ import { salvarProposta, initializeDatabase, type FileUpload } from '@/lib/datab
 
 async function getPuppeteerInstance(): Promise<any> {
   const isDocker = fs.existsSync('/.dockerenv');
-  const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV || process.env.AWS_LAMBDA_FUNCTION_NAME;
+  const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
   
   console.log('🔍 Detectando ambiente:', {
     isDocker,
     isVercel,
-    NODE_ENV: process.env.NODE_ENV,
-    VERCEL: process.env.VERCEL,
-    VERCEL_ENV: process.env.VERCEL_ENV
+    NODE_ENV: process.env.NODE_ENV
   });
   
   // Docker environment (Coolify)
   if (isDocker) {
-    console.log('🐳 Detectado ambiente Docker - usando Chromium do sistema');
-    
+    console.log('🐳 Ambiente Docker - usando Chromium');
     const puppeteer = await import('puppeteer');
     
-    // Caminhos possíveis do Chromium no Docker
-    const possibleChromePaths = [
-      process.env.PUPPETEER_EXECUTABLE_PATH,
-      '/usr/bin/chromium',
-      '/usr/bin/chromium-browser', 
-      '/usr/bin/google-chrome-stable',
-      '/usr/bin/google-chrome'
-    ].filter(Boolean);
-    
-    let chromePath = possibleChromePaths[0];
-    
-    // Verificar qual caminho existe
-    for (const path of possibleChromePaths) {
-      if (path && fs.existsSync(path)) {
-        chromePath = path;
-        console.log(`🔍 Chromium encontrado em: ${chromePath}`);
-        break;
-      }
-    }
-    
     return await puppeteer.default.launch({
-      executablePath: chromePath,
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
       headless: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
         '--disable-gpu',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding',
-        '--disable-features=VizDisplayCompositor'
+        '--single-process'
       ]
     });
   }
   
   // Vercel serverless environment
   if (isVercel) {
-    console.log('🌐 Detectado ambiente serverless (Vercel/AWS) - usando puppeteer-core + chromium');
+    console.log('🌐 Ambiente serverless - usando puppeteer-core');
+    const puppeteerCore = await import('puppeteer-core');
+    const chromium = await import('@sparticuz/chromium');
     
-    try {
-      const puppeteerCore = await import('puppeteer-core');
-      const chromium = await import('@sparticuz/chromium');
-      
-      const browser = await puppeteerCore.default.launch({
-        args: [
-          ...chromium.default.args,
-          '--hide-scrollbars',
-          '--disable-web-security'
-        ],
-        executablePath: await chromium.default.executablePath(),
-        headless: true,
-      });
-      
-      return browser;
-    } catch (error) {
-      console.error('❌ Erro ao carregar puppeteer-core + chromium:', error);
-      throw new Error(`Falha ao inicializar browser no ambiente serverless: ${error}`);
-    }
+    return await puppeteerCore.default.launch({
+      args: chromium.default.args,
+      executablePath: await chromium.default.executablePath(),
+      headless: true
+    });
   }
   
-  // Ambiente local - usar configuração simples e confiável
-  console.log('🏠 Ambiente local - usando puppeteer com config simples');
+  // Ambiente local - configuração simples
+  console.log('🏠 Ambiente local - usando Puppeteer padrão');
   const puppeteer = await import('puppeteer');
   
   return await puppeteer.default.launch({
     headless: true,
     args: [
       '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-web-security',
-      '--disable-features=VizDisplayCompositor',
-      '--disable-extensions',
-      '--disable-background-timer-throttling',
-      '--disable-backgrounding-occluded-windows',
-      '--disable-renderer-backgrounding'
-    ],
-    timeout: 30000
+      '--disable-setuid-sandbox'
+    ]
   });
 }
 
@@ -172,56 +122,31 @@ interface UploadedFile {
 async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: UploadedFile[] = []): Promise<Buffer> {
   console.log('🔄 Iniciando Puppeteer...');
   
-  const browser = await getPuppeteerInstance();
-  
+  let browser;
   try {
-    // Processar arquivos anexados (sem conversão de PDF para evitar erros)
-    const processedFiles = uploadedFiles.map(doc => {
-      console.log(`📎 Documento anexado: ${doc.name} (${doc.type})`);
-      return doc;
-    });
-    
+    browser = await getPuppeteerInstance();
     const page = await browser.newPage();
     
-    // Configurar timeout e viewport
-    page.setDefaultTimeout(30000); // 30 segundos
+    // Configurações simples e confiáveis
     await page.setViewport({ width: 800, height: 1200 });
     
     console.log('📄 Gerando HTML...');
-    console.log('📎 Documentos processados:', processedFiles.map(doc => ({
-      name: doc.name,
-      type: doc.type,
-      category: doc.category,
-      hasBase64: !!doc.base64,
-      hasPdfImages: !!doc.pdfImages,
-      pdfImagesCount: doc.pdfImages?.length || 0
-    })));
-    
-    const html = generatePropostaHTML(formData, processedFiles);
+    const html = generatePropostaHTML(formData, uploadedFiles);
     console.log('📏 HTML tamanho:', html.length, 'caracteres');
     
-    // Debug: salvar HTML para verificar
-    const htmlPath = path.join(process.cwd(), 'debug-proposta.html');
-    fs.writeFileSync(htmlPath, html);
-    console.log('🐛 HTML salvo para debug:', htmlPath);
-    
     console.log('🌐 Carregando HTML no navegador...');
-    await page.setContent(html, { 
-      waitUntil: 'domcontentloaded',
-      timeout: 10000 
-    });
+    await page.setContent(html, { waitUntil: 'networkidle0' });
     
     console.log('📄 Gerando PDF...');
     const pdfBuffer = await page.pdf({
       format: 'A4',
       margin: {
         top: '20mm',
-        bottom: '20mm', 
+        bottom: '20mm',
         left: '15mm',
         right: '15mm'
       },
-      printBackground: true,
-      preferCSSPageSize: false
+      printBackground: true
     });
 
     console.log('✅ PDF gerado, tamanho:', pdfBuffer.length, 'bytes');
@@ -231,7 +156,13 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: Uploa
     console.error('❌ Erro no Puppeteer:', error);
     throw error;
   } finally {
-    await browser.close();
+    if (browser) {
+      try {
+        await browser.close();
+      } catch (closeError) {
+        console.warn('⚠️ Erro ao fechar browser:', closeError);
+      }
+    }
   }
 }
 
