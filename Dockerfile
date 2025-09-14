@@ -1,7 +1,7 @@
 # Use Node.js 20 Alpine for smaller image size
 FROM node:20-alpine
 
-# Install dependencies for building Node.js native modules and Puppeteer
+# Install dependencies for building Node.js native modules, Puppeteer and PDF conversion
 RUN apk add --no-cache \
     python3 \
     make \
@@ -12,7 +12,10 @@ RUN apk add --no-cache \
     freetype \
     harfbuzz \
     ttf-freefont \
-    wget
+    wget \
+    imagemagick \
+    ghostscript \
+    poppler-utils
 
 WORKDIR /app
 

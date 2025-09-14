@@ -4,6 +4,59 @@ import fs from 'fs';
 import path from 'path';
 import { salvarProposta, initializeDatabase, type FileUpload } from '@/lib/database';
 
+// Função para converter PDF em imagens
+async function convertPdfToImages(base64Pdf: string): Promise<string[]> {
+  try {
+    console.log('🔄 Convertendo PDF para imagens...');
+    
+    // Remover o prefixo data:application/pdf;base64,
+    const pdfBuffer = Buffer.from(base64Pdf.replace(/^data:application\/pdf;base64,/, ''), 'base64');
+    
+    // Salvar PDF temporariamente
+    const tempPdfPath = path.join(process.cwd(), 'temp-pdf-' + Date.now() + '.pdf');
+    fs.writeFileSync(tempPdfPath, pdfBuffer);
+    
+    // Importar pdf2pic dinamicamente
+    const { fromPath } = await import('pdf2pic');
+    
+    const convert = fromPath(tempPdfPath, {
+      density: 150,           // DPI
+      saveFilename: 'page',
+      savePath: process.cwd(),
+      format: 'png',
+      width: 800,
+      height: 1200
+    });
+    
+    // Converter todas as páginas
+    const results = await convert.bulk(-1); // -1 converte todas as páginas
+    
+    const images: string[] = [];
+    
+    for (const result of results) {
+      if (result.path) {
+        // Ler a imagem e converter para base64
+        const imageBuffer = fs.readFileSync(result.path);
+        const base64Image = `data:image/png;base64,${imageBuffer.toString('base64')}`;
+        images.push(base64Image);
+        
+        // Remover arquivo temporário da imagem
+        fs.unlinkSync(result.path);
+      }
+    }
+    
+    // Remover PDF temporário
+    fs.unlinkSync(tempPdfPath);
+    
+    console.log(`✅ PDF convertido: ${images.length} páginas`);
+    return images;
+    
+  } catch (error) {
+    console.error('❌ Erro ao converter PDF:', error);
+    return [];
+  }
+}
+
 async function getPuppeteerInstance(): Promise<any> {
   const isDocker = fs.existsSync('/.dockerenv');
   const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
@@ -203,8 +256,25 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: Uploa
       // Configurações otimizadas
       await page.setViewport({ width: 800, height: 1200 });
       
+      console.log('📄 Processando arquivos anexados...');
+      
+      // Processar arquivos PDF para converter em imagens
+      const processedFiles = [];
+      for (const file of uploadedFiles) {
+        if (file.type.includes('pdf') && file.base64) {
+          console.log(`🔄 Convertendo PDF: ${file.name}`);
+          const pdfImages = await convertPdfToImages(file.base64);
+          processedFiles.push({
+            ...file,
+            pdfImages
+          });
+        } else {
+          processedFiles.push(file);
+        }
+      }
+      
       console.log('📄 Gerando HTML...');
-      const html = generatePropostaHTML(formData, uploadedFiles);
+      const html = generatePropostaHTML(formData, processedFiles);
       console.log('📏 HTML tamanho:', html.length, 'caracteres');
       
       console.log('🌐 Carregando HTML no navegador...');
