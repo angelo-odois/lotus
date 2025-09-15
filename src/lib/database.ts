@@ -22,6 +22,9 @@ export interface FileUpload {
   base64?: string;
   category?: string;
   size?: number;
+  savedPath?: string;
+  savedName?: string;
+  propostaId?: string;
 }
 
 export async function initializeDatabase(): Promise<void> {
@@ -37,7 +40,8 @@ export async function initializeDatabase(): Promise<void> {
 export async function salvarProposta(
   formData: FormData, 
   uploadedFiles: FileUpload[] = [],
-  pdfFilename?: string
+  pdfFilename?: string,
+  propostaId?: string
 ): Promise<string> {
   try {
     console.log('💾 Salvando proposta no banco...');
@@ -107,7 +111,13 @@ export async function salvarProposta(
     };
 
     // Query para inserir a proposta
-    const query = `
+    const query = propostaId ? `
+      INSERT INTO propostas (
+        id, dados_pessoais, endereco, dados_conjuge, empreendimento, 
+        unidade, documentos, status, pdf_gerado
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING id, created_at;
+    ` : `
       INSERT INTO propostas (
         dados_pessoais, endereco, dados_conjuge, empreendimento, 
         unidade, documentos, status, pdf_gerado
@@ -115,7 +125,17 @@ export async function salvarProposta(
       RETURNING id, created_at;
     `;
 
-    const params = [
+    const params = propostaId ? [
+      propostaId,
+      JSON.stringify(dadosPessoais),
+      JSON.stringify(endereco),
+      dadosConjuge ? JSON.stringify(dadosConjuge) : null,
+      JSON.stringify(empreendimento),
+      JSON.stringify(unidade),
+      JSON.stringify(documentos),
+      'concluida',
+      !!pdfFilename
+    ] : [
       JSON.stringify(dadosPessoais),
       JSON.stringify(endereco),
       dadosConjuge ? JSON.stringify(dadosConjuge) : null,

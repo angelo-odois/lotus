@@ -3,6 +3,52 @@ import { FormData } from '@/types/form';
 import fs from 'fs';
 import path from 'path';
 import { salvarProposta, initializeDatabase, type FileUpload } from '@/lib/database';
+import { randomBytes } from 'crypto';
+
+// Função para salvar documentos em pastas organizadas por proposta
+async function saveDocuments(propostaId: string, files: FileUpload[]): Promise<FileUpload[]> {
+  try {
+    // Criar pasta para a proposta
+    const documentsDir = path.join(process.cwd(), 'documentos', propostaId);
+    if (!fs.existsSync(documentsDir)) {
+      fs.mkdirSync(documentsDir, { recursive: true });
+      console.log('📁 Pasta criada:', documentsDir);
+    }
+    
+    const savedFiles: FileUpload[] = [];
+    
+    for (const file of files) {
+      if (file.base64) {
+        // Gerar nome seguro para o arquivo
+        const timestamp = Date.now();
+        const randomSuffix = randomBytes(4).toString('hex');
+        const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const fileName = `${timestamp}_${randomSuffix}_${sanitizedName}`;
+        const filePath = path.join(documentsDir, fileName);
+        
+        // Remover prefixo data: se existir
+        const base64Data = file.base64.replace(/^data:[^;]+;base64,/, '');
+        
+        // Salvar arquivo
+        fs.writeFileSync(filePath, base64Data, 'base64');
+        console.log('💾 Arquivo salvo:', fileName);
+        
+        // Adicionar informações do arquivo salvo
+        savedFiles.push({
+          ...file,
+          savedPath: filePath,
+          savedName: fileName,
+          propostaId
+        });
+      }
+    }
+    
+    return savedFiles;
+  } catch (error) {
+    console.error('❌ Erro ao salvar documentos:', error);
+    return files; // Retornar arquivos originais se falhar
+  }
+}
 
 // Função para converter PDF em imagens usando pdf-lib
 async function convertPdfToImages(base64Pdf: string, fileName: string): Promise<string[]> {
@@ -269,12 +315,19 @@ export async function POST(request: NextRequest) {
     const formData: FormData = body;
     const uploadedFiles: FileUpload[] = body.documentos?.arquivos || [];
     
+    // Gerar ID único para a proposta
+    const propostaId = randomBytes(16).toString('hex');
+    console.log('📋 ID da proposta:', propostaId);
+    
+    // Salvar documentos em pasta organizada por proposta
+    const savedFiles = await saveDocuments(propostaId, uploadedFiles);
+    
     console.log('📄 Processando proposta...', { 
       nome: formData.nome, 
-      documentos: uploadedFiles.length 
+      documentos: savedFiles.length 
     });
 
-    // Gerar PDF com Puppeteer
+    // Gerar PDF com Puppeteer  
     const pdfBuffer = await generatePDFWithPuppeteer(formData, uploadedFiles);
     
     // Salvar PDF para download
@@ -284,7 +337,7 @@ export async function POST(request: NextRequest) {
     console.log('✅ PDF gerado, salvando no banco...');
     
     // Salvar dados no PostgreSQL
-    const propostaId = await salvarProposta(formData, uploadedFiles, filename);
+    const savedPropostaId = await salvarProposta(formData, savedFiles, filename, propostaId);
     
     console.log(`✅ Proposta processada: PDF gerado e dados salvos (ID: ${propostaId})`);
     

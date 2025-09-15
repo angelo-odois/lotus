@@ -1,11 +1,25 @@
 import { NextRequest } from 'next/server';
 
-// Credenciais simples (em produção, usar hash e variáveis de ambiente)
-const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'lotus2024';
+// Credenciais dos usuários (em produção, usar hash e variáveis de ambiente)
+const USERS = {
+  'admin': {
+    password: 'lotus2024',
+    role: 'admin'
+  },
+  'roberta.magalhaes': {
+    password: 'RobertaMg2024@Secure',
+    role: 'admin'
+  }
+};
 
 export function validateCredentials(username: string, password: string): boolean {
-  return username === ADMIN_USERNAME && password === ADMIN_PASSWORD;
+  const user = USERS[username as keyof typeof USERS];
+  return user && user.password === password;
+}
+
+export function getUserRole(username: string): string | null {
+  const user = USERS[username as keyof typeof USERS];
+  return user ? user.role : null;
 }
 
 export function createAuthToken(username: string): string {
