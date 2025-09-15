@@ -13,43 +13,57 @@ async function convertPdfToImages(base64Pdf: string, fileName: string): Promise<
     const pdfData = base64Pdf.replace(/^data:application\/pdf;base64,/, '');
     const pdfBuffer = Buffer.from(pdfData, 'base64');
     
+    console.log(`📊 Tamanho do buffer PDF: ${pdfBuffer.length} bytes`);
+    
     // Importar pdfjs-dist e canvas
-    const pdfjs = await import('pdfjs-dist');
+    const pdfjs = await import('pdfjs-dist/legacy/build/pdf.js');
     const { createCanvas } = await import('canvas');
     
-    // Configurar worker path
-    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+    // Desabilitar worker para servidor Node.js
+    pdfjs.GlobalWorkerOptions.workerSrc = null;
     
-    // Carregar o PDF
-    const loadingTask = pdfjs.getDocument({ data: pdfBuffer });
+    console.log('🔧 Configuração do pdfjs completa');
+    
+    // Carregar o PDF com configurações específicas para Node.js
+    const loadingTask = pdfjs.getDocument({
+      data: pdfBuffer,
+      useSystemFonts: true,
+      disableFontFace: true,
+      isEvalSupported: false,
+    });
+    
     const pdf = await loadingTask.promise;
-    
-    console.log(`📄 PDF carregado: ${pdf.numPages} páginas`);
+    console.log(`📄 PDF carregado com sucesso: ${pdf.numPages} páginas`);
     
     const images: string[] = [];
     
     // Converter cada página
     for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
       try {
+        console.log(`🔄 Processando página ${pageNum}...`);
+        
         const page = await pdf.getPage(pageNum);
-        const viewport = page.getViewport({ scale: 2.0 }); // Escala alta para qualidade
+        const viewport = page.getViewport({ scale: 1.5 }); // Escala otimizada
         
         const canvas = createCanvas(viewport.width, viewport.height);
-        const context = canvas.getContext('2d');
+        const context = canvas.getContext('2d') as any;
+        
+        console.log(`📐 Canvas criado: ${viewport.width}x${viewport.height}`);
         
         const renderContext = {
           canvasContext: context,
           viewport: viewport,
         };
         
-        await page.render(renderContext).promise;
+        const renderTask = page.render(renderContext);
+        await renderTask.promise;
         
         // Converter para base64
         const imageBuffer = canvas.toBuffer('image/png');
         const base64Image = `data:image/png;base64,${imageBuffer.toString('base64')}`;
         images.push(base64Image);
         
-        console.log(`✅ Página ${pageNum} convertida`);
+        console.log(`✅ Página ${pageNum} convertida com sucesso (${Math.round(imageBuffer.length / 1024)}KB)`);
         
       } catch (pageError) {
         console.error(`❌ Erro na página ${pageNum}:`, pageError);
@@ -61,6 +75,7 @@ async function convertPdfToImages(base64Pdf: string, fileName: string): Promise<
     
   } catch (error) {
     console.error('❌ Erro ao converter PDF:', error);
+    console.error('Stack trace:', error);
     return [];
   }
 }
@@ -550,12 +565,31 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
       width: 100%;
       max-width: 100%;
       height: auto;
-      border: none;
+      border: 2px solid #ddd;
+      border-radius: 8px;
       margin: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       display: block;
     }
     
     .document-page {
+      page-break-inside: avoid;
+      margin: 25px 0;
+      padding: 0;
+    }
+    
+    .page-header {
+      text-align: center;
+      margin-bottom: 15px;
+      background: #FFC629;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid #E6B324;
+      font-weight: bold;
+      color: #000;
+    }
+    
+    .unknown-file {
       margin-bottom: 15px;
       page-break-inside: avoid;
     }
@@ -800,15 +834,24 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
               ${(() => {
                 // Se for imagem, mostrar imagem em tamanho grande
                 if (doc.base64 && doc.type && (doc.type.includes('image') || doc.type.includes('jpeg') || doc.type.includes('jpg') || doc.type.includes('png'))) {
-                  return `<img src="${doc.base64}" alt="${doc.name}" class="document-image">`;
+                  return `
+                    <div class="document-page" style="page-break-inside: avoid; margin: 20px 0;">
+                      <div class="page-header" style="text-align: center; margin-bottom: 15px; background: #FFC629; padding: 10px; border-radius: 5px;">
+                        <strong style="color: #000;">📸 ${doc.name}</strong>
+                      </div>
+                      <img src="${doc.base64}" alt="${doc.name}" class="document-image" style="max-width: 100%; height: auto; border: 2px solid #ddd; border-radius: 5px;">
+                    </div>
+                  `;
                 }
                 
                 // Se for PDF e tiver imagens convertidas, mostrar as imagens
                 if (doc.type && doc.type.includes('pdf') && doc.pdfImages && doc.pdfImages.length > 0) {
                   return doc.pdfImages.map((pageImage: string, pageIndex: number) => `
-                    <div class="document-page">
-                      <div class="page-number">Página ${pageIndex + 1} de ${doc.pdfImages?.length || 0}</div>
-                      <img src="${pageImage}" alt="${doc.name} - Página ${pageIndex + 1}" class="document-image">
+                    <div class="document-page" style="page-break-inside: avoid; margin: 20px 0;">
+                      <div class="page-header" style="text-align: center; margin-bottom: 15px; background: #FFC629; padding: 10px; border-radius: 5px;">
+                        <strong style="color: #000;">📄 ${doc.name} - Página ${pageIndex + 1} de ${doc.pdfImages?.length || 0}</strong>
+                      </div>
+                      <img src="${pageImage}" alt="${doc.name} - Página ${pageIndex + 1}" class="document-image" style="max-width: 100%; height: auto; border: 2px solid #ddd; border-radius: 5px;">
                     </div>
                   `).join('');
                 }
