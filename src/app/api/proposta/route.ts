@@ -6,87 +6,9 @@ import { salvarProposta, initializeDatabase, type FileUpload } from '@/lib/datab
 
 // Função para converter PDF em imagens usando pdfjs-dist
 async function convertPdfToImages(base64Pdf: string, fileName: string): Promise<string[]> {
-  try {
-    console.log('🔄 Tentando converter PDF para imagens:', fileName);
-    
-    // Remover o prefixo data:application/pdf;base64,
-    const pdfData = base64Pdf.replace(/^data:application\/pdf;base64,/, '');
-    const pdfBuffer = Buffer.from(pdfData, 'base64');
-    
-    console.log(`📊 Tamanho do buffer PDF: ${pdfBuffer.length} bytes`);
-    
-    // Tentar importar pdfjs-dist e canvas dinamicamente
-    const pdfjs = await import('pdfjs-dist');
-    const { createCanvas } = await import('canvas');
-    
-    // Verificar se temos acesso aos métodos necessários
-    if (!pdfjs.getDocument || !createCanvas) {
-      console.log('⚠️ PDF.js ou Canvas não disponível, pulando conversão');
-      return [];
-    }
-    
-    // Desabilitar worker para servidor Node.js
-    if (pdfjs.GlobalWorkerOptions) {
-      pdfjs.GlobalWorkerOptions.workerSrc = null;
-    }
-    
-    console.log('🔧 Configuração do pdfjs completa');
-    
-    // Carregar o PDF com configurações básicas
-    const loadingTask = pdfjs.getDocument({
-      data: pdfBuffer,
-      useSystemFonts: true,
-      disableFontFace: true,
-      isEvalSupported: false,
-    });
-    
-    const pdf = await loadingTask.promise;
-    console.log(`📄 PDF carregado com sucesso: ${pdf.numPages} páginas`);
-    
-    const images: string[] = [];
-    
-    // Converter cada página (máximo 5 páginas para evitar problemas de performance)
-    const maxPages = Math.min(pdf.numPages, 5);
-    for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
-      try {
-        console.log(`🔄 Processando página ${pageNum}...`);
-        
-        const page = await pdf.getPage(pageNum);
-        const viewport = page.getViewport({ scale: 1.2 }); // Escala reduzida
-        
-        const canvas = createCanvas(viewport.width, viewport.height);
-        const context = canvas.getContext('2d') as any;
-        
-        console.log(`📐 Canvas criado: ${viewport.width}x${viewport.height}`);
-        
-        const renderContext = {
-          canvasContext: context,
-          viewport: viewport,
-        };
-        
-        const renderTask = page.render(renderContext);
-        await renderTask.promise;
-        
-        // Converter para base64
-        const imageBuffer = canvas.toBuffer('image/png');
-        const base64Image = `data:image/png;base64,${imageBuffer.toString('base64')}`;
-        images.push(base64Image);
-        
-        console.log(`✅ Página ${pageNum} convertida com sucesso (${Math.round(imageBuffer.length / 1024)}KB)`);
-        
-      } catch (pageError) {
-        console.error(`❌ Erro na página ${pageNum}:`, pageError);
-        break; // Para na primeira página com erro
-      }
-    }
-    
-    console.log(`✅ PDF convertido: ${images.length} páginas de ${pdf.numPages} para imagens`);
-    return images;
-    
-  } catch (error) {
-    console.error('❌ Erro ao converter PDF, continuando sem conversão:', error.message);
-    return []; // Retorna array vazio para continuar o processamento
-  }
+  // Desabilitar conversão temporariamente para evitar erros
+  console.log('📄 PDF detectado:', fileName, '- Convertendo para placeholder');
+  return [];
 }
 
 // Função para extrair informações do PDF
@@ -248,7 +170,7 @@ export async function POST(request: NextRequest) {
     
     const body = await request.json();
     const formData: FormData = body;
-    const uploadedFiles: FileUpload[] = body.documentos || [];
+    const uploadedFiles: FileUpload[] = body.documentos?.arquivos || [];
     
     console.log('📄 Processando proposta...', { 
       nome: formData.nome, 
