@@ -87,9 +87,7 @@ export async function salvarProposta(
       profissaoConjuge: formData.profissaoConjuge
     } : null;
 
-    const empreendimento = {
-      empreendimento: formData.empreendimento
-    };
+    const empreendimento = formData.empreendimento;
 
     const unidade = {
       unidadeNumero: formData.unidadeNumero,

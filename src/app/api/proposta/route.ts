@@ -851,7 +851,7 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
         <table class="form-table">
           <tr>
             <td class="form-label">EMPREENDIMENTO:</td>
-            <td class="form-value">${formData.empreendimento?.empreendimento || ''}</td>
+            <td class="form-value">${typeof formData.empreendimento === 'string' ? formData.empreendimento : (formData.empreendimento?.empreendimento || '')}</td>
           </tr>
           <tr>
             <td class="form-label">INCORPORADORA:</td>

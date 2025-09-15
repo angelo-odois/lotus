@@ -103,11 +103,6 @@ export default function LoginPage() {
             </div>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
-              Credenciais padrão: admin / lotus2024
-            </p>
-          </div>
         </div>
       </div>
     </div>

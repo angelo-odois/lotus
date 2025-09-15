@@ -31,6 +31,34 @@ export default function DashboardPage() {
   });
   const router = useRouter();
 
+  // Helper function to safely extract empreendimento value
+  const getEmpreendimentoValue = (proposta: Proposta): string => {
+    // Handle direct string (new format)
+    if (typeof proposta.empreendimento === 'string') {
+      return proposta.empreendimento;
+    }
+    
+    // Handle nested object (old format)
+    if (proposta.empreendimento?.empreendimento) {
+      const nested = proposta.empreendimento.empreendimento;
+      
+      // If nested is a string, return it
+      if (typeof nested === 'string') {
+        return nested;
+      }
+      
+      // If nested is an object with empreendimento property, extract it
+      if (nested?.empreendimento && typeof nested.empreendimento === 'string') {
+        return nested.empreendimento;
+      }
+      
+      // Fallback: stringify the nested value
+      return String(nested);
+    }
+    
+    return 'Não informado';
+  };
+
   const loadPropostas = async () => {
     try {
       const offset = page * limit;
@@ -67,17 +95,7 @@ export default function DashboardPage() {
       const uniqueEmpreendimentos = new Set<string>();
       
       data.propostas.forEach((proposta: Proposta) => {
-        let emp: string;
-        
-        // Ensure we always get a string value
-        if (typeof proposta.empreendimento === 'string') {
-          emp = proposta.empreendimento;
-        } else if (proposta.empreendimento?.empreendimento) {
-          emp = String(proposta.empreendimento.empreendimento);
-        } else {
-          emp = 'Não informado';
-        }
-        
+        const emp = getEmpreendimentoValue(proposta);
         uniqueEmpreendimentos.add(emp);
         porEmpreendimento[String(emp)] = (porEmpreendimento[String(emp)] || 0) + 1;
       });
@@ -441,7 +459,7 @@ export default function DashboardPage() {
                       <div className="mt-2 sm:flex sm:justify-between">
                         <div className="sm:flex">
                           <p className="flex items-center text-sm text-gray-500">
-                            Empreendimento: {proposta.empreendimento?.empreendimento || 'N/A'}
+                            Empreendimento: {getEmpreendimentoValue(proposta)}
                           </p>
                           <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
                             PDF: {proposta.pdf_gerado ? '✅ Gerado' : '❌ Não gerado'}

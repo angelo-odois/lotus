@@ -220,7 +220,13 @@ export default function PropostaDetalhePage() {
             <dl className="grid grid-cols-1 gap-4">
               <div>
                 <dt className="text-sm font-medium text-gray-500">Empreendimento</dt>
-                <dd className="text-sm text-gray-900">{proposta.empreendimento?.empreendimento || 'N/A'}</dd>
+                <dd className="text-sm text-gray-900">{(() => {
+                  if (typeof proposta.empreendimento === 'string') return proposta.empreendimento;
+                  const nested = proposta.empreendimento?.empreendimento;
+                  if (typeof nested === 'string') return nested;
+                  if (nested?.empreendimento) return String(nested.empreendimento);
+                  return proposta.empreendimento?.empreendimento ? String(proposta.empreendimento.empreendimento) : 'N/A';
+                })()}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500">Número da Unidade</dt>
