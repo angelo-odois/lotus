@@ -35,14 +35,25 @@ export default function DashboardPage() {
     try {
       const offset = page * limit;
       const filterParam = filterEmpreendimento ? `&empreendimento=${encodeURIComponent(filterEmpreendimento)}` : '';
-      const response = await fetch(`/api/propostas?dashboard=true&limit=${limit}&offset=${offset}${filterParam}`);
+      console.log('🔍 Carregando propostas...', { limit, offset, filterParam });
+      
+      const response = await fetch(`/api/propostas?dashboard=true&limit=${limit}&offset=${offset}${filterParam}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      console.log('📊 Resposta da API:', { status: response.status, ok: response.ok });
       
       if (response.status === 401) {
+        console.log('❌ Não autorizado, redirecionando para login');
         router.push('/admin/login');
         return;
       }
       
       const data = await response.json();
+      console.log('📋 Dados recebidos:', { total: data.total, propostas: data.propostas?.length });
       setPropostas(data.propostas);
       setTotal(data.total);
       setSelectedItems([]); // Limpar seleção ao carregar nova página
@@ -68,7 +79,7 @@ export default function DashboardPage() {
         }
         
         uniqueEmpreendimentos.add(emp);
-        porEmpreendimento[emp] = (porEmpreendimento[emp] || 0) + 1;
+        porEmpreendimento[String(emp)] = (porEmpreendimento[String(emp)] || 0) + 1;
       });
       
       // Additional safety check to ensure all values are strings
@@ -343,8 +354,8 @@ export default function DashboardPage() {
               {Object.entries(indicators.porEmpreendimento)
                 .sort(([,a], [,b]) => b - a)
                 .map(([empreendimento, count]) => (
-                <div key={empreendimento} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="text-sm font-medium text-gray-700">{empreendimento}</span>
+                <div key={String(empreendimento)} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">{String(empreendimento)}</span>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                     {count}
                   </span>

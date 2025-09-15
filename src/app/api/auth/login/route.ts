@@ -21,10 +21,11 @@ export async function POST(request: NextRequest) {
     
     // Definir cookie com token
     response.cookies.set('auth_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      httpOnly: false, // Permitir acesso via JavaScript para debugging
+      secure: false, // Desabilitar em desenvolvimento
       sameSite: 'lax',
-      maxAge: 24 * 60 * 60 // 24 horas
+      maxAge: 24 * 60 * 60, // 24 horas
+      path: '/' // Garantir que o cookie é válido para todo o site
     });
     
     return response;
