@@ -8,14 +8,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string; filename: string }> }
 ) {
   try {
-    // TEMPORÁRIO: Desabilitando autenticação para teste
-    // const auth = getAuthFromRequest(request);
-    // if (!auth) {
-    //   return NextResponse.json(
-    //     { error: 'Não autorizado' },
-    //     { status: 401 }
-    //   );
-    // }
+    const auth = getAuthFromRequest(request);
+    if (!auth) {
+      return NextResponse.json(
+        { error: 'Não autorizado' },
+        { status: 401 }
+      );
+    }
 
     const { id, filename } = await params;
     
