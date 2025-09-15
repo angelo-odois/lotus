@@ -36,7 +36,8 @@
 
         <div class="section">
             <h3>🧪 Testes Disponíveis</h3>
-            <button class="btn-primary" onclick="testPropostasEndpoint()">Testar Endpoint Propostas</button>
+            <button class="btn-primary" onclick="testPropostasEndpoint()">Testar Endpoint Propostas (Antigo)</button>
+            <button class="btn-success" onclick="testNovoEndpoint()">🆕 Testar Novo Endpoint (/api/listar)</button>
             <button class="btn-success" onclick="testPropostasWithAuth()">Testar com Autenticação</button>
             <button class="btn-warning" onclick="testCookies()">Verificar Cookies</button>
             <button class="btn-danger" onclick="clearLogs()">Limpar Logs</button>
@@ -117,8 +118,64 @@
             }
         }
 
+        async function testNovoEndpoint() {
+            log('🆕 Testando NOVO endpoint /api/listar...', 'info');
+            
+            try {
+                const url = '/api/listar?dashboard=true&limit=5';
+                log(`📡 Fazendo requisição para: ${url}`, 'info');
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                log(`📊 Status da resposta: ${response.status} ${response.statusText}`, 
+                    response.ok ? 'success' : 'error');
+
+                const contentType = response.headers.get('content-type');
+                log(`📋 Content-Type: ${contentType || 'N/A'}`, 'info');
+                
+                const endpoint = response.headers.get('X-Endpoint');
+                if (endpoint) {
+                    log(`🔧 Endpoint Header: ${endpoint}`, 'info');
+                }
+
+                let data;
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                    log(`📦 Dados recebidos (JSON):`, 'success');
+                    
+                    if (data.success) {
+                        log(`✅ Sucesso! Endpoint: ${data.endpoint}`, 'success');
+                        log(`   - Total de propostas: ${data.total || 'N/A'}`, 'info');
+                        log(`   - Propostas retornadas: ${data.propostas?.length || 'N/A'}`, 'info');
+                        log(`   - Versão: ${data.meta?.version || 'N/A'}`, 'info');
+                        log(`   - Duração: ${data.meta?.duration || 'N/A'}`, 'info');
+                        
+                        if (data.propostas && data.propostas.length > 0) {
+                            const first = data.propostas[0];
+                            log(`👤 Primeira proposta: ${first.dados_pessoais?.nome || 'N/A'}`, 'info');
+                        }
+                    } else {
+                        log(`❌ Erro do endpoint: ${data.error}`, 'error');
+                        if (data.details) {
+                            log(`🔍 Detalhes: ${data.details}`, 'error');
+                        }
+                    }
+                } else {
+                    const text = await response.text();
+                    log(`📦 Resposta (HTML/Texto): ${text.substring(0, 100)}...`, 'warning');
+                }
+
+            } catch (error) {
+                log(`❌ Erro na requisição: ${error.message}`, 'error');
+                log(`🔍 Stack trace: ${error.stack}`, 'error');
+            }
+        }
+
         async function testPropostasEndpoint() {
-            log('🚀 Testando endpoint /api/propostas...', 'info');
+            log('🚀 Testando endpoint /api/propostas... (ANTIGO)', 'info');
             
             try {
                 const url = '/api/propostas?dashboard=true&limit=5';
