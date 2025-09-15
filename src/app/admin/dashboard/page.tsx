@@ -56,12 +56,27 @@ export default function DashboardPage() {
       const uniqueEmpreendimentos = new Set<string>();
       
       data.propostas.forEach((proposta: Proposta) => {
-        const emp = proposta.empreendimento?.empreendimento || 'Não informado';
+        let emp: string;
+        
+        // Ensure we always get a string value
+        if (typeof proposta.empreendimento === 'string') {
+          emp = proposta.empreendimento;
+        } else if (proposta.empreendimento?.empreendimento) {
+          emp = String(proposta.empreendimento.empreendimento);
+        } else {
+          emp = 'Não informado';
+        }
+        
         uniqueEmpreendimentos.add(emp);
         porEmpreendimento[emp] = (porEmpreendimento[emp] || 0) + 1;
       });
       
-      setEmpreendimentos(Array.from(uniqueEmpreendimentos).sort());
+      // Additional safety check to ensure all values are strings
+      const safeEmpreendimentos = Array.from(uniqueEmpreendimentos)
+        .filter(emp => typeof emp === 'string' && emp.length > 0)
+        .sort();
+      
+      setEmpreendimentos(safeEmpreendimentos);
       setIndicators({
         total: data.total,
         concluidas,
@@ -211,9 +226,11 @@ export default function DashboardPage() {
                 className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm rounded-md"
               >
                 <option value="">Todos os empreendimentos</option>
-                {empreendimentos.map((emp) => (
-                  <option key={emp} value={emp}>{emp}</option>
-                ))}
+                {empreendimentos
+                  .filter(emp => typeof emp === 'string' && emp.length > 0)
+                  .map((emp) => (
+                    <option key={String(emp)} value={String(emp)}>{String(emp)}</option>
+                  ))}
               </select>
             </div>
             {filterEmpreendimento && (
