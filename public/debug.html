@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Lotus System</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .section { margin-bottom: 30px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #e8f5e8; border-color: #4caf50; }
+        .error { background: #ffe8e8; border-color: #f44336; }
+        .warning { background: #fff3cd; border-color: #ffc107; }
+        .info { background: #e3f2fd; border-color: #2196f3; }
+        pre { background: #f8f8f8; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        button { padding: 10px 15px; margin: 5px; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .btn-danger { background: #dc3545; color: white; }
+        #results { margin-top: 20px; }
+        .log-entry { margin: 2px 0; padding: 5px; font-size: 12px; }
+        .timestamp { color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug - Sistema Lotus</h1>
+        
+        <div class="section info">
+            <h3>ℹ️ Informações do Sistema</h3>
+            <p><strong>URL Atual:</strong> <span id="currentUrl"></span></p>
+            <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+            <p><strong>Timestamp:</strong> <span id="timestamp"></span></p>
+        </div>
+
+        <div class="section">
+            <h3>🧪 Testes Disponíveis</h3>
+            <button class="btn-primary" onclick="testPropostasEndpoint()">Testar Endpoint Propostas</button>
+            <button class="btn-success" onclick="testPropostasWithAuth()">Testar com Autenticação</button>
+            <button class="btn-warning" onclick="testCookies()">Verificar Cookies</button>
+            <button class="btn-danger" onclick="clearLogs()">Limpar Logs</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Inicializar informações do sistema
+        document.getElementById('currentUrl').textContent = window.location.href;
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        document.getElementById('timestamp').textContent = new Date().toISOString();
+
+        let logs = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toISOString();
+            const logEntry = {
+                timestamp,
+                message,
+                type
+            };
+            logs.push(logEntry);
+            updateResultsDisplay();
+        }
+
+        function updateResultsDisplay() {
+            const resultsDiv = document.getElementById('results');
+            if (logs.length === 0) {
+                resultsDiv.innerHTML = '<div class="section info"><p>Nenhum teste executado ainda.</p></div>';
+                return;
+            }
+
+            let html = '<div class="section"><h3>📋 Logs dos Testes</h3>';
+            logs.forEach(entry => {
+                const cssClass = entry.type === 'error' ? 'error' : 
+                               entry.type === 'success' ? 'success' : 
+                               entry.type === 'warning' ? 'warning' : 'info';
+                
+                html += `<div class="log-entry ${cssClass}">`;
+                html += `<span class="timestamp">[${entry.timestamp}]</span> `;
+                html += `<span>${entry.message}</span>`;
+                html += '</div>';
+            });
+            html += '</div>';
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        function clearLogs() {
+            logs = [];
+            updateResultsDisplay();
+        }
+
+        function testCookies() {
+            log('🍪 Verificando cookies...', 'info');
+            
+            const cookies = document.cookie.split(';').map(c => c.trim()).filter(c => c);
+            
+            if (cookies.length === 0) {
+                log('❌ Nenhum cookie encontrado', 'error');
+                return;
+            }
+
+            log(`✅ Encontrados ${cookies.length} cookies:`, 'success');
+            cookies.forEach(cookie => {
+                const [name] = cookie.split('=');
+                log(`   - ${name}`, 'info');
+            });
+
+            const authToken = cookies.find(c => c.startsWith('auth_token='));
+            if (authToken) {
+                const value = authToken.split('=')[1];
+                log(`🔑 Auth token encontrado: ${value.substring(0, 20)}...`, 'success');
+            } else {
+                log('⚠️ Auth token não encontrado', 'warning');
+            }
+        }
+
+        async function testPropostasEndpoint() {
+            log('🚀 Testando endpoint /api/propostas...', 'info');
+            
+            try {
+                const url = '/api/propostas?dashboard=true&limit=5';
+                log(`📡 Fazendo requisição para: ${url}`, 'info');
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                log(`📊 Status da resposta: ${response.status} ${response.statusText}`, 
+                    response.ok ? 'success' : 'error');
+
+                const contentType = response.headers.get('content-type');
+                log(`📋 Content-Type: ${contentType || 'N/A'}`, 'info');
+
+                let data;
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                    log(`📦 Dados recebidos (JSON):`, 'success');
+                    log(`   - Total de propostas: ${data.total || 'N/A'}`, 'info');
+                    log(`   - Propostas retornadas: ${data.propostas?.length || 'N/A'}`, 'info');
+                    
+                    if (data.debug) {
+                        log(`   - Duração: ${data.debug.duration || 'N/A'}`, 'info');
+                        log(`   - Timestamp: ${data.debug.timestamp || 'N/A'}`, 'info');
+                    }
+                } else {
+                    const text = await response.text();
+                    log(`📦 Resposta (HTML/Texto): ${text.substring(0, 100)}...`, 'warning');
+                }
+
+            } catch (error) {
+                log(`❌ Erro na requisição: ${error.message}`, 'error');
+                log(`🔍 Stack trace: ${error.stack}`, 'error');
+            }
+        }
+
+        async function testPropostasWithAuth() {
+            log('🔐 Testando endpoint com autenticação forçada...', 'info');
+            
+            // Primeiro verificar se temos cookie de auth
+            const authCookie = document.cookie.split(';')
+                .find(c => c.trim().startsWith('auth_token='));
+            
+            if (!authCookie) {
+                log('❌ Cookie de autenticação não encontrado. Faça login primeiro.', 'error');
+                return;
+            }
+
+            const authToken = authCookie.split('=')[1];
+            log(`🔑 Usando token: ${authToken.substring(0, 20)}...`, 'info');
+
+            try {
+                const url = '/api/propostas?dashboard=true&limit=3';
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Cookie': `auth_token=${authToken}`
+                    }
+                });
+
+                log(`📊 Status: ${response.status} ${response.statusText}`, 
+                    response.ok ? 'success' : 'error');
+
+                if (response.status === 401) {
+                    log('🚫 Não autorizado - Token inválido ou expirado', 'error');
+                    return;
+                }
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Sucesso! Total: ${data.total}, Retornadas: ${data.propostas?.length}`, 'success');
+                    
+                    if (data.propostas && data.propostas.length > 0) {
+                        const firstProposta = data.propostas[0];
+                        log(`📋 Primeira proposta: ${firstProposta.dados_pessoais?.nome || 'N/A'}`, 'info');
+                        log(`🏢 Empreendimento: ${JSON.stringify(firstProposta.empreendimento)}`, 'info');
+                    }
+                } else {
+                    log(`❌ Erro: ${data.error || 'Erro desconhecido'}`, 'error');
+                }
+
+            } catch (error) {
+                log(`❌ Erro na requisição: ${error.message}`, 'error');
+            }
+        }
+
+        // Executar teste inicial de cookies
+        setTimeout(() => {
+            testCookies();
+        }, 1000);
+    </script>
+</body>
+</html>
