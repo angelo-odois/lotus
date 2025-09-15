@@ -152,14 +152,29 @@ export async function buscarProposta(id: string): Promise<PropostaDB | null> {
   }
 }
 
-export async function listarPropostas(limit: number = 10, offset: number = 0): Promise<PropostaDB[]> {
+export async function listarPropostas(limit: number = 10, offset: number = 0, empreendimento?: string): Promise<PropostaDB[]> {
   try {
-    const query = `
-      SELECT * FROM propostas 
-      ORDER BY created_at DESC 
-      LIMIT $1 OFFSET $2
-    `;
-    const results = await executeQuery<PropostaDB>(query, [limit, offset]);
+    let query: string;
+    let params: any[];
+    
+    if (empreendimento) {
+      query = `
+        SELECT * FROM propostas 
+        WHERE empreendimento->>'empreendimento' = $3
+        ORDER BY created_at DESC 
+        LIMIT $1 OFFSET $2
+      `;
+      params = [limit, offset, empreendimento];
+    } else {
+      query = `
+        SELECT * FROM propostas 
+        ORDER BY created_at DESC 
+        LIMIT $1 OFFSET $2
+      `;
+      params = [limit, offset];
+    }
+    
+    const results = await executeQuery<PropostaDB>(query, params);
     return results;
   } catch (error) {
     console.error('❌ Erro ao listar propostas:', error);
@@ -179,10 +194,20 @@ export async function deletarProposta(id: string): Promise<boolean> {
   }
 }
 
-export async function contarPropostas(): Promise<number> {
+export async function contarPropostas(empreendimento?: string): Promise<number> {
   try {
-    const query = 'SELECT COUNT(*) as total FROM propostas';
-    const result = await executeQuerySingle<{ total: string }>(query);
+    let query: string;
+    let params: any[];
+    
+    if (empreendimento) {
+      query = "SELECT COUNT(*) as total FROM propostas WHERE empreendimento->>'empreendimento' = $1";
+      params = [empreendimento];
+    } else {
+      query = 'SELECT COUNT(*) as total FROM propostas';
+      params = [];
+    }
+    
+    const result = await executeQuerySingle<{ total: string }>(query, params);
     return parseInt(result?.total || '0');
   } catch (error) {
     console.error('❌ Erro ao contar propostas:', error);

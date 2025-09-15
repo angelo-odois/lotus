@@ -21,12 +21,21 @@ export default function DashboardPage() {
   const [limit] = useState(10);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  const [filterEmpreendimento, setFilterEmpreendimento] = useState('');
+  const [empreendimentos, setEmpreendimentos] = useState<string[]>([]);
+  const [indicators, setIndicators] = useState({
+    total: 0,
+    concluidas: 0,
+    rascunhos: 0,
+    porEmpreendimento: {} as Record<string, number>
+  });
   const router = useRouter();
 
   const loadPropostas = async () => {
     try {
       const offset = page * limit;
-      const response = await fetch(`/api/propostas?dashboard=true&limit=${limit}&offset=${offset}`);
+      const filterParam = filterEmpreendimento ? `&empreendimento=${encodeURIComponent(filterEmpreendimento)}` : '';
+      const response = await fetch(`/api/propostas?dashboard=true&limit=${limit}&offset=${offset}${filterParam}`);
       
       if (response.status === 401) {
         router.push('/admin/login');
@@ -37,6 +46,29 @@ export default function DashboardPage() {
       setPropostas(data.propostas);
       setTotal(data.total);
       setSelectedItems([]); // Limpar seleção ao carregar nova página
+      
+      // Calcular indicadores
+      const concluidas = data.propostas.filter((p: Proposta) => p.status === 'concluida').length;
+      const rascunhos = data.propostas.filter((p: Proposta) => p.status === 'rascunho').length;
+      
+      // Agrupar por empreendimento
+      const porEmpreendimento: Record<string, number> = {};
+      const uniqueEmpreendimentos = new Set<string>();
+      
+      data.propostas.forEach((proposta: Proposta) => {
+        const emp = proposta.empreendimento?.empreendimento || 'Não informado';
+        uniqueEmpreendimentos.add(emp);
+        porEmpreendimento[emp] = (porEmpreendimento[emp] || 0) + 1;
+      });
+      
+      setEmpreendimentos(Array.from(uniqueEmpreendimentos).sort());
+      setIndicators({
+        total: data.total,
+        concluidas,
+        rascunhos,
+        porEmpreendimento
+      });
+      
     } catch (error) {
       console.error('Erro ao carregar propostas:', error);
     } finally {
@@ -127,7 +159,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadPropostas();
-  }, [page]);
+  }, [page, filterEmpreendimento]);
 
   if (loading) {
     return (
@@ -162,28 +194,148 @@ export default function DashboardPage() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {/* Stats */}
-        <div className="bg-white overflow-hidden shadow rounded-lg mb-6">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
-                  <span className="text-white font-bold">{total}</span>
+        {/* Filtros */}
+        <div className="bg-white shadow rounded-lg mb-6 p-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <div className="flex-1">
+              <label htmlFor="filter-empreendimento" className="block text-sm font-medium text-gray-700 mb-2">
+                Filtrar por Empreendimento
+              </label>
+              <select
+                id="filter-empreendimento"
+                value={filterEmpreendimento}
+                onChange={(e) => {
+                  setFilterEmpreendimento(e.target.value);
+                  setPage(0); // Reset page when filtering
+                }}
+                className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm rounded-md"
+              >
+                <option value="">Todos os empreendimentos</option>
+                {empreendimentos.map((emp) => (
+                  <option key={emp} value={emp}>{emp}</option>
+                ))}
+              </select>
+            </div>
+            {filterEmpreendimento && (
+              <button
+                onClick={() => setFilterEmpreendimento('')}
+                className="mt-6 sm:mt-0 px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md"
+              >
+                Limpar Filtro
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Indicadores */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">📊</span>
+                  </div>
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      Total
+                    </dt>
+                    <dd className="text-lg font-medium text-gray-900">
+                      {indicators.total}
+                    </dd>
+                  </dl>
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Total de Propostas
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {total} propostas cadastradas
-                  </dd>
-                </dl>
+            </div>
+          </div>
+
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">✅</span>
+                  </div>
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      Concluídas
+                    </dt>
+                    <dd className="text-lg font-medium text-gray-900">
+                      {indicators.concluidas}
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="w-8 h-8 bg-orange-500 rounded-md flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">📝</span>
+                  </div>
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      Rascunhos
+                    </dt>
+                    <dd className="text-lg font-medium text-gray-900">
+                      {indicators.rascunhos}
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">🏢</span>
+                  </div>
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      Empreendimentos
+                    </dt>
+                    <dd className="text-lg font-medium text-gray-900">
+                      {empreendimentos.length}
+                    </dd>
+                  </dl>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Resumo por Empreendimento */}
+        {Object.keys(indicators.porEmpreendimento).length > 0 && (
+          <div className="bg-white shadow rounded-lg mb-6 p-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">📈 Propostas por Empreendimento</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {Object.entries(indicators.porEmpreendimento)
+                .sort(([,a], [,b]) => b - a)
+                .map(([empreendimento, count]) => (
+                <div key={empreendimento} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">{empreendimento}</span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    {count}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Bulk Actions Bar */}
         {selectedItems.length > 0 && (

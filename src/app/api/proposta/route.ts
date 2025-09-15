@@ -6,9 +6,67 @@ import { salvarProposta, initializeDatabase, type FileUpload } from '@/lib/datab
 
 // Função para converter PDF em imagens usando pdfjs-dist
 async function convertPdfToImages(base64Pdf: string, fileName: string): Promise<string[]> {
-  // Desabilitar conversão temporariamente para evitar erros
-  console.log('📄 PDF detectado:', fileName, '- Convertendo para placeholder');
-  return [];
+  try {
+    console.log('📄 PDF detectado:', fileName, '- Iniciando conversão para imagem');
+    
+    // Remover o prefixo data:application/pdf;base64, se existir
+    const cleanBase64 = base64Pdf.replace(/^data:application\/pdf;base64,/, '');
+    const pdfBuffer = Buffer.from(cleanBase64, 'base64');
+    
+    // Importar dependências dinamicamente para evitar problemas de SSR
+    const pdfjsLib = await import('pdfjs-dist');
+    const { createCanvas } = await import('canvas');
+    
+    // Configurar worker do PDF.js para Node.js (desabilitar para ambiente server)
+    pdfjsLib.GlobalWorkerOptions.workerSrc = false;
+    
+    // Carregar o documento PDF
+    const pdf = await pdfjsLib.getDocument({
+      data: pdfBuffer,
+      useSystemFonts: true,
+    }).promise;
+    
+    console.log(`📄 PDF carregado: ${pdf.numPages} página(s)`);
+    
+    const images: string[] = [];
+    
+    // Converter cada página em imagem (máximo 3 páginas para performance)
+    const maxPages = Math.min(pdf.numPages, 3);
+    
+    for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
+      try {
+        const page = await pdf.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 1.5 }); // Escala para melhor qualidade
+        
+        // Criar canvas para renderizar a página
+        const canvas = createCanvas(viewport.width, viewport.height);
+        const context = canvas.getContext('2d');
+        
+        // Renderizar a página no canvas
+        await page.render({
+          canvasContext: context as any,
+          viewport: viewport,
+        }).promise;
+        
+        // Converter canvas para base64
+        const imageBase64 = canvas.toDataURL('image/jpeg', 0.8);
+        images.push(imageBase64);
+        
+        console.log(`✅ Página ${pageNum} convertida para imagem`);
+        
+      } catch (pageError) {
+        console.error(`❌ Erro ao converter página ${pageNum}:`, pageError);
+        // Continue com as outras páginas mesmo se uma falhar
+      }
+    }
+    
+    console.log(`✅ PDF convertido: ${images.length} imagem(s) gerada(s)`);
+    return images;
+    
+  } catch (error) {
+    console.error('❌ Erro ao converter PDF para imagens:', error);
+    return []; // Retorna array vazio em caso de erro
+  }
 }
 
 // Função para extrair informações do PDF
