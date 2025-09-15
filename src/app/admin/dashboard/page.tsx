@@ -65,7 +65,7 @@ export default function DashboardPage() {
       const filterParam = filterEmpreendimento ? `&empreendimento=${encodeURIComponent(filterEmpreendimento)}` : '';
       console.log('🔍 Carregando propostas...', { limit, offset, filterParam });
       
-      const response = await fetch(`/api/propostas?dashboard=true&limit=${limit}&offset=${offset}${filterParam}`, {
+      const response = await fetch(`/api/list?dashboard=true&limit=${limit}&offset=${offset}${filterParam}`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
