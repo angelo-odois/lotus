@@ -28,7 +28,7 @@ export default function PropostaDetalhePage() {
   useEffect(() => {
     const loadProposta = async () => {
       try {
-        const response = await fetch(`/api/propostas?id=${id}`);
+        const response = await fetch(`/api/list?id=${id}`);
         
         if (response.status === 401) {
           router.push('/admin/login');
@@ -41,7 +41,7 @@ export default function PropostaDetalhePage() {
         }
         
         const data = await response.json();
-        setProposta(data.proposta);
+        setProposta(data.proposta || data);
       } catch (error) {
         console.error('Erro ao carregar proposta:', error);
         router.push('/admin/dashboard');
