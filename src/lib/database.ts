@@ -166,3 +166,26 @@ export async function listarPropostas(limit: number = 10, offset: number = 0): P
     return [];
   }
 }
+
+export async function deletarProposta(id: string): Promise<boolean> {
+  try {
+    const query = 'DELETE FROM propostas WHERE id = $1';
+    await executeQuery(query, [id]);
+    console.log(`✅ Proposta deletada: ${id}`);
+    return true;
+  } catch (error) {
+    console.error('❌ Erro ao deletar proposta:', error);
+    return false;
+  }
+}
+
+export async function contarPropostas(): Promise<number> {
+  try {
+    const query = 'SELECT COUNT(*) as total FROM propostas';
+    const result = await executeQuerySingle<{ total: string }>(query);
+    return parseInt(result?.total || '0');
+  } catch (error) {
+    console.error('❌ Erro ao contar propostas:', error);
+    return 0;
+  }
+}
