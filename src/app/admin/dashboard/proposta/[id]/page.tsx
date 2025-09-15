@@ -266,7 +266,26 @@ export default function PropostaDetalhePage() {
                           </p>
                         )}
                       </div>
-                      <span className="text-green-600 text-sm">✓ Anexado</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-green-600 text-sm">✓ Anexado</span>
+                        <a
+                          href={`/api/admin/documents/${proposta.id}/${arquivo.name}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs"
+                          title="Visualizar documento"
+                        >
+                          👁️ Ver
+                        </a>
+                        <a
+                          href={`/api/admin/documents/${proposta.id}/${arquivo.name}?download=1`}
+                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs"
+                          title="Baixar documento"
+                          download={arquivo.name}
+                        >
+                          📥 Download
+                        </a>
+                      </div>
                     </div>
                   </li>
                 ))}

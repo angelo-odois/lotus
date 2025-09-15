@@ -11,6 +11,16 @@ interface Proposta {
   status: string;
   pdf_gerado: boolean;
   created_at: string;
+  documentos?: {
+    arquivos?: Array<{
+      name: string;
+      type: string;
+      category?: string;
+      size?: number;
+    }>;
+    pdfFilename?: string;
+    dataEnvio?: string;
+  };
 }
 
 export default function DashboardPage() {
@@ -463,6 +473,9 @@ export default function DashboardPage() {
                           </p>
                           <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
                             PDF: {proposta.pdf_gerado ? '✅ Gerado' : '❌ Não gerado'}
+                          </p>
+                          <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                            Docs: {proposta.documentos?.arquivos?.length ? `📎 ${proposta.documentos.arquivos.length} anexo(s)` : '📄 Nenhum anexo'}
                           </p>
                         </div>
                         <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
