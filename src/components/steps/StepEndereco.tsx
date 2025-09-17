@@ -46,7 +46,7 @@ export function StepEndereco({ formData, updateFormData }: StepEnderecoProps) {
         <h2 className="text-xl font-semibold text-gray-900 mb-2">Endereço</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">CEP *</label>
           <input
@@ -70,14 +70,14 @@ export function StepEndereco({ formData, updateFormData }: StepEnderecoProps) {
           )}
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="sm:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">Logradouro *</label>
           <input
             type="text"
             required
             value={formData.logradouro}
             onChange={(e) => updateFormData('logradouro', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="Rua, Avenida, Quadra..."
           />
         </div>
@@ -89,7 +89,7 @@ export function StepEndereco({ formData, updateFormData }: StepEnderecoProps) {
             required
             value={formData.numero}
             onChange={(e) => updateFormData('numero', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="123"
           />
         </div>
@@ -100,7 +100,7 @@ export function StepEndereco({ formData, updateFormData }: StepEnderecoProps) {
             type="text"
             value={formData.complemento || ''}
             onChange={(e) => updateFormData('complemento', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="Apt, Bloco, Casa..."
           />
         </div>
@@ -112,7 +112,7 @@ export function StepEndereco({ formData, updateFormData }: StepEnderecoProps) {
             required
             value={formData.bairro}
             onChange={(e) => updateFormData('bairro', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="Nome do bairro"
           />
         </div>
@@ -124,7 +124,7 @@ export function StepEndereco({ formData, updateFormData }: StepEnderecoProps) {
             required
             value={formData.cidade}
             onChange={(e) => updateFormData('cidade', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="Nome da cidade"
           />
         </div>
@@ -135,7 +135,7 @@ export function StepEndereco({ formData, updateFormData }: StepEnderecoProps) {
             required
             value={formData.uf}
             onChange={(e) => updateFormData('uf', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
           >
             <option value="">Selecione</option>
             {config.ufs.map(uf => (

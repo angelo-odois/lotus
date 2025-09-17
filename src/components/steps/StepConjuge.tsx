@@ -48,15 +48,15 @@ export function StepConjuge({ formData, updateFormData }: StepConjugeProps) {
         <h2 className="text-xl font-semibold text-gray-900 mb-2">Cônjuge</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <div className="sm:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">Nome Completo *</label>
           <input
             type="text"
             required
             value={formData.nomeConjuge || ''}
             onChange={(e) => updateFormData('nomeConjuge', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="Nome completo do cônjuge"
           />
         </div>
@@ -68,7 +68,7 @@ export function StepConjuge({ formData, updateFormData }: StepConjugeProps) {
             required
             value={formData.cpfConjuge || ''}
             onChange={(e) => updateFormData('cpfConjuge', formatCPF(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="000.000.000-00"
           />
         </div>
@@ -80,7 +80,7 @@ export function StepConjuge({ formData, updateFormData }: StepConjugeProps) {
             required
             value={formData.rgConjuge || ''}
             onChange={(e) => updateFormData('rgConjuge', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="00.000.000-0"
           />
         </div>
@@ -92,7 +92,7 @@ export function StepConjuge({ formData, updateFormData }: StepConjugeProps) {
             required
             value={formData.orgaoExpedidorConjuge || ''}
             onChange={(e) => updateFormData('orgaoExpedidorConjuge', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="SSP/DF"
           />
         </div>
@@ -103,7 +103,7 @@ export function StepConjuge({ formData, updateFormData }: StepConjugeProps) {
             required
             value={formData.sexoConjuge || ''}
             onChange={(e) => updateFormData('sexoConjuge', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
           >
             <option value="">Selecione</option>
             <option value="masculino">Masculino</option>
@@ -118,7 +118,7 @@ export function StepConjuge({ formData, updateFormData }: StepConjugeProps) {
             required
             value={formData.dataNascimentoConjuge || ''}
             onChange={(e) => updateFormData('dataNascimentoConjuge', formatDate(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="DD/MM/AAAA"
             maxLength={10}
           />
@@ -131,7 +131,7 @@ export function StepConjuge({ formData, updateFormData }: StepConjugeProps) {
             required
             value={formData.naturalidadeConjuge || ''}
             onChange={(e) => updateFormData('naturalidadeConjuge', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="Brasília"
           />
         </div>
@@ -143,7 +143,7 @@ export function StepConjuge({ formData, updateFormData }: StepConjugeProps) {
             required
             value={formData.nacionalidadeConjuge || ''}
             onChange={(e) => updateFormData('nacionalidadeConjuge', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="Brasileira"
           />
         </div>
@@ -155,7 +155,7 @@ export function StepConjuge({ formData, updateFormData }: StepConjugeProps) {
             required
             value={formData.telefoneCelularConjuge || ''}
             onChange={(e) => updateFormData('telefoneCelularConjuge', formatPhone(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="(61) 99999-9999"
           />
         </div>
@@ -166,7 +166,7 @@ export function StepConjuge({ formData, updateFormData }: StepConjugeProps) {
             type="email"
             value={formData.emailConjuge || ''}
             onChange={(e) => updateFormData('emailConjuge', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="conjuge@email.com"
           />
         </div>
@@ -178,7 +178,7 @@ export function StepConjuge({ formData, updateFormData }: StepConjugeProps) {
             required
             value={formData.profissaoConjuge || ''}
             onChange={(e) => updateFormData('profissaoConjuge', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="Profissão do cônjuge"
           />
         </div>

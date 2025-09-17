@@ -19,7 +19,7 @@ export function ProgressBar({
   return (
     <div className="mb-8">
       {/* Labels dos passos - estilo mais próximo do original */}
-      <div className="flex flex-wrap justify-between gap-2 mb-6">
+      <div className="flex flex-wrap justify-between gap-1 sm:gap-2 mb-6">
         {config.steps.map((label, index) => {
           const stepNum = (index + 1) as Step;
           const isSpouseStep = stepNum === 3;
@@ -36,7 +36,7 @@ export function ProgressBar({
               key={stepNum}
               onClick={() => isAccessible ? goToStep(stepNum) : undefined}
               className={`
-                flex-1 text-xs md:text-sm font-medium px-2 py-2 rounded-lg transition-all duration-300 cursor-pointer text-center
+                flex-1 text-xs sm:text-sm font-medium px-1 sm:px-2 py-2 rounded-lg transition-all duration-300 cursor-pointer text-center
                 ${isActive 
                   ? 'text-[#1A1A1A] bg-[#FFC629] shadow-lg font-semibold' 
                   : 'text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700'
@@ -66,7 +66,7 @@ export function ProgressBar({
           const isSpouseStep = stepNum === 3;
           
           if (isSpouseStep && !shouldShowSpouseStep) {
-            return <div key={stepNum} className="w-10 h-10" />; // Espaço vazio
+            return <div key={stepNum} className="w-8 h-8 sm:w-10 sm:h-10" />; // Espaço vazio
           }
 
           const isActive = currentStep >= stepNum;
@@ -77,7 +77,7 @@ export function ProgressBar({
               key={stepNum}
               onClick={() => goToStep(stepNum)}
               className={`
-                w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 cursor-pointer
+                w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer
                 ${isActive 
                   ? 'bg-[#FFC629] text-[#1A1A1A] shadow-lg transform scale-110' 
                   : 'bg-gray-300 text-gray-600 hover:bg-gray-400'

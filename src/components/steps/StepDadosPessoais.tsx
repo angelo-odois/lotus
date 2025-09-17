@@ -56,8 +56,8 @@ export function StepDadosPessoais({ formData, updateFormData }: StepDadosPessoai
         <h2 className="text-xl font-semibold text-gray-900 mb-2">Dados Pessoais</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <div className="sm:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Nome Completo *
           </label>
@@ -66,7 +66,7 @@ export function StepDadosPessoais({ formData, updateFormData }: StepDadosPessoai
             required
             value={formData.nome}
             onChange={(e) => updateFormData('nome', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="Seu nome completo"
           />
         </div>
@@ -80,7 +80,7 @@ export function StepDadosPessoais({ formData, updateFormData }: StepDadosPessoai
             required
             value={formData.cpfCnpj}
             onChange={(e) => updateFormData('cpfCnpj', formatCPF(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="000.000.000-00"
           />
         </div>
@@ -94,7 +94,7 @@ export function StepDadosPessoais({ formData, updateFormData }: StepDadosPessoai
             required
             value={formData.rgInsEst}
             onChange={(e) => updateFormData('rgInsEst', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="00.000.000-0"
           />
         </div>
@@ -108,7 +108,7 @@ export function StepDadosPessoais({ formData, updateFormData }: StepDadosPessoai
             required
             value={formData.orgaoExpedidor}
             onChange={(e) => updateFormData('orgaoExpedidor', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="SSP/DF"
           />
         </div>
@@ -121,7 +121,7 @@ export function StepDadosPessoais({ formData, updateFormData }: StepDadosPessoai
             required
             value={formData.sexo}
             onChange={(e) => updateFormData('sexo', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
           >
             <option value="">Selecione</option>
             <option value="masculino">Masculino</option>
@@ -138,7 +138,7 @@ export function StepDadosPessoais({ formData, updateFormData }: StepDadosPessoai
             required
             value={formData.dataNascimento}
             onChange={(e) => updateFormData('dataNascimento', formatDate(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="DD/MM/AAAA"
             maxLength={10}
           />
@@ -153,7 +153,7 @@ export function StepDadosPessoais({ formData, updateFormData }: StepDadosPessoai
             required
             value={formData.naturalidade}
             onChange={(e) => updateFormData('naturalidade', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="Brasília"
           />
         </div>
@@ -167,7 +167,7 @@ export function StepDadosPessoais({ formData, updateFormData }: StepDadosPessoai
             required
             value={formData.nacionalidade}
             onChange={(e) => updateFormData('nacionalidade', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="Brasileira"
           />
         </div>
@@ -181,7 +181,7 @@ export function StepDadosPessoais({ formData, updateFormData }: StepDadosPessoai
             required
             value={formData.telefoneCelular}
             onChange={(e) => updateFormData('telefoneCelular', formatPhone(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="(61) 99999-9999"
           />
         </div>
@@ -194,12 +194,12 @@ export function StepDadosPessoais({ formData, updateFormData }: StepDadosPessoai
             type="tel"
             value={formData.telefoneComercial || ''}
             onChange={(e) => updateFormData('telefoneComercial', formatPhone(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="(61) 3333-3333"
           />
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="sm:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             E-mail *
           </label>
@@ -208,7 +208,7 @@ export function StepDadosPessoais({ formData, updateFormData }: StepDadosPessoai
             required
             value={formData.email}
             onChange={(e) => updateFormData('email', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="seu@email.com"
           />
         </div>
@@ -222,16 +222,16 @@ export function StepDadosPessoais({ formData, updateFormData }: StepDadosPessoai
             required
             value={formData.profissao}
             onChange={(e) => updateFormData('profissao', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="Sua profissão"
           />
         </div>
 
-        <div className="lg:col-span-3">
+        <div className="sm:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-4">
             Estado Civil *
           </label>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
               { value: 'solteiro', label: 'Solteiro(a)' },
               { value: 'casado', label: 'Casado(a)' },

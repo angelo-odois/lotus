@@ -85,11 +85,11 @@ export function PropostaForm() {
 
   return (
     <div className="min-h-screen bg-[#FEFCF7] font-inter">
-      <div className="flex items-center justify-center min-h-screen p-6">
+      <div className="flex items-center justify-center min-h-screen p-4 sm:p-6">
         <div className="bg-white rounded-3xl shadow-2xl border border-[#FFC629]/10 overflow-hidden max-w-5xl w-full">
           <Header />
           
-          <div className="p-8 md:p-12">
+          <div className="p-4 sm:p-6 md:p-8">
             <ProgressBar 
               currentStep={currentStep}
               totalSteps={totalSteps}
@@ -112,7 +112,7 @@ export function PropostaForm() {
             />
           </div>
 
-          <footer className="bg-[#1A1A1A] text-white p-12 md:p-16 text-center">
+          <footer className="bg-[#1A1A1A] text-white p-6 sm:p-8 md:p-12 text-center">
             <div className="flex justify-center mb-6">
               <Image 
                 src="/logo.svg" 
@@ -122,13 +122,13 @@ export function PropostaForm() {
                 className="filter invert brightness-0 contrast-100" 
               />
             </div>
-            <p className="text-lg font-semibold text-[#FFC629] mb-2">
+            <p className="text-base sm:text-lg font-semibold text-[#FFC629] mb-2">
               Lotus Cidade
             </p>
             <p className="text-sm text-gray-300 mb-1">
               lotuscidade.com.br
             </p>
-            <p className="text-xs text-gray-400 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-xs text-gray-400 leading-relaxed max-w-2xl mx-auto px-4">
               Setor Comercial Sul, Quadra 9, Ed. Parque Cidade Corporate, Torre A, Sala 1105, Brasília-DF
             </p>
           </footer>

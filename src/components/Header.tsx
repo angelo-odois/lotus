@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 export function Header() {
   return (
-    <div className="relative bg-gradient-to-br from-[#FFC629] to-[#FFD93D] p-12 md:p-6 text-center overflow-hidden rounded-t-2xl">
+    <div className="relative bg-gradient-to-br from-[#FFC629] to-[#FFD93D] p-6 md:p-8 text-center overflow-hidden rounded-t-2xl">
       {/* Pattern overlay */}
       <div 
         className="absolute inset-0 opacity-20"
@@ -14,7 +14,7 @@ export function Header() {
       
       {/* Logo container */}
       <div className="relative z-10">
-        <div className="bg-[#1A1A1A] inline-block p-6 rounded-2xl mb-4 shadow-xl">
+        <div className="bg-[#1A1A1A] inline-block p-4 sm:p-6 rounded-2xl mb-4 shadow-xl">
           <Image 
             src="/logo.svg" 
             alt="Lotus" 
@@ -24,7 +24,7 @@ export function Header() {
           />
         </div>
         
-        <h1 className="text-2xl md:text-2xl font-bold text-[#1A1A1A] mb-3 tracking-wide">
+        <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A] mb-3 tracking-wide">
           PROPOSTA DE COMPRA
         </h1>
       </div>

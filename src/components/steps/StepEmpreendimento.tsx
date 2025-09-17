@@ -15,7 +15,7 @@ export function StepEmpreendimento({ formData, updateFormData }: StepEmpreendime
         <h2 className="text-xl font-semibold text-gray-900 mb-2">Empreendimento</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-4">
         {Object.entries(config.empreendimentos).map(([key, name]) => (
           <label
             key={key}

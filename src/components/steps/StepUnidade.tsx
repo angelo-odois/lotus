@@ -39,7 +39,7 @@ export function StepUnidade({ formData, updateFormData, calculateFinancing }: St
             required
             value={formData.unidadeNumero}
             onChange={(e) => updateFormData('unidadeNumero', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="Ex: 101, 205, Torre A - Apt 1502"
           />
         </div>
@@ -50,7 +50,7 @@ export function StepUnidade({ formData, updateFormData, calculateFinancing }: St
           </h3>
 
           {isVert ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Valor do Sinal (R$) *</label>
                 <input
@@ -58,7 +58,7 @@ export function StepUnidade({ formData, updateFormData, calculateFinancing }: St
                   required
                   value={formData.valorSinal || ''}
                   onChange={(e) => updateFormData('valorSinal', formatCurrency(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
                   placeholder="50.000,00"
                 />
               </div>
@@ -70,7 +70,7 @@ export function StepUnidade({ formData, updateFormData, calculateFinancing }: St
                   required
                   value={formData.valorMensais || ''}
                   onChange={(e) => updateFormData('valorMensais', formatCurrency(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
                   placeholder="2.500,00"
                 />
               </div>
@@ -82,7 +82,7 @@ export function StepUnidade({ formData, updateFormData, calculateFinancing }: St
                   required
                   value={formData.valorSemestral || ''}
                   onChange={(e) => updateFormData('valorSemestral', formatCurrency(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
                   placeholder="15.000,00"
                 />
               </div>
@@ -94,13 +94,13 @@ export function StepUnidade({ formData, updateFormData, calculateFinancing }: St
                   required
                   value={formData.valorChaves || ''}
                   onChange={(e) => updateFormData('valorChaves', formatCurrency(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
                   placeholder="100.000,00"
                 />
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Valor do Imóvel (R$) *</label>
                 <input
@@ -108,7 +108,7 @@ export function StepUnidade({ formData, updateFormData, calculateFinancing }: St
                   required
                   value={formData.valorImovel}
                   onChange={(e) => updateFormData('valorImovel', formatCurrency(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
                   placeholder="450.000,00"
                 />
               </div>
@@ -120,7 +120,7 @@ export function StepUnidade({ formData, updateFormData, calculateFinancing }: St
                   required
                   value={formData.valorEntrada}
                   onChange={(e) => updateFormData('valorEntrada', formatCurrency(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
                   placeholder="90.000,00"
                 />
               </div>
@@ -131,7 +131,7 @@ export function StepUnidade({ formData, updateFormData, calculateFinancing }: St
                   type="text"
                   readOnly
                   value={formData.valorFinanciar}
-                  className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-700"
+                  className="w-full px-3 py-2.5 sm:py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-700 text-sm sm:text-base"
                   placeholder="360.000,00"
                 />
               </div>

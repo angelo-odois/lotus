@@ -115,7 +115,7 @@ export function StepDocumentos({ uploadedFiles, setUploadedFiles, shouldShowSpou
 
       <div
         className={`
-          border-2 border-dashed rounded-lg p-12 text-center transition-all cursor-pointer
+          border-2 border-dashed rounded-lg p-6 sm:p-12 text-center transition-all cursor-pointer
           ${isDragOver 
             ? 'border-yellow-400 bg-yellow-50' 
             : 'border-gray-300 hover:border-yellow-400 hover:bg-gray-50'
