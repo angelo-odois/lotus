@@ -28,6 +28,20 @@ export function StepConjuge({ formData, updateFormData }: StepConjugeProps) {
     return numbers;
   };
 
+  const formatDate = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    let formatted = numbers;
+
+    if (numbers.length >= 2) {
+      formatted = numbers.replace(/(\d{2})(\d)/, '$1/$2');
+    }
+    if (numbers.length >= 4) {
+      formatted = numbers.replace(/(\d{2})(\d{2})(\d)/, '$1/$2/$3');
+    }
+
+    return formatted.substring(0, 10); // Limita a 10 caracteres (DD/MM/AAAA)
+  };
+
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
@@ -100,11 +114,13 @@ export function StepConjuge({ formData, updateFormData }: StepConjugeProps) {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Data de Nascimento *</label>
           <input
-            type="date"
+            type="text"
             required
             value={formData.dataNascimentoConjuge || ''}
-            onChange={(e) => updateFormData('dataNascimentoConjuge', e.target.value)}
+            onChange={(e) => updateFormData('dataNascimentoConjuge', formatDate(e.target.value))}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            placeholder="DD/MM/AAAA"
+            maxLength={10}
           />
         </div>
 

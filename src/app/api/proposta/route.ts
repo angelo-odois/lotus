@@ -764,7 +764,7 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
           </tr>
           <tr>
             <td class="form-label">DATA NASCIMENTO:</td>
-            <td class="form-value">${formData.dataNascimento ? new Date(formData.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR') : ''}</td>
+            <td class="form-value">${formData.dataNascimento || ''}</td>
           </tr>
           <tr>
             <td class="form-label">NATURALIDADE:</td>
@@ -824,7 +824,7 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
           </tr>
           <tr>
             <td class="form-label">DATA NASCIMENTO:</td>
-            <td class="form-value">${formData.dataNascimentoConjuge ? new Date(formData.dataNascimentoConjuge + 'T00:00:00').toLocaleDateString('pt-BR') : ''}</td>
+            <td class="form-value">${formData.dataNascimentoConjuge || ''}</td>
           </tr>
           <tr>
             <td class="form-label">NATURALIDADE:</td>
