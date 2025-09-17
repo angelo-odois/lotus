@@ -121,6 +121,7 @@ export function StepConjuge({ formData, updateFormData }: StepConjugeProps) {
             className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
             placeholder="DD/MM/AAAA"
             maxLength={10}
+            inputMode="numeric"
           />
         </div>
 
