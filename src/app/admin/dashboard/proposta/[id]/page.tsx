@@ -221,29 +221,68 @@ export default function PropostaDetalhePage() {
               <div>
                 <dt className="text-sm font-medium text-gray-500">Empreendimento</dt>
                 <dd className="text-sm text-gray-900">{(() => {
-                  if (typeof proposta.empreendimento === 'string') return proposta.empreendimento;
+                  if (typeof proposta.empreendimento === 'string') return proposta.empreendimento.toUpperCase();
                   const nested = proposta.empreendimento?.empreendimento;
-                  if (typeof nested === 'string') return nested;
-                  if (nested?.empreendimento) return String(nested.empreendimento);
-                  return proposta.empreendimento?.empreendimento ? String(proposta.empreendimento.empreendimento) : 'N/A';
+                  if (typeof nested === 'string') return nested.toUpperCase();
+                  if (nested?.empreendimento) return String(nested.empreendimento).toUpperCase();
+                  return proposta.empreendimento?.empreendimento ? String(proposta.empreendimento.empreendimento).toUpperCase() : 'N/A';
                 })()}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500">Número da Unidade</dt>
                 <dd className="text-sm text-gray-900">{proposta.unidade?.unidadeNumero || 'N/A'}</dd>
               </div>
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Valor do Imóvel</dt>
-                <dd className="text-sm text-gray-900">{formatCurrency(proposta.unidade?.valorImovel || '0')}</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Valor da Entrada</dt>
-                <dd className="text-sm text-gray-900">{formatCurrency(proposta.unidade?.valorEntrada || '0')}</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Valor a Financiar</dt>
-                <dd className="text-sm text-gray-900">{formatCurrency(proposta.unidade?.valorFinanciar || '0')}</dd>
-              </div>
+              {(() => {
+                const empreendimentoValue = (() => {
+                  if (typeof proposta.empreendimento === 'string') return proposta.empreendimento;
+                  const nested = proposta.empreendimento?.empreendimento;
+                  if (typeof nested === 'string') return nested;
+                  if (nested?.empreendimento) return String(nested.empreendimento);
+                  return proposta.empreendimento?.empreendimento ? String(proposta.empreendimento.empreendimento) : '';
+                })();
+
+                const isVert = empreendimentoValue.toLowerCase() === 'vert';
+
+                if (isVert) {
+                  return (
+                    <>
+                      <div>
+                        <dt className="text-sm font-medium text-gray-500">Valor do Sinal</dt>
+                        <dd className="text-sm text-gray-900">{formatCurrency(proposta.unidade?.valorSinal || '0')}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-sm font-medium text-gray-500">Valor das Mensais</dt>
+                        <dd className="text-sm text-gray-900">{formatCurrency(proposta.unidade?.valorMensais || '0')}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-sm font-medium text-gray-500">Valor do Semestral</dt>
+                        <dd className="text-sm text-gray-900">{formatCurrency(proposta.unidade?.valorSemestral || '0')}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-sm font-medium text-gray-500">Valor das Chaves</dt>
+                        <dd className="text-sm text-gray-900">{formatCurrency(proposta.unidade?.valorChaves || '0')}</dd>
+                      </div>
+                    </>
+                  );
+                } else {
+                  return (
+                    <>
+                      <div>
+                        <dt className="text-sm font-medium text-gray-500">Valor do Imóvel</dt>
+                        <dd className="text-sm text-gray-900">{formatCurrency(proposta.unidade?.valorImovel || '0')}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-sm font-medium text-gray-500">Valor da Entrada</dt>
+                        <dd className="text-sm text-gray-900">{formatCurrency(proposta.unidade?.valorEntrada || '0')}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-sm font-medium text-gray-500">Valor a Financiar</dt>
+                        <dd className="text-sm text-gray-900">{formatCurrency(proposta.unidade?.valorFinanciar || '0')}</dd>
+                      </div>
+                    </>
+                  );
+                }
+              })()}
             </dl>
           </div>
 

@@ -93,7 +93,12 @@ export async function salvarProposta(
       unidadeNumero: formData.unidadeNumero,
       valorImovel: formData.valorImovel,
       valorEntrada: formData.valorEntrada,
-      valorFinanciar: formData.valorFinanciar
+      valorFinanciar: formData.valorFinanciar,
+      // Campos específicos do VERT
+      valorSinal: formData.valorSinal,
+      valorMensais: formData.valorMensais,
+      valorSemestral: formData.valorSemestral,
+      valorChaves: formData.valorChaves
     };
 
     const documentos = {

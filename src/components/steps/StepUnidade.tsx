@@ -10,6 +10,8 @@ interface StepUnidadeProps {
 }
 
 export function StepUnidade({ formData, updateFormData, calculateFinancing }: StepUnidadeProps) {
+  const isVert = formData.empreendimento === 'vert';
+
   useEffect(() => {
     calculateFinancing();
   }, [formData.valorImovel, formData.valorEntrada, calculateFinancing]);
@@ -43,44 +45,98 @@ export function StepUnidade({ formData, updateFormData, calculateFinancing }: St
         </div>
 
         <div className="bg-green-50 border border-green-200 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Valores da Proposta</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Valor do Imóvel (R$) *</label>
-              <input
-                type="text"
-                required
-                value={formData.valorImovel}
-                onChange={(e) => updateFormData('valorImovel', formatCurrency(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                placeholder="4500.000,00"
-              />
-            </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            {isVert ? 'Composição de Valores - VERT' : 'Valores da Proposta'}
+          </h3>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Valor de Entrada (R$) *</label>
-              <input
-                type="text"
-                required
-                value={formData.valorEntrada}
-                onChange={(e) => updateFormData('valorEntrada', formatCurrency(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                placeholder="900.000,00"
-              />
-            </div>
+          {isVert ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Valor do Sinal (R$) *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.valorSinal || ''}
+                  onChange={(e) => updateFormData('valorSinal', formatCurrency(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  placeholder="50.000,00"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Valor a Financiar (R$)</label>
-              <input
-                type="text"
-                readOnly
-                value={formData.valorFinanciar}
-                className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-700"
-                placeholder="360.000,00"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Valor das Mensais (R$) *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.valorMensais || ''}
+                  onChange={(e) => updateFormData('valorMensais', formatCurrency(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  placeholder="2.500,00"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Valor do Semestral (R$) *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.valorSemestral || ''}
+                  onChange={(e) => updateFormData('valorSemestral', formatCurrency(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  placeholder="15.000,00"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Valor das Chaves (R$) *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.valorChaves || ''}
+                  onChange={(e) => updateFormData('valorChaves', formatCurrency(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  placeholder="100.000,00"
+                />
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Valor do Imóvel (R$) *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.valorImovel}
+                  onChange={(e) => updateFormData('valorImovel', formatCurrency(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  placeholder="450.000,00"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Valor de Entrada (R$) *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.valorEntrada}
+                  onChange={(e) => updateFormData('valorEntrada', formatCurrency(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  placeholder="90.000,00"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Valor a Financiar (R$)</label>
+                <input
+                  type="text"
+                  readOnly
+                  value={formData.valorFinanciar}
+                  className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-700"
+                  placeholder="360.000,00"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

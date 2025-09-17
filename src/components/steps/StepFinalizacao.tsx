@@ -10,6 +10,8 @@ interface StepFinalizacaoProps {
 }
 
 export function StepFinalizacao({ formData, uploadedFiles, shouldShowSpouseStep }: StepFinalizacaoProps) {
+  const isVert = formData.empreendimento === 'vert';
+
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
@@ -18,7 +20,7 @@ export function StepFinalizacao({ formData, uploadedFiles, shouldShowSpouseStep 
 
       <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">🏠 Resumo da Proposta</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
             <span className="font-medium text-gray-600">Cliente:</span>
@@ -35,7 +37,7 @@ export function StepFinalizacao({ formData, uploadedFiles, shouldShowSpouseStep 
           <div>
             <span className="font-medium text-gray-600">Empreendimento:</span>
             <span className="ml-2 text-gray-900">
-              {config.empreendimentos[formData.empreendimento as keyof typeof config.empreendimentos] || '-'}
+              {(config.empreendimentos[formData.empreendimento as keyof typeof config.empreendimentos] || '-').toUpperCase()}
             </span>
           </div>
           
@@ -43,21 +45,47 @@ export function StepFinalizacao({ formData, uploadedFiles, shouldShowSpouseStep 
             <span className="font-medium text-gray-600">Unidade:</span>
             <span className="ml-2 text-gray-900">{formData.unidadeNumero || '-'}</span>
           </div>
-          
-          <div>
-            <span className="font-medium text-gray-600">Valor do Imóvel:</span>
-            <span className="ml-2 text-green-600 font-semibold">R$ {formData.valorImovel || '0,00'}</span>
-          </div>
-          
-          <div>
-            <span className="font-medium text-gray-600">Valor de Entrada:</span>
-            <span className="ml-2 text-green-600 font-semibold">R$ {formData.valorEntrada || '0,00'}</span>
-          </div>
-          
-          <div>
-            <span className="font-medium text-gray-600">Valor a Financiar:</span>
-            <span className="ml-2 text-green-600 font-semibold">R$ {formData.valorFinanciar || '0,00'}</span>
-          </div>
+
+          {isVert ? (
+            <>
+              <div>
+                <span className="font-medium text-gray-600">Valor do Sinal:</span>
+                <span className="ml-2 text-green-600 font-semibold">R$ {formData.valorSinal || '0,00'}</span>
+              </div>
+
+              <div>
+                <span className="font-medium text-gray-600">Valor das Mensais:</span>
+                <span className="ml-2 text-green-600 font-semibold">R$ {formData.valorMensais || '0,00'}</span>
+              </div>
+
+              <div>
+                <span className="font-medium text-gray-600">Valor do Semestral:</span>
+                <span className="ml-2 text-green-600 font-semibold">R$ {formData.valorSemestral || '0,00'}</span>
+              </div>
+
+              <div>
+                <span className="font-medium text-gray-600">Valor das Chaves:</span>
+                <span className="ml-2 text-green-600 font-semibold">R$ {formData.valorChaves || '0,00'}</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <span className="font-medium text-gray-600">Valor do Imóvel:</span>
+                <span className="ml-2 text-green-600 font-semibold">R$ {formData.valorImovel || '0,00'}</span>
+              </div>
+
+              <div>
+                <span className="font-medium text-gray-600">Valor de Entrada:</span>
+                <span className="ml-2 text-green-600 font-semibold">R$ {formData.valorEntrada || '0,00'}</span>
+              </div>
+
+              <div>
+                <span className="font-medium text-gray-600">Valor a Financiar:</span>
+                <span className="ml-2 text-green-600 font-semibold">R$ {formData.valorFinanciar || '0,00'}</span>
+              </div>
+            </>
+          )}
           
           <div>
             <span className="font-medium text-gray-600">Documentos:</span>

@@ -45,6 +45,12 @@ export interface FormData {
   valorEntrada: string;
   valorFinanciar: string;
 
+  // Valores específicos do VERT
+  valorSinal?: string;
+  valorMensais?: string;
+  valorSemestral?: string;
+  valorChaves?: string;
+
   // Metadados
   dataEnvio?: string;
   timestamp?: number;

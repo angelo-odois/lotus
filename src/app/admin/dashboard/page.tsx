@@ -268,7 +268,7 @@ export default function DashboardPage() {
                 {empreendimentos
                   .filter(emp => typeof emp === 'string' && emp.length > 0)
                   .map((emp) => (
-                    <option key={String(emp)} value={String(emp)}>{String(emp)}</option>
+                    <option key={String(emp)} value={String(emp)}>{String(emp).toUpperCase()}</option>
                   ))}
               </select>
             </div>
@@ -383,7 +383,7 @@ export default function DashboardPage() {
                 .sort(([,a], [,b]) => b - a)
                 .map(([empreendimento, count]) => (
                 <div key={String(empreendimento)} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="text-sm font-medium text-gray-700">{String(empreendimento)}</span>
+                  <span className="text-sm font-medium text-gray-700">{String(empreendimento).toUpperCase()}</span>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                     {count}
                   </span>
@@ -469,7 +469,7 @@ export default function DashboardPage() {
                       <div className="mt-2 sm:flex sm:justify-between">
                         <div className="sm:flex">
                           <p className="flex items-center text-sm text-gray-500">
-                            Empreendimento: {getEmpreendimentoValue(proposta)}
+                            Empreendimento: {getEmpreendimentoValue(proposta).toUpperCase()}
                           </p>
                           <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
                             PDF: {proposta.pdf_gerado ? '✅ Gerado' : '❌ Não gerado'}

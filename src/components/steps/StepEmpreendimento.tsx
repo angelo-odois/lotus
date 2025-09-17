@@ -37,7 +37,7 @@ export function StepEmpreendimento({ formData, updateFormData }: StepEmpreendime
               className="sr-only"
             />
             <div className="text-center">
-              <h3 className="text-xl font-bold text-gray-900 mb-1">{name}</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-1">{name.toUpperCase()}</h3>
               <p className="text-sm text-gray-600">Residencial</p>
             </div>
           </label>

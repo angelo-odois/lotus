@@ -48,7 +48,13 @@ const initialFormData: FormData = {
   // Valores
   valorImovel: '',
   valorEntrada: '',
-  valorFinanciar: ''
+  valorFinanciar: '',
+
+  // Valores específicos do VERT
+  valorSinal: '',
+  valorMensais: '',
+  valorSemestral: '',
+  valorChaves: ''
 };
 
 export function usePropostaForm() {
@@ -88,16 +94,27 @@ export function usePropostaForm() {
   const validateCurrentStep = () => {
     console.log(`🔍 Validando step ${currentStep}...`);
     console.log(`📊 FormData completo:`, formData);
-    
+
+    // Validação dinâmica para step 5 baseada no empreendimento
+    const getStep5Fields = (): (keyof FormData)[] => {
+      const baseFields: (keyof FormData)[] = ['unidadeNumero'];
+
+      if (formData.empreendimento === 'vert') {
+        return [...baseFields, 'valorSinal', 'valorMensais', 'valorSemestral', 'valorChaves'];
+      } else {
+        return [...baseFields, 'valorImovel', 'valorEntrada'];
+      }
+    };
+
     const requiredFields: { [key in Step]: (keyof FormData)[] } = {
-      1: ['nome', 'cpfCnpj', 'rgInsEst', 'orgaoExpedidor', 'sexo', 'dataNascimento', 
+      1: ['nome', 'cpfCnpj', 'rgInsEst', 'orgaoExpedidor', 'sexo', 'dataNascimento',
           'naturalidade', 'nacionalidade', 'telefoneCelular', 'email', 'profissao', 'estadoCivil'],
       2: ['cep', 'logradouro', 'numero', 'bairro', 'cidade', 'uf'],
-      3: shouldShowSpouseStep() ? ['nomeConjuge', 'cpfConjuge', 'rgConjuge', 'orgaoExpedidorConjuge', 
-          'sexoConjuge', 'dataNascimentoConjuge', 'naturalidadeConjuge', 'nacionalidadeConjuge', 
+      3: shouldShowSpouseStep() ? ['nomeConjuge', 'cpfConjuge', 'rgConjuge', 'orgaoExpedidorConjuge',
+          'sexoConjuge', 'dataNascimentoConjuge', 'naturalidadeConjuge', 'nacionalidadeConjuge',
           'telefoneCelularConjuge', 'profissaoConjuge'] : [],
       4: ['empreendimento'],
-      5: ['unidadeNumero', 'valorImovel', 'valorEntrada'],
+      5: getStep5Fields(),
       6: [], // Documentos opcionais
       7: [] // Finalização
     };

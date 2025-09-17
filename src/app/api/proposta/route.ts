@@ -475,9 +475,10 @@ async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: Uploa
 function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] = []): string {
   const currentDate = new Date();
   const numeroProsposta = `LP${currentDate.getFullYear()}${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}${String(currentDate.getHours()).padStart(2, '0')}${String(currentDate.getMinutes()).padStart(2, '0')}`;
-  
+
   const enderecoCompleto = `${formData.logradouro || ''} ${formData.numero || ''} ${formData.complemento || ''}`.trim();
   const isMarriedOrUnion = formData.estadoCivil === 'casado' || formData.estadoCivil === 'uniao-estavel';
+  const isVert = formData.empreendimento === 'vert';
   
   return `
 <!DOCTYPE html>
@@ -851,7 +852,7 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
         <table class="form-table">
           <tr>
             <td class="form-label">EMPREENDIMENTO:</td>
-            <td class="form-value">${typeof formData.empreendimento === 'string' ? formData.empreendimento : (formData.empreendimento?.empreendimento || '')}</td>
+            <td class="form-value">${(typeof formData.empreendimento === 'string' ? formData.empreendimento : (formData.empreendimento?.empreendimento || '')).toUpperCase()}</td>
           </tr>
           <tr>
             <td class="form-label">INCORPORADORA:</td>
@@ -870,9 +871,27 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
 
       <!-- Valores -->
       <div class="section">
-        <div class="section-title">VALORES DA PROPOSTA</div>
+        <div class="section-title">${isVert ? 'COMPOSIÇÃO DE VALORES - VERT' : 'VALORES DA PROPOSTA'}</div>
         <div class="values-section">
           <table class="values-table">
+            ${isVert ? `
+            <tr>
+              <td class="value-label">(A) VALOR DO SINAL:</td>
+              <td class="value-amount">R$ ${formData.valorSinal || '0,00'}</td>
+            </tr>
+            <tr>
+              <td class="value-label">(B) VALOR DAS MENSAIS:</td>
+              <td class="value-amount">R$ ${formData.valorMensais || '0,00'}</td>
+            </tr>
+            <tr>
+              <td class="value-label">(C) VALOR DO SEMESTRAL:</td>
+              <td class="value-amount">R$ ${formData.valorSemestral || '0,00'}</td>
+            </tr>
+            <tr>
+              <td class="value-label">(D) VALOR DAS CHAVES:</td>
+              <td class="value-amount">R$ ${formData.valorChaves || '0,00'}</td>
+            </tr>
+            ` : `
             <tr>
               <td class="value-label">(A) VALOR DA PROPOSTA:</td>
               <td class="value-amount">R$ ${formData.valorImovel || '0,00'}</td>
@@ -885,6 +904,7 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
               <td class="value-label">(C) VALOR A FINANCIAR:</td>
               <td class="value-amount">R$ ${formData.valorFinanciar || '0,00'}</td>
             </tr>
+            `}
           </table>
         </div>
       </div>
