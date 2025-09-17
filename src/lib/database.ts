@@ -182,9 +182,12 @@ export async function listarPropostas(limit: number = 10, offset: number = 0, em
     
     if (empreendimento) {
       query = `
-        SELECT * FROM propostas 
-        WHERE empreendimento->>'empreendimento' = $3
-        ORDER BY created_at DESC 
+        SELECT * FROM propostas
+        WHERE (
+          empreendimento = $3 OR
+          empreendimento->>'empreendimento' = $3
+        )
+        ORDER BY created_at DESC
         LIMIT $1 OFFSET $2
       `;
       params = [limit, offset, empreendimento];
@@ -223,7 +226,10 @@ export async function contarPropostas(empreendimento?: string): Promise<number> 
     let params: any[];
     
     if (empreendimento) {
-      query = "SELECT COUNT(*) as total FROM propostas WHERE empreendimento->>'empreendimento' = $1";
+      query = `SELECT COUNT(*) as total FROM propostas WHERE (
+        empreendimento = $1 OR
+        empreendimento->>'empreendimento' = $1
+      )`;
       params = [empreendimento];
     } else {
       query = 'SELECT COUNT(*) as total FROM propostas';
