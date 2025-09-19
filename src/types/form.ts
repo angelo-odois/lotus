@@ -48,7 +48,9 @@ export interface FormData {
   // Valores específicos do VERT
   valorSinal?: string;
   valorMensais?: string;
+  parcelasMensais?: string;
   valorSemestral?: string;
+  parcelasSemestrais?: string;
   valorChaves?: string;
 
   // Metadados

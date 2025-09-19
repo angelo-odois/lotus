@@ -252,11 +252,21 @@ export default function PropostaDetalhePage() {
                       </div>
                       <div>
                         <dt className="text-sm font-medium text-gray-500">Valor das Mensais</dt>
-                        <dd className="text-sm text-gray-900">{formatCurrency(proposta.unidade?.valorMensais || '0')}</dd>
+                        <dd className="text-sm text-gray-900">
+                          {formatCurrency(proposta.unidade?.valorMensais || '0')}
+                          {proposta.unidade?.parcelasMensais && (
+                            <span className="text-gray-500 ml-2">({proposta.unidade.parcelasMensais}x)</span>
+                          )}
+                        </dd>
                       </div>
                       <div>
                         <dt className="text-sm font-medium text-gray-500">Valor do Semestral</dt>
-                        <dd className="text-sm text-gray-900">{formatCurrency(proposta.unidade?.valorSemestral || '0')}</dd>
+                        <dd className="text-sm text-gray-900">
+                          {formatCurrency(proposta.unidade?.valorSemestral || '0')}
+                          {proposta.unidade?.parcelasSemestrais && (
+                            <span className="text-gray-500 ml-2">({proposta.unidade.parcelasSemestrais}x)</span>
+                          )}
+                        </dd>
                       </div>
                       <div>
                         <dt className="text-sm font-medium text-gray-500">Valor das Chaves</dt>

@@ -53,7 +53,9 @@ const initialFormData: FormData = {
   // Valores específicos do VERT
   valorSinal: '',
   valorMensais: '',
+  parcelasMensais: '',
   valorSemestral: '',
+  parcelasSemestrais: '',
   valorChaves: ''
 };
 
@@ -100,7 +102,7 @@ export function usePropostaForm() {
       const baseFields: (keyof FormData)[] = ['unidadeNumero'];
 
       if (formData.empreendimento === 'vert') {
-        return [...baseFields, 'valorSinal', 'valorMensais', 'valorSemestral', 'valorChaves'];
+        return [...baseFields, 'valorSinal', 'valorMensais', 'parcelasMensais', 'valorSemestral', 'parcelasSemestrais', 'valorChaves'];
       } else {
         return [...baseFields, 'valorImovel', 'valorEntrada'];
       }

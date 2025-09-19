@@ -881,11 +881,11 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
             </tr>
             <tr>
               <td class="value-label">(B) VALOR DAS MENSAIS:</td>
-              <td class="value-amount">R$ ${formData.valorMensais || '0,00'}</td>
+              <td class="value-amount">R$ ${formData.valorMensais || '0,00'} ${formData.parcelasMensais ? `(${formData.parcelasMensais}x)` : ''}</td>
             </tr>
             <tr>
               <td class="value-label">(C) VALOR DO SEMESTRAL:</td>
-              <td class="value-amount">R$ ${formData.valorSemestral || '0,00'}</td>
+              <td class="value-amount">R$ ${formData.valorSemestral || '0,00'} ${formData.parcelasSemestrais ? `(${formData.parcelasSemestrais}x)` : ''}</td>
             </tr>
             <tr>
               <td class="value-label">(D) VALOR DAS CHAVES:</td>

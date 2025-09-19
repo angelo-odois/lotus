@@ -63,28 +63,58 @@ export function StepUnidade({ formData, updateFormData, calculateFinancing }: St
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Valor das Mensais (R$) *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.valorMensais || ''}
-                  onChange={(e) => updateFormData('valorMensais', formatCurrency(e.target.value))}
-                  className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
-                  placeholder="2.500,00"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Valor das Mensais (R$) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.valorMensais || ''}
+                    onChange={(e) => updateFormData('valorMensais', formatCurrency(e.target.value))}
+                    className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
+                    placeholder="2.500,00"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Qtd Parcelas Mensais *</label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    max="120"
+                    value={formData.parcelasMensais || ''}
+                    onChange={(e) => updateFormData('parcelasMensais', e.target.value)}
+                    className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
+                    placeholder="24"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Valor do Semestral (R$) *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.valorSemestral || ''}
-                  onChange={(e) => updateFormData('valorSemestral', formatCurrency(e.target.value))}
-                  className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
-                  placeholder="15.000,00"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Valor do Semestral (R$) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.valorSemestral || ''}
+                    onChange={(e) => updateFormData('valorSemestral', formatCurrency(e.target.value))}
+                    className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
+                    placeholder="15.000,00"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Qtd Parcelas Semestrais *</label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    max="20"
+                    value={formData.parcelasSemestrais || ''}
+                    onChange={(e) => updateFormData('parcelasSemestrais', e.target.value)}
+                    className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base"
+                    placeholder="4"
+                  />
+                </div>
               </div>
 
               <div>
