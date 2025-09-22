@@ -50,11 +50,22 @@ export class WhatsAppService {
   }
 
   async sendNewProposalNotification(phoneNumber: string, clientName: string, propostaId: string): Promise<boolean> {
+    // Criar data no fuso horário de Brasília
+    const brasiliaDate = new Date().toLocaleString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+
     const message = `🏠 *NOVA PROPOSTA RECEBIDA*
 
 📋 *Cliente:* ${clientName}
 🔖 *ID da Proposta:* ${propostaId}
-📅 *Data:* ${new Date().toLocaleString('pt-BR')}
+📅 *Data:* ${brasiliaDate}
 
 ✅ Uma nova proposta foi enviada e está aguardando análise.
 
