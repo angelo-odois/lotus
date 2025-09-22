@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { salvarProposta, initializeDatabase, type FileUpload } from '@/lib/database';
 import { randomBytes } from 'crypto';
+import { whatsappService } from '@/lib/whatsapp';
 
 // Função para salvar documentos em pastas organizadas por proposta
 async function saveDocuments(propostaId: string, files: FileUpload[]): Promise<FileUpload[]> {
@@ -338,9 +339,28 @@ export async function POST(request: NextRequest) {
     
     // Salvar dados no PostgreSQL
     const savedPropostaId = await salvarProposta(formData, savedFiles, filename, propostaId);
-    
+
     console.log(`✅ Proposta processada: PDF gerado e dados salvos (ID: ${propostaId})`);
-    
+
+    // Enviar notificação via WhatsApp
+    try {
+      console.log('📱 Enviando notificação WhatsApp...');
+      const notificationSent = await whatsappService.sendNewProposalNotification(
+        '556195512980',
+        formData.nome || 'Cliente não informado',
+        propostaId
+      );
+
+      if (notificationSent) {
+        console.log('✅ Notificação WhatsApp enviada com sucesso');
+      } else {
+        console.warn('⚠️ Falha ao enviar notificação WhatsApp');
+      }
+    } catch (notificationError) {
+      console.error('❌ Erro ao enviar notificação WhatsApp:', notificationError);
+      // Não falhar a criação da proposta por causa da notificação
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Proposta processada com sucesso',
@@ -369,6 +389,10 @@ interface UploadedFile {
   base64?: string;
   category?: string;
   pdfImages?: string[];
+  pdfInfo?: {
+    pages: number;
+    size: string;
+  };
 }
 
 async function generatePDFWithPuppeteer(formData: FormData, uploadedFiles: UploadedFile[] = []): Promise<Buffer> {
@@ -852,7 +876,7 @@ function generatePropostaHTML(formData: FormData, uploadedFiles: UploadedFile[] 
         <table class="form-table">
           <tr>
             <td class="form-label">EMPREENDIMENTO:</td>
-            <td class="form-value">${(typeof formData.empreendimento === 'string' ? formData.empreendimento : (formData.empreendimento?.empreendimento || '')).toUpperCase()}</td>
+            <td class="form-value">${(typeof formData.empreendimento === 'string' ? formData.empreendimento : formData.empreendimento || '').toString().toUpperCase()}</td>
           </tr>
           <tr>
             <td class="form-label">INCORPORADORA:</td>

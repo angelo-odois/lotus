@@ -46,7 +46,7 @@ export function StepEndereco({ formData, updateFormData }: StepEnderecoProps) {
         <h2 className="text-xl font-semibold text-gray-900 mb-2">Endereço</h2>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">CEP *</label>
           <input
@@ -70,7 +70,7 @@ export function StepEndereco({ formData, updateFormData }: StepEnderecoProps) {
           )}
         </div>
 
-        <div className="sm:col-span-2">
+        <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">Logradouro *</label>
           <input
             type="text"
