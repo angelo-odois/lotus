@@ -21,6 +21,7 @@ interface PropostaDetalhada {
 export default function PropostaDetalhePage() {
   const [proposta, setProposta] = useState<PropostaDetalhada | null>(null);
   const [loading, setLoading] = useState(true);
+  const [regenerating, setRegenerating] = useState(false);
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
@@ -61,16 +62,59 @@ export default function PropostaDetalhePage() {
 
   const formatCurrency = (value: string) => {
     if (!value) return 'R$ 0,00';
-    
+
     // Remove formatação existente e converte para número
     const numericValue = parseFloat(value.replace(/[^\d,]/g, '').replace(',', '.'));
-    
+
     if (isNaN(numericValue)) return value;
-    
+
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
     }).format(numericValue);
+  };
+
+  const handleRegeneratePDF = async (propostaId: string) => {
+    if (!confirm('Tem certeza que deseja regenerar o PDF desta proposta?')) {
+      return;
+    }
+
+    setRegenerating(true);
+
+    try {
+      const response = await fetch('/api/admin/regenerate-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ propostaId }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('PDF regenerado com sucesso!');
+
+        // Recarregar os dados da proposta
+        const propostaResponse = await fetch(`/api/list?id=${propostaId}`);
+        if (propostaResponse.ok) {
+          const propostaData = await propostaResponse.json();
+          setProposta(propostaData.proposta || propostaData);
+        }
+
+        // Redirecionar para o PDF regenerado se disponível
+        if (data.downloadUrl) {
+          window.open(data.downloadUrl, '_blank');
+        }
+      } else {
+        alert(`Erro ao regenerar PDF: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Erro ao regenerar PDF:', error);
+      alert('Erro ao regenerar PDF. Tente novamente.');
+    } finally {
+      setRegenerating(false);
+    }
   };
 
   if (loading) {
@@ -137,6 +181,13 @@ export default function PropostaDetalhePage() {
                   📄 Baixar PDF
                 </a>
               )}
+              <button
+                onClick={() => handleRegeneratePDF(proposta.id)}
+                disabled={regenerating}
+                className="bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white px-4 py-1 rounded text-sm font-medium"
+              >
+                {regenerating ? '🔄 Regenerando...' : '🔄 Regenerar PDF'}
+              </button>
             </div>
           </div>
         </div>
