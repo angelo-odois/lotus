@@ -1,9 +1,9 @@
 export const config = {
   whatsapp: {
-    url: 'https://waha.nexuso2.com',
-    apiKey: 'D2EFC7EDF3E4425F917DBAE37D3D0B74',
-    phone: '556199911676',
-    session: 'lotus'
+    url: process.env.WAHA_URL || 'https://waha.nexuso2.com',
+    apiKey: process.env.WAHA_API_KEY || 'D2EFC7EDF3E4425F917DBAE37D3D0B74',
+    phone: process.env.WAHA_PHONE || '556199911676',
+    session: process.env.WAHA_SESSION || 'lotus'
   },
   
   empreendimentos: {
