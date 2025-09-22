@@ -18,6 +18,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
+      <head>
+      </head>
       <body className="font-sans antialiased">
         {children}
         {process.env.NODE_ENV === 'production' && (
