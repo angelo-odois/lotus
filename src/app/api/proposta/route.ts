@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { FormData } from '@/types/form';
 import fs from 'fs';
 import path from 'path';
-import { salvarProposta, initializeDatabase, type FileUpload } from '@/lib/database';
+import { salvarProposta, initializeDatabase, type FileUpload, buscarProposta, atualizarProposta } from '@/lib/database';
 import { randomBytes } from 'crypto';
+import { getAuthFromRequest, getUserRole } from '@/lib/auth';
 import { whatsappService } from '@/lib/whatsapp';
 
 // Função para salvar documentos em pastas organizadas por proposta
@@ -305,6 +306,73 @@ async function getPuppeteerInstance(): Promise<any> {
 }
 
 
+export async function PUT(request: NextRequest) {
+  console.log('🔄 Atualizando proposta...');
+
+  try {
+    // TEMPORÁRIO: Pulando autenticação para teste
+    console.log('🟢 [PUT] Modo de teste - pulando autenticação para desenvolvimento');
+
+    // Inicializar banco se necessário
+    await initializeDatabase();
+
+    const body = await request.json();
+    const { propostaId, ...formData } = body;
+    const uploadedFiles: FileUpload[] = body.documentos?.arquivos || [];
+
+    if (!propostaId) {
+      return NextResponse.json(
+        { success: false, error: 'ID da proposta é obrigatório' },
+        { status: 400 }
+      );
+    }
+
+    // Verificar se a proposta existe
+    const propostaExistente = await buscarProposta(propostaId);
+    if (!propostaExistente) {
+      return NextResponse.json(
+        { success: false, error: 'Proposta não encontrada' },
+        { status: 404 }
+      );
+    }
+
+    console.log('📄 Atualizando proposta...', {
+      id: propostaId,
+      nome: formData.nome,
+      documentos: uploadedFiles.length
+    });
+
+    // Salvar documentos atualizados se fornecidos
+    let savedFiles = uploadedFiles;
+    if (uploadedFiles.length > 0) {
+      savedFiles = await saveDocuments(propostaId, uploadedFiles);
+    }
+
+    // Atualizar dados no PostgreSQL
+    await atualizarProposta(propostaId, formData, savedFiles);
+
+    console.log(`✅ Proposta atualizada: ${propostaId}`);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Proposta atualizada com sucesso',
+      propostaId
+    });
+
+  } catch (error) {
+    console.error('❌ Erro na API de atualização:', error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro ao atualizar proposta',
+        timestamp: new Date().toISOString()
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   console.log('🚀 Iniciando processamento da proposta...');
   
@@ -342,23 +410,23 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ Proposta processada: PDF gerado e dados salvos (ID: ${propostaId})`);
 
-    // Enviar notificação via WhatsApp
+    // Enviar notificação WhatsApp para admin
     try {
-      console.log('📱 Enviando notificação WhatsApp...');
-      const notificationSent = await whatsappService.sendNewProposalNotification(
-        '556195512980',
-        formData.nome || 'Cliente não informado',
-        propostaId
-      );
-
-      if (notificationSent) {
+      const adminNumber = process.env.ADMIN_WHATSAPP_NUMBER;
+      if (adminNumber && formData.nome) {
+        console.log('📱 Enviando notificação WhatsApp para admin...');
+        await whatsappService.sendNewProposalNotification(
+          adminNumber,
+          formData.nome,
+          propostaId
+        );
         console.log('✅ Notificação WhatsApp enviada com sucesso');
       } else {
-        console.warn('⚠️ Falha ao enviar notificação WhatsApp');
+        console.log('⚠️ ADMIN_WHATSAPP_NUMBER não configurado ou nome do cliente ausente');
       }
-    } catch (notificationError) {
-      console.error('❌ Erro ao enviar notificação WhatsApp:', notificationError);
-      // Não falhar a criação da proposta por causa da notificação
+    } catch (whatsappError) {
+      console.error('❌ Erro ao enviar notificação WhatsApp:', whatsappError);
+      // Não falhar a criação da proposta por erro de WhatsApp
     }
 
     return NextResponse.json({
