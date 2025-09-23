@@ -83,7 +83,6 @@ export function SuccessPage({ customerName, pdfFilename, message, propostaId, on
 
 👤 Nome: ${customerName}
 🆔 ID da Proposta: ${propostaId || 'N/A'}
-📋 Arquivo: ${pdfFilename || 'Proposta Lotus Cidade'}
 
 Documentos que preciso enviar:
 • RG (frente e verso)
@@ -94,7 +93,7 @@ Documentos que preciso enviar:
 
 Obrigado!`
                     );
-                    const whatsappUrl = `https://wa.me/5561999999999?text=${whatsappMessage}`;
+                    const whatsappUrl = `https://wa.me/5561995512980?text=${whatsappMessage}`;
                     window.open(whatsappUrl, '_blank');
                   }}
                   className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors inline-flex items-center space-x-2"
