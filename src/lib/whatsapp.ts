@@ -12,10 +12,12 @@ interface WhatsAppResponse {
 class WhatsAppService {
   private apiUrl: string;
   private token: string;
+  private session: string;
 
   constructor() {
     this.apiUrl = process.env.WHATSAPP_API_URL || '';
     this.token = process.env.WHATSAPP_API_TOKEN || '';
+    this.session = process.env.WHATSAPP_SESSION || 'lotus';
   }
 
   async sendMessage(to: string, message: string): Promise<WhatsAppResponse> {
@@ -28,26 +30,38 @@ class WhatsAppService {
         return { success: true, messageId: 'sim_' + Date.now() };
       }
 
-      const response = await fetch(this.apiUrl, {
+      // Formato WAHA: POST /api/{session}/sendText
+      const wahaEndpoint = `${this.apiUrl}/api/${this.session}/sendText`;
+
+      console.log('📱 [WhatsApp WAHA] Enviando mensagem...');
+      console.log('📱 [WhatsApp WAHA] Endpoint:', wahaEndpoint);
+      console.log('📱 [WhatsApp WAHA] Para:', to);
+
+      const response = await fetch(wahaEndpoint, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.token}`,
+          'X-API-KEY': this.token,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          to: to,
+          chatId: `${to}@c.us`,
           text: message
         }),
       });
 
+      console.log('📱 [WhatsApp WAHA] Status da resposta:', response.status);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ [WhatsApp WAHA] Resposta:', data);
         return { success: true, messageId: data.id || 'unknown' };
       } else {
         const error = await response.text();
+        console.error('❌ [WhatsApp WAHA] Erro na resposta:', error);
         return { success: false, error: `HTTP ${response.status}: ${error}` };
       }
     } catch (error) {
+      console.error('❌ [WhatsApp WAHA] Erro de conexão:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erro desconhecido'

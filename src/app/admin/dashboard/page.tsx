@@ -135,26 +135,6 @@ export default function DashboardPage() {
     router.push('/admin/login');
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja deletar esta proposta?')) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/propostas?id=${id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        await loadPropostas();
-      } else {
-        alert('Erro ao deletar proposta');
-      }
-    } catch (error) {
-      console.error('Erro ao deletar:', error);
-      alert('Erro ao deletar proposta');
-    }
-  };
 
   const handleSelectItem = (id: string) => {
     setSelectedItems(prev => 
@@ -513,12 +493,6 @@ export default function DashboardPage() {
                           </a>
                         </div>
                       )}
-                      <button
-                        onClick={() => handleDelete(proposta.id)}
-                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-                      >
-                        Deletar
-                      </button>
                     </div>
                   </div>
                 </div>
