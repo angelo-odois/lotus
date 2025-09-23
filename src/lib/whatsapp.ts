@@ -1,77 +1,127 @@
-import { config } from '@/config';
-
-export interface WhatsAppMessage {
-  chatId: string;
+interface WhatsAppMessage {
+  to: string;
   text: string;
 }
 
-export class WhatsAppService {
-  private baseUrl: string;
-  private apiKey: string;
-  private session: string;
+interface WhatsAppResponse {
+  success: boolean;
+  messageId?: string;
+  error?: string;
+}
+
+class WhatsAppService {
+  private apiUrl: string;
+  private token: string;
 
   constructor() {
-    this.baseUrl = config.whatsapp.url;
-    this.apiKey = config.whatsapp.apiKey;
-    this.session = config.whatsapp.session;
+    this.apiUrl = process.env.WHATSAPP_API_URL || '';
+    this.token = process.env.WHATSAPP_API_TOKEN || '';
   }
 
-  async sendMessage(chatId: string, message: string): Promise<boolean> {
+  async sendMessage(to: string, message: string): Promise<WhatsAppResponse> {
     try {
-      console.log('📱 Enviando mensagem WhatsApp para:', chatId);
-
-      const response = await fetch(`${this.baseUrl}/api/sendText`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-KEY': this.apiKey
-        },
-        body: JSON.stringify({
-          session: this.session,
-          chatId: `${chatId}@c.us`,
-          text: message
-        })
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ Erro ao enviar mensagem WhatsApp:', response.status, errorText);
-        return false;
+      // Se não há configuração, simular sucesso para desenvolvimento
+      if (!this.apiUrl || !this.token) {
+        console.log('📱 [WhatsApp] Modo de simulação - enviando mensagem:');
+        console.log(`📱 [WhatsApp] Para: ${to}`);
+        console.log(`📱 [WhatsApp] Mensagem: ${message}`);
+        return { success: true, messageId: 'sim_' + Date.now() };
       }
 
-      const result = await response.json();
-      console.log('✅ Mensagem WhatsApp enviada com sucesso:', result);
-      return true;
+      const response = await fetch(this.apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: to,
+          text: message
+        }),
+      });
 
+      if (response.ok) {
+        const data = await response.json();
+        return { success: true, messageId: data.id || 'unknown' };
+      } else {
+        const error = await response.text();
+        return { success: false, error: `HTTP ${response.status}: ${error}` };
+      }
     } catch (error) {
-      console.error('❌ Erro na conexão com WAHA:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro desconhecido'
+      };
+    }
+  }
+
+  async sendNewProposalNotification(
+    adminNumber: string,
+    clientName: string,
+    propostaId: string
+  ): Promise<boolean> {
+    const message = `🏠 *Nova Proposta Recebida - Lotus Cidade*
+
+👤 *Cliente:* ${clientName}
+🆔 *ID da Proposta:* ${propostaId}
+📅 *Data:* ${new Date().toLocaleString('pt-BR')}
+
+📋 Uma nova proposta foi submetida no sistema.
+🔗 Acesse o dashboard para visualizar os detalhes.
+
+---
+💻 Sistema Lotus Cidade`;
+
+    const result = await this.sendMessage(adminNumber, message);
+
+    if (result.success) {
+      console.log(`✅ [WhatsApp] Notificação enviada com sucesso para ${adminNumber}`);
+      return true;
+    } else {
+      console.error(`❌ [WhatsApp] Erro ao enviar notificação: ${result.error}`);
       return false;
     }
   }
 
-  async sendNewProposalNotification(phoneNumber: string, clientName: string, propostaId: string): Promise<boolean> {
-    // Criar data no fuso horário de Brasília
-    const brasiliaDate = new Date().toLocaleString('pt-BR', {
-      timeZone: 'America/Sao_Paulo',
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
+  async sendDocumentRequest(
+    clientNumber: string,
+    clientName: string,
+    propostaId: string
+  ): Promise<boolean> {
+    const message = `🏠 *Lotus Cidade - Envio de Documentos*
 
-    const message = `🏠 *NOVA PROPOSTA RECEBIDA*
+Olá ${clientName}! 👋
 
-📋 *Cliente:* ${clientName}
-🔖 *ID da Proposta:* ${propostaId}
-📅 *Data:* ${brasiliaDate}
+✅ Sua proposta foi recebida com sucesso!
+🆔 *ID da Proposta:* ${propostaId}
 
-✅ Uma nova proposta foi enviada e está aguardando análise.
+📎 *Próximo passo:* Envie seus documentos através deste WhatsApp:
 
-📱 Sistema Lotus Cidade`;
+📋 *Documentos necessários:*
+• RG (frente e verso)
+• CPF
+• Comprovante de renda
+• Comprovante de residência
+• Outros documentos solicitados
 
-    return this.sendMessage(phoneNumber, message);
+📱 *Como enviar:*
+1. Tire fotos claras dos documentos
+2. Envie através deste WhatsApp
+3. Aguarde confirmação do recebimento
+
+🕐 Nossa equipe analisará seus documentos em até 24 horas.
+
+Obrigado por escolher a Lotus Cidade! 🏡`;
+
+    const result = await this.sendMessage(clientNumber, message);
+
+    if (result.success) {
+      console.log(`✅ [WhatsApp] Solicitação de documentos enviada para ${clientNumber}`);
+      return true;
+    } else {
+      console.error(`❌ [WhatsApp] Erro ao enviar solicitação: ${result.error}`);
+      return false;
+    }
   }
 }
 

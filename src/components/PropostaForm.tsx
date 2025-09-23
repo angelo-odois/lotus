@@ -6,7 +6,6 @@ import { StepEndereco } from './steps/StepEndereco';
 import { StepConjuge } from './steps/StepConjuge';
 import { StepEmpreendimento } from './steps/StepEmpreendimento';
 import { StepUnidade } from './steps/StepUnidade';
-import { StepDocumentos } from './steps/StepDocumentos';
 import { StepFinalizacao } from './steps/StepFinalizacao';
 import { ProgressBar } from './ProgressBar';
 import { Navigation } from './Navigation';
@@ -37,7 +36,7 @@ export function PropostaForm() {
 
   const renderStep = () => {
     console.log(`👁️ Renderizando step: ${currentStep}, shouldShowSpouseStep: ${shouldShowSpouseStep}`);
-    
+
     switch (currentStep) {
       case 1:
         console.log('📄 Renderizando StepDadosPessoais');
@@ -61,9 +60,6 @@ export function PropostaForm() {
         console.log('📄 Renderizando StepUnidade');
         return <StepUnidade formData={formData} updateFormData={updateFormData} calculateFinancing={calculateFinancing} />;
       case 6:
-        console.log('📄 Renderizando StepDocumentos');
-        return <StepDocumentos uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles} shouldShowSpouseStep={shouldShowSpouseStep} />;
-      case 7:
         console.log('📄 Renderizando StepFinalizacao');
         return <StepFinalizacao formData={formData} uploadedFiles={uploadedFiles} shouldShowSpouseStep={shouldShowSpouseStep} />;
       default:
@@ -78,6 +74,7 @@ export function PropostaForm() {
       <SuccessPage
         customerName={formData.nome || 'Cliente'}
         pdfFilename={successData.filename}
+        propostaId={successData.propostaId}
         onNewProposal={startNewProposal}
       />
     );

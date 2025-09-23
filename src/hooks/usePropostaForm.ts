@@ -65,9 +65,9 @@ export function usePropostaForm() {
   const [uploadedFiles, setUploadedFiles] = useState<FileUpload[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [successData, setSuccessData] = useState<{filename?: string}>({});
+  const [successData, setSuccessData] = useState<{filename?: string; propostaId?: string}>({});
 
-  const totalSteps = 7;
+  const totalSteps = 6;
 
   const updateFormData = useCallback((field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -117,8 +117,7 @@ export function usePropostaForm() {
           'telefoneCelularConjuge', 'profissaoConjuge'] : [],
       4: ['empreendimento'],
       5: getStep5Fields(),
-      6: [], // Documentos opcionais
-      7: [] // Finalização
+      6: [] // Finalização
     };
 
     const fieldsToValidate = requiredFields[currentStep] || [];
@@ -232,26 +231,18 @@ export function usePropostaForm() {
   const submitForm = useCallback(async () => {
     setIsSubmitting(true);
     console.log('📤 Enviando formulário...', formData);
-    console.log('📎 Documentos anexados:', uploadedFiles.length);
-    
+
     try {
       const submitData = {
         ...formData,
         dataEnvio: new Date().toISOString(),
         timestamp: Date.now(),
-        documentos: uploadedFiles.map(file => ({
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          category: file.category,
-          base64: file.base64
-        }))
+        documentos: { arquivos: [] }
       };
 
       console.log('📊 Dados para envio:', {
         nome: submitData.nome,
-        empreendimento: submitData.empreendimento,
-        documentos: submitData.documentos.length
+        empreendimento: submitData.empreendimento
       });
 
       // Gerar PDF diretamente
@@ -265,10 +256,11 @@ export function usePropostaForm() {
         const result = await response.json();
         console.log('✅ PDF gerado:', result);
         
-        setSuccessData({ 
+        setSuccessData({
           filename: result.filename,
           downloadUrl: result.downloadUrl,
-          message: result.message 
+          message: result.message,
+          propostaId: result.propostaId
         });
         setIsSuccess(true);
       } else {
@@ -282,7 +274,7 @@ export function usePropostaForm() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, uploadedFiles]);
+  }, [formData]);
 
   const startNewProposal = useCallback(() => {
     setCurrentStep(1);
@@ -314,7 +306,7 @@ export function usePropostaForm() {
     
     // Computed
     shouldShowSpouseStep: shouldShowSpouseStep(),
-    progressPercentage: ((shouldShowSpouseStep() ? currentStep : (currentStep > 3 ? currentStep - 1 : currentStep)) / 
+    progressPercentage: ((shouldShowSpouseStep() ? currentStep : (currentStep > 3 ? currentStep - 1 : currentStep)) /
                         (shouldShowSpouseStep() ? totalSteps : totalSteps - 1)) * 100,
     
     // Actions

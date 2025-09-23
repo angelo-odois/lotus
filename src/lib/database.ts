@@ -220,11 +220,126 @@ export async function deletarProposta(id: string): Promise<boolean> {
   }
 }
 
+export async function atualizarProposta(
+  id: string,
+  formData: FormData,
+  uploadedFiles: FileUpload[] = []
+): Promise<boolean> {
+  try {
+    console.log('💾 Atualizando proposta no banco...');
+
+    // Organizar dados por seções
+    const dadosPessoais = {
+      nome: formData.nome,
+      cpfCnpj: formData.cpfCnpj,
+      rgInsEst: formData.rgInsEst,
+      orgaoExpedidor: formData.orgaoExpedidor,
+      sexo: formData.sexo,
+      dataNascimento: formData.dataNascimento,
+      naturalidade: formData.naturalidade,
+      nacionalidade: formData.nacionalidade,
+      telefoneCelular: formData.telefoneCelular,
+      telefoneComercial: formData.telefoneComercial,
+      email: formData.email,
+      profissao: formData.profissao,
+      estadoCivil: formData.estadoCivil
+    };
+
+    const endereco = {
+      cep: formData.cep,
+      logradouro: formData.logradouro,
+      numero: formData.numero,
+      complemento: formData.complemento,
+      bairro: formData.bairro,
+      cidade: formData.cidade,
+      uf: formData.uf
+    };
+
+    const dadosConjuge = formData.estadoCivil === 'casado' || formData.estadoCivil === 'uniao-estavel' ? {
+      nomeConjuge: formData.nomeConjuge,
+      cpfConjuge: formData.cpfConjuge,
+      rgConjuge: formData.rgConjuge,
+      orgaoExpedidorConjuge: formData.orgaoExpedidorConjuge,
+      sexoConjuge: formData.sexoConjuge,
+      dataNascimentoConjuge: formData.dataNascimentoConjuge,
+      naturalidadeConjuge: formData.naturalidadeConjuge,
+      nacionalidadeConjuge: formData.nacionalidadeConjuge,
+      telefoneCelularConjuge: formData.telefoneCelularConjuge,
+      emailConjuge: formData.emailConjuge,
+      profissaoConjuge: formData.profissaoConjuge
+    } : null;
+
+    const empreendimento = formData.empreendimento;
+
+    const unidade = {
+      unidadeNumero: formData.unidadeNumero,
+      valorImovel: formData.valorImovel,
+      valorEntrada: formData.valorEntrada,
+      valorFinanciar: formData.valorFinanciar,
+      // Campos específicos do VERT
+      valorSinal: formData.valorSinal,
+      valorMensais: formData.valorMensais,
+      valorSemestral: formData.valorSemestral,
+      valorChaves: formData.valorChaves,
+      parcelasMensais: formData.parcelasMensais,
+      parcelasSemestrais: formData.parcelasSemestrais
+    };
+
+    const documentos = uploadedFiles.length > 0 ? {
+      arquivos: uploadedFiles.map(file => ({
+        name: file.name,
+        type: file.type,
+        category: file.category,
+        size: file.size,
+        hasBase64: !!file.base64
+      })),
+      dataAtualizacao: new Date().toISOString()
+    } : undefined;
+
+    // Query para atualizar a proposta
+    let query = `
+      UPDATE propostas SET
+        dados_pessoais = $2,
+        endereco = $3,
+        dados_conjuge = $4,
+        empreendimento = $5,
+        unidade = $6,
+        updated_at = CURRENT_TIMESTAMP
+    `;
+
+    let params = [
+      id,
+      JSON.stringify(dadosPessoais),
+      JSON.stringify(endereco),
+      dadosConjuge ? JSON.stringify(dadosConjuge) : null,
+      JSON.stringify(empreendimento),
+      JSON.stringify(unidade)
+    ];
+
+    // Se houver documentos, adicionar à query
+    if (documentos) {
+      query += `, documentos = $7`;
+      params.push(JSON.stringify(documentos));
+    }
+
+    query += ` WHERE id = $1`;
+
+    await executeQuery(query, params);
+
+    console.log(`✅ Proposta atualizada com ID: ${id}`);
+    return true;
+
+  } catch (error) {
+    console.error('❌ Erro ao atualizar proposta:', error);
+    throw error;
+  }
+}
+
 export async function contarPropostas(empreendimento?: string): Promise<number> {
   try {
     let query: string;
     let params: any[];
-    
+
     if (empreendimento) {
       query = `SELECT COUNT(*) as total FROM propostas WHERE (
         empreendimento = $1 OR
@@ -235,7 +350,7 @@ export async function contarPropostas(empreendimento?: string): Promise<number> 
       query = 'SELECT COUNT(*) as total FROM propostas';
       params = [];
     }
-    
+
     const result = await executeQuerySingle<{ total: string }>(query, params);
     return parseInt(result?.total || '0');
   } catch (error) {

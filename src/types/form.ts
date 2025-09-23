@@ -68,7 +68,7 @@ export interface FileUpload {
   base64?: string;
 }
 
-export type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+export type Step = 1 | 2 | 3 | 4 | 5 | 6;
 
 export interface WhatsAppConfig {
   url: string;

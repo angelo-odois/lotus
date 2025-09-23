@@ -7,10 +7,11 @@ interface SuccessPageProps {
   customerName: string;
   pdfFilename?: string;
   message?: string;
+  propostaId?: string;
   onNewProposal: () => void;
 }
 
-export function SuccessPage({ customerName, pdfFilename, message, onNewProposal }: SuccessPageProps) {
+export function SuccessPage({ customerName, pdfFilename, message, propostaId, onNewProposal }: SuccessPageProps) {
 
   return (
     <div className="min-h-screen bg-[#FEFCF7] font-inter">
@@ -65,6 +66,45 @@ export function SuccessPage({ customerName, pdfFilename, message, onNewProposal 
               </div>
             )}
 
+            {/* WhatsApp Documents */}
+            <div className="bg-green-50 border border-green-200 rounded-xl p-6 mb-8">
+              <div className="text-center">
+                <MessageCircle className="mx-auto h-12 w-12 text-green-600 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  📄 Envie seus Documentos
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Para finalizar o processo, envie seus documentos através do WhatsApp.
+                </p>
+                <button
+                  onClick={() => {
+                    const whatsappMessage = encodeURIComponent(
+                      `Olá! Gostaria de enviar os documentos da minha proposta.
+
+👤 Nome: ${customerName}
+🆔 ID da Proposta: ${propostaId || 'N/A'}
+📋 Arquivo: ${pdfFilename || 'Proposta Lotus Cidade'}
+
+Documentos que preciso enviar:
+• RG (frente e verso)
+• CPF
+• Comprovante de renda
+• Comprovante de residência
+• Outros documentos solicitados
+
+Obrigado!`
+                    );
+                    const whatsappUrl = `https://wa.me/5561999999999?text=${whatsappMessage}`;
+                    window.open(whatsappUrl, '_blank');
+                  }}
+                  className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors inline-flex items-center space-x-2"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  <span>Enviar Documentos via WhatsApp</span>
+                </button>
+              </div>
+            </div>
+
             {/* Next steps */}
             <div className="bg-[#FFC629]/10 border border-[#FFC629]/30 rounded-xl p-6 mb-8">
               <div className="text-center">
@@ -72,7 +112,7 @@ export function SuccessPage({ customerName, pdfFilename, message, onNewProposal 
                   ✨ Proposta Concluída
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  Sua proposta foi gerada com sucesso! Salve o PDF para seus registros.
+                  Sua proposta foi gerada com sucesso! Salve o PDF para seus registros e envie seus documentos pelo WhatsApp.
                 </p>
                 {/* <button
                   onClick={onNewProposal}
